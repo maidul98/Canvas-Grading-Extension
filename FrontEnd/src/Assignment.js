@@ -6,7 +6,7 @@ class Assignment extends Component{
       };
 
     toggleButton = () => {
-        this.setState({clicked: !clicked});
+        this.setState({clicked: !this.state.clicked});
         //implement expand/collapse button 
     }
     render(){
