@@ -3,10 +3,6 @@ import ReactDOM from 'react-dom';
 import './dashboard.css';
 import * as serviceWorker from './serviceWorker';
 
-
-
-
-
 class Screen extends React.Component {
 
   render(){

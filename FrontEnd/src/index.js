@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import {BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
 
 class LoginButton extends React.Component {
@@ -8,7 +9,9 @@ class LoginButton extends React.Component {
   render(){
     return (
     <div class="login_button">
-    <button class="log_but"> Cornell Login</button>
+    <Link to="/dashboard">
+    <button onClick= "dashboard.js" class="log_but"> Cornell Login</button>
+    </Link>
     </div>
     )
   }
