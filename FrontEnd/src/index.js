@@ -1,10 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+class LoginButton extends React.Component {
+
+  render(){
+    return (
+    <div class="login_button">
+    <button class="log_but"> Press Me</button>
+    </div>
+    )
+  }
+}
+
+
+ReactDOM.render(<LoginButton/>, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

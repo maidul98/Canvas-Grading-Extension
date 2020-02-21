@@ -11,3 +11,16 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+.log_but{
+  padding: 0 auto;
+}
+
+.login_button{
+  list-style: none;
+  margin: 0 auto;
+  margin-top: 10%;
+  width: 90%;
+  background: red;
+}
