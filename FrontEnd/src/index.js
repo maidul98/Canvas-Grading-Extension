@@ -8,7 +8,7 @@ class LoginButton extends React.Component {
   render(){
     return (
     <div class="login_button">
-    <button class="log_but"> Press Me</button>
+    <button class="log_but"> Cornell Login</button>
     </div>
     )
   }

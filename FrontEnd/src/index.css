@@ -12,15 +12,19 @@ code {
     monospace;
 }
 
-
 .log_but{
-  padding: 0 auto;
+  margin-left: auto;
+  width: 70%;
+  height: 200px;
+  background: rgb(255, 23, 0);
+  font-size: 50px;
+  border-radius: 20px;
 }
 
 .login_button{
+  text-align: center;
   list-style: none;
   margin: 0 auto;
   margin-top: 10%;
   width: 90%;
-  background: red;
 }
