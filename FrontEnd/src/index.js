@@ -1,25 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Assignment from './Assignment';
+import {BrowserRouter, Link} from 'react-router-dom';
 import './index.css';
-import {BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
+
+const NotFound = () => {
+  return "Page not found."
+}
 
 class LoginButton extends React.Component {
 
   render(){
     return (
+    <BrowserRouter>
     <div class="login_button">
-    <Link to="/dashboard">
-    <button onClick= "dashboard.js" class="log_but"> Cornell Login</button>
-    </Link>
+        <Link to="/Assignment">
+        <button class="log_but"> Cornell Login</button>
+        </Link>
     </div>
+    </BrowserRouter>
     )
   }
 }
 
 
 ReactDOM.render(<LoginButton/>, document.getElementById('root'));
+
+export {NotFound, LoginButton}
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
