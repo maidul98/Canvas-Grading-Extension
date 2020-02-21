@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Assignment from './Assignment';
 import './index.css';
 import {BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
