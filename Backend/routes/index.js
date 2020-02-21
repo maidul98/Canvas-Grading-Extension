@@ -11,8 +11,8 @@ router.get('/', function (req, res, next) {
   try {
     axios.get("https://canvas.cornell.edu/api/v1/courses/15037/enrollments",
       config)
-      .then(response => console.log(response.data),
-        JSON.parse(response.data).forEach(function (element) {
+      .then(response =>
+        response.data.forEach(function (element) {
           console.log(element.user)
         })
       )
