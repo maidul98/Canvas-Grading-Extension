@@ -1,7 +1,7 @@
 import React from 'react';
 import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import Assignment from './Assignment';
-import LoginButton from './loginbutton';
+import LoginButton from './LoginButton'
 import './index.css';
 
 
@@ -11,7 +11,7 @@ class App extends React.Component {
     <BrowserRouter>
       <div>
         <Switch>
-          <Route path = "/" component={LoginButton} exact />
+          <Route path = "/" component={LoginButton} exact/>
           <Route path="/Assignment" component={Assignment}/>
         </Switch>
       </div>

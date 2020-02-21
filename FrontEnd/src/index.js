@@ -4,26 +4,10 @@ import {BrowserRouter, Link} from 'react-router-dom';
 import {withRouter} from 'react-router';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
-
-class LoginButton extends React.Component {
-
-  render(){
-    return (
-    <BrowserRouter>
-    <div class="login_button">
-        <Link to="/Assignment">
-          <button class="log_but"> Cornell Login</button>
-        </Link>
-    </div>
-    </BrowserRouter>
-    )
-  }
-}
+import App from './App';
 
 
-ReactDOM.render(<LoginButton/>, document.getElementById('root'));
-
-export default withRouter(LoginButton)
+ReactDOM.render(<App/>, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
