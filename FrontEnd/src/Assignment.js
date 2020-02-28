@@ -23,12 +23,13 @@ class Assignment extends Component{
             .then(students => {this.setState({students: students });})
             .catch(error=>console.log(error));
         }
-        
+
       }
 
     toggleButton = () => {
         this.setState({clicked: !this.state.clicked});
     }
+    
     render(){
         const props = this.props;
         const name = props.name;

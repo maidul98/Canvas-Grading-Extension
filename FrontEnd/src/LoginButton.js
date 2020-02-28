@@ -5,9 +5,11 @@ class LoginButton extends Component {
 
     render(){
       return (
-          <Link to="/assignment">
-          <button className="log_but"> Cornell Login</button>
-          </Link>
+          <div class = "login_button">
+            <Link to="/assignment">
+              <button className="log_but"> Cornell Login</button>
+            </Link>
+          </div>
       )
     }
   }
