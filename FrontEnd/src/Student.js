@@ -13,7 +13,7 @@ class Student extends Component{
         const id = props.login_id
 
         return(
-                <button className = {styles.Student} id={id}><strong>{name}</strong></button>
+                <button className = {styles.Student} id={id} key={id}><strong>{name}</strong></button>
         )
     }
 }
