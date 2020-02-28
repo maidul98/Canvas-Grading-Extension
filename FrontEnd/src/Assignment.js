@@ -20,9 +20,14 @@ class Assignment extends Component{
         const id = props.id;
 
         return(
-            <Link to="/students">
-            <button className = {styles.Button} id={id} key={id} onClick={this.handleClick}><strong>{name}</strong></button>
-            </Link>
+            <div>
+            <div className="top_bar">
+              Canvas Grading Extension
+            </div>
+                <Link to="/students">
+                <button className = {styles.Button} id={id} key={id} onClick={this.handleClick}><strong>{name}</strong></button>
+                </Link>
+            </div>
         )
     }
 }

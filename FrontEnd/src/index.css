@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: rgb(235, 235, 235);
 }
 
 code {
@@ -13,12 +14,17 @@ code {
 }
 
 .log_but{
+  color: white;
+  -webkit-text-stroke-color: black;
+  -webkit-text-stroke-width: 2px;
   margin-left: auto;
   width: 70%;
   height: 200px;
+  font-weight: bold;
   background: rgb(255, 23, 0);
   font-size: 50px;
   border-radius: 20px;
+  border: 4px solid black;
 }
 
 .login_button{
@@ -27,4 +33,18 @@ code {
   margin: 0 auto;
   margin-top: 10%;
   width: 90%;
+}
+
+.top_bar{
+  margin: none;
+  background-color: red;
+  -webkit-text-stroke-color: black;
+  -webkit-text-stroke-width: 1px;
+  color: white;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 32px;
+  padding-bottom: 1%;
+  padding-left: 5px;
+  padding-top: 5px;
 }
