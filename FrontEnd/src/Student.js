@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import styles from './App.module.css';
 
-class Assignment extends Component{
+class Student extends Component{
     state = {
         clicked: false,
         students: null
@@ -18,4 +18,4 @@ class Assignment extends Component{
     }
 }
 
-export default Assignment;
+export default Student;
