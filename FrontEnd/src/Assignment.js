@@ -29,7 +29,6 @@ class Assignment extends Component{
     toggleButton = () => {
         this.setState({clicked: !this.state.clicked});
     }
-    
     render(){
         const props = this.props;
         const name = props.name;
@@ -37,6 +36,9 @@ class Assignment extends Component{
 
         return(
             <div>
+            <div className="top_bar">
+              Canvas Grading Extension
+            </div>
                 <button className = {styles.Button} id={id} onClick={this.toggleButton}><strong>{name}</strong></button>
                 {this.state.students!=null&&this.state.clicked?this.state.students.map(d=>this.renderStudent(d.login_id, d.name)):null}
             </div>
