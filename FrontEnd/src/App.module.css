@@ -1,0 +1,17 @@
+.Button {
+    border-radius: 10px;
+    margin: auto;
+    margin-top: 10%;
+    height: 60px;
+    width: 40%;
+    display: flex; 
+    justify-content: center;
+}
+
+.Student {
+    margin: auto;
+    height: 30px;
+    width: 20%;
+    display: flex; 
+    justify-content: center;
+}
