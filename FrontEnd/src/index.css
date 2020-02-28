@@ -70,3 +70,8 @@ code {
   float: right;
   margin-right: 2%;
 }
+
+.form_el{
+  margin: 0 auto;
+  padding-left: 40%;
+}

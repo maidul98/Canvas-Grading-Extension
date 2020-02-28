@@ -14,7 +14,17 @@ class Dashboard extends React.Component {
           Name of Student:
         </div>
         <div className = "submit">
-            <button className = "sub_but"> Submit Grade </button>
+            <form>
+              <div className = "form_el">
+                <label for="grade"> Grade </label>
+                <input type="text" id = "grade" name="grade"/>
+              </div>
+              <div className = "form_el">
+                <label for= "comments"> Comments </label>
+                <input type = "textarea" id = "comments" name = "comments" />
+              </div>
+              <input type="submit" className = "sub_but" value="Submit"/>
+            </form>
         </div>
       </div>
     )
