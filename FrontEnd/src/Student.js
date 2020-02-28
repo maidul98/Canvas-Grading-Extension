@@ -15,7 +15,7 @@ class Student extends Component{
 
         return(
                 <Link to = "/dashboard">
-                  <button onClick = {this.toggleButton} className = {styles.Student} id={id}><strong>{name}</strong></button>
+                  <button className = {styles.Student} id={id}><strong>{name}</strong></button>
                 </Link>
         )
     }

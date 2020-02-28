@@ -1,34 +1,19 @@
 import React, { Component } from 'react';
 import Student from './Student';
+import StudentList from './StudentList';
 import styles from './App.module.css';
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import {Link, useHistory} from 'react-router-dom';
 
 
 class Assignment extends Component{
     state = {
-        clicked: false,
-        students: null
-      };
+        id: null, //assignment ID from Canvas
+    };
 
-    renderStudent = (id, name) => {
-        return (
-            <Student id = {id} name={name}/>
-        )
+    handleClick = () => {
+        this.props.history.push("/students");
     }
 
-    componentDidMount() {
-        if(this.state.students==null){
-            fetch('/get-enrollments')
-            .then(resp => {return resp.json()})
-            .then(students => {this.setState({students: students });})
-            .catch(error=>console.log(error));
-        }
-
-      }
-
-    toggleButton = () => {
-        this.setState({clicked: !this.state.clicked});
-    }
     render(){
         const props = this.props;
         const name = props.name;
@@ -39,8 +24,9 @@ class Assignment extends Component{
             <div className="top_bar">
               Canvas Grading Extension
             </div>
-                <button className = {styles.Button} id={id} onClick={this.toggleButton}><strong>{name}</strong></button>
-                {this.state.students!=null&&this.state.clicked?this.state.students.map(d=>this.renderStudent(d.login_id, d.name)):null}
+                <Link to="/students">
+                <button className = {styles.Button} id={id} key={id} onClick={this.handleClick}><strong>{name}</strong></button>
+                </Link>
             </div>
         )
     }

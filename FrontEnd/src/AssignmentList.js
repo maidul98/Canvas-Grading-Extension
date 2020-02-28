@@ -11,10 +11,11 @@ function renderAssignment(name){
 class AssignmentList extends Component{
     render(){
         return(
-            <div>
+            /*<div>
                 {this.props.assignments==null? 'Loading...' : 
             this.props.assignments.map(d=>renderAssignment(this.props.name))}
-            </div>
+            </div>*/
+            <Assignment name="Test Assignment" history={this.props.history}/>
         )
     }
 }

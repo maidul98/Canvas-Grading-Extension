@@ -1,7 +1,8 @@
 import React from 'react';
 import {BrowserRouter, Route, Switch} from 'react-router-dom';
-import Assignment from './Assignment';
-import LoginButton from './LoginButton'
+import AssignmentList from './AssignmentList';
+import LoginButton from './LoginButton';
+import StudentList from './StudentList';
 import Dashboard from './dashboard'
 import './index.css';
 
@@ -13,7 +14,8 @@ class App extends React.Component {
       <div>
         <Switch>
           <Route path = "/" component={LoginButton} exact/>
-          <Route path="/Assignment" component={Assignment}/>
+          <Route path="/assignments" component={AssignmentList}/>
+          <Route path="/students" component={StudentList}/>
           <Route path="/dashboard" component={Dashboard}/>
         </Switch>
       </div>
