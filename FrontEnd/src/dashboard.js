@@ -13,6 +13,9 @@ class Dashboard extends React.Component {
         <div className = "mid">
           Name of Student:
         </div>
+        <div className = "submit">
+            <button className = "sub_but"> Submit Grade </button>
+        </div>
       </div>
     )
   }
