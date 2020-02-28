@@ -1,0 +1,30 @@
+.Button {
+    border-radius: 10px;
+    background-color: white;
+    margin: auto;
+    margin-top: 10%;
+    height: 60px;
+    width: 40%;
+    display: flex;
+    justify-content: center;
+}
+
+.Student {
+    margin: auto;
+    height: 30px;
+    width: 20%;
+    display: flex;
+    justify-content: center;
+}
+
+.top_bar{
+  margin: none;
+  background-color: red;
+  color: white;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 32px;
+  padding-bottom: 1%;
+  padding-left: 5px;
+  padding-top: 5px;
+}

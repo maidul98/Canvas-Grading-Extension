@@ -1,13 +1,33 @@
 import React, { Component } from 'react';
+import Student from './Student';
+import styles from './App.module.css';
+import {BrowserRouter, Route, Switch} from 'react-router-dom';
+
 
 class Assignment extends Component{
     state = {
-        clicked: false
+        clicked: false,
+        students: null
       };
+
+    renderStudent = (id, name) => {
+        return (
+            <Student id = {id} name={name}/>
+        )
+    }
+
+    componentDidMount() {
+        if(this.state.students==null){
+            fetch('/get-enrollments')
+            .then(resp => {return resp.json()})
+            .then(students => {this.setState({students: students });})
+            .catch(error=>console.log(error));
+        }
+
+      }
 
     toggleButton = () => {
         this.setState({clicked: !this.state.clicked});
-        //implement expand/collapse button 
     }
     render(){
         const props = this.props;
@@ -16,7 +36,11 @@ class Assignment extends Component{
 
         return(
             <div>
-                <button id={id} onClick={this.toggleButton}><strong>{name}</strong></button>
+            <div className="top_bar">
+              Canvas Grading Extension
+            </div>
+                <button className = {styles.Button} id={id} onClick={this.toggleButton}><strong>{name}</strong></button>
+                {this.state.students!=null&&this.state.clicked?this.state.students.map(d=>this.renderStudent(d.login_id, d.name)):null}
             </div>
         )
     }

@@ -1,7 +1,8 @@
 import React from 'react';
 import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import Assignment from './Assignment';
-import LoginButton from './loginbutton'
+import LoginButton from './LoginButton'
+import Dashboard from './dashboard'
 import './index.css';
 
 
@@ -10,10 +11,10 @@ class App extends React.Component {
     return (
     <BrowserRouter>
       <div>
-        <LoginButton />
         <Switch>
-          <Route exact path = "/" component={LoginButton}/>
-          <Route exact path="/Assignment" component={Assignment}/>
+          <Route path = "/" component={LoginButton} exact/>
+          <Route path="/Assignment" component={Assignment}/>
+          <Route path="/dashboard" component={Dashboard}/>
         </Switch>
       </div>
     </BrowserRouter>
