@@ -1,3 +1,7 @@
+/**
+ * This file will store all the logic for retrieving and sending data using the 
+ * Canvas API. All database querying logic should be put in queries.js.
+ */
 const axios = require('axios')
 
 exports.student_enrollments = function (req, res, next) {

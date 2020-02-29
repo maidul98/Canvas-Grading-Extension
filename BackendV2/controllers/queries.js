@@ -1,5 +1,15 @@
+/**
+ * This file will store the logic behind all the database queries. All functions
+ * defined here will deal with retrieving or pushing data from the 
+ * MySQL database. 
+ */
+
 var mysql = require('mysql');
 
+/** Configure Heroku Connection */
+/** TODO: Store all these constants in a separate file, gitignore it and figure 
+ * out deployment mechanism - where will these pins be stored? That is a later 
+ * problem */
 var db = mysql.createConnection({
   host: "us-cdbr-iron-east-04.cleardb.net",
   user: "be9696052936bb",
@@ -7,6 +17,7 @@ var db = mysql.createConnection({
   database: "heroku_aff64052225438d"
 });
 
+//Initialize connection
 db.connect((err) => {
   if (err) {
     throw err;
@@ -14,6 +25,11 @@ db.connect((err) => {
   console.log('Connected to database');
 });
 
+/**
+ * A higher-order function that returns a function for querying a full table.
+ * @param {string} tableName The name of the table to be queried. Make sure the 
+ * table exists to avoid TableNotFoundErrors on Heroku/
+ */
 function createQueryFunction(tableName) {
   return function (_, res, _) {
     var a1 = "SELECT * FROM `" + tableName + "`";
@@ -26,7 +42,8 @@ function createQueryFunction(tableName) {
     });
   };
 }
-
+/** Gets the submission table */
 exports.get_submission_table = createQueryFunction("submission");
 
+/** Gets the assignments table */
 exports.get_assignments_table = createQueryFunction("assignments");

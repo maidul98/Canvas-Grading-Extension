@@ -1,3 +1,9 @@
+/**
+ * This file will define all the routes needed for this project. Do not put any 
+ * logic in this file - this is simply meant to define the endpoints we need to
+ * set up and use. Put the relevant logic in api-call.js or queries.js
+ * appropriately. 
+ */
 var express = require('express');
 var router = express.Router();
 var apiCalls = require('../controllers/api-calls')
