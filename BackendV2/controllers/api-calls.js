@@ -4,8 +4,10 @@
  */
 const axios = require('axios')
 
+/** Obtains all the student enrollments for the specific class. */
 exports.student_enrollments = function (req, res, next) {
   const config = {
+    //TODO: Factor out bearer tokens into another file that isn't publicly accessible.
     headers: { Authorization: `Bearer 9713~TYz9t4zPXdeHonsL9g19ac3kIucoU8BdskLUNZ1rijvusRvhhdbyQFMhXPDhDltZ` }
   };
 
