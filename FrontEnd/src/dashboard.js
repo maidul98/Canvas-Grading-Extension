@@ -17,11 +17,11 @@ class Dashboard extends React.Component {
             <form>
               <div className = "form_el">
                 <label for="grade"> Grade </label>
-                <input type="text" id = "grade" name="grade"/>
+                <input className = "grade" type="number" min = "0" step="any" id = "grade" name="grade"/>
               </div>
               <div className = "form_el">
                 <label for= "comments"> Comments </label>
-                <input type = "textarea" id = "comments" name = "comments" />
+                <textarea className = "comments" type = "textarea" rows = "5" columns = "20" id = "comments" name = "comments" />
               </div>
               <input type="submit" className = "sub_but" value="Submit"/>
             </form>

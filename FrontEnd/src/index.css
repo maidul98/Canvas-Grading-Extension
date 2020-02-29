@@ -73,7 +73,12 @@ code {
 
 .form_el{
   margin: 0 auto;
+  text-align: right;
+  margin-right: 40%;
+  padding-top: 4%;
+
 }
+
 
 h1{
   text-align: center;
