@@ -24,7 +24,7 @@ class Assignment extends Component{
             <div className="top_bar">
               Canvas Grading Extension
             </div>
-                <Link to="/students">
+                <Link to={"/students/"+id}>
                 <button className = {styles.Button} id={id} key={id} onClick={this.handleClick}><strong>{name}</strong></button>
                 </Link>
             </div>

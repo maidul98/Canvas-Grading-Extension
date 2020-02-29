@@ -11,10 +11,10 @@ class Student extends Component{
     render(){
         const props = this.props;
         const name = props.name;
-        const id = props.login_id
+        const id = props.id;
 
         return(
-                <Link to = "/dashboard">
+                <Link to = {"/dashboard/"+id}>
                   <button className = {styles.Student} id={id}><strong>{name}</strong></button>
                 </Link>
         )
