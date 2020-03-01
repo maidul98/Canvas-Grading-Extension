@@ -3,7 +3,6 @@
  * defined here will deal with retrieving or pushing data from the 
  * MySQL database. 
  */
-
 var mysql = require('mysql');
 
 /** Configure Heroku Connection */
@@ -14,16 +13,23 @@ var db = mysql.createConnection({
   host: "us-cdbr-iron-east-04.cleardb.net",
   user: "be9696052936bb",
   password: "4f1c4dfa",
-  database: "heroku_aff64052225438d"
+  database: "heroku_aff64052225438d",
+  port: 3306,
+  connectTimeout: 100000,
+  max_questions: 5000
 });
 
 //Initialize connection
-db.connect((err) => {
-  if (err) {
-    throw err;
-  }
-  console.log('Connected to database');
-});
+// db.connect((err) => {
+//   if (err) {
+//     throw err;
+//   }
+//   console.log('Connected to database');
+// });
+
+setInterval(function () {
+  db.query('SELECT 1');
+}, 15000);
 
 /**
  * A higher-order function that returns a function for querying a full table.
