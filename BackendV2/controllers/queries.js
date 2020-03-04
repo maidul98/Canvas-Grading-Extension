@@ -19,14 +19,6 @@ var db = mysql.createConnection({
   max_questions: 5000
 });
 
-//Initialize connection
-// db.connect((err) => {
-//   if (err) {
-//     throw err;
-//   }
-//   console.log('Connected to database');
-// });
-
 setInterval(function () {
   db.query('SELECT 1');
 }, 15000);

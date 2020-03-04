@@ -16,7 +16,7 @@ exports.student_enrollments = function (_, res) {
       .then(response => {
         result = []
         response.data.forEach(function (element) {
-          if (element.type == "StudentEnrollment" || true) {
+          if (element.type == "StudentEnrollment") {
             result.push(element);
           };
         });
