@@ -48,3 +48,14 @@ exports.get_submissions_for_assignment = function (req, res) {
     })
     .catch(error => console.log(error));
 }
+
+exports.get_assignments_table = function (req, res) {
+  axios
+    .get(`https://canvas.cornell.edu//api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions`, config)
+    .then(result => {
+      const submissionsJSONArray = result.data;
+      res.json(submissionsJSONArray);
+    })
+    .catch(error => console.log(error));
+    
+}
