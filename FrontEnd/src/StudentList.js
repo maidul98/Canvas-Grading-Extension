@@ -17,7 +17,7 @@ class StudentList extends Component{
         need to change this later to get a list of students using this.props.assignment_id and this.props.TA_id
         */
         if(this.state.students==null){
-            fetch('/get-enrollments')
+            fetch('/student-enrollments')
             .then(resp => {return resp.json()})
             .then(students => {this.setState({students: students });})
             .catch(error=>console.log(error));
@@ -43,7 +43,7 @@ class StudentList extends Component{
               </h1>
               <div className = "studentlist">
                 {this.state.students==null? 'Loading...' :
-                this.state.students.map(d=>this.renderStudent(d.login_id, d.name))}
+                this.state.students.map(d=>this.renderStudent(d.user.login_id, d.user.name))}
               </div>
             </div>
         )
