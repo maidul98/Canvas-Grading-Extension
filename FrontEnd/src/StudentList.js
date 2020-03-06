@@ -34,7 +34,7 @@ class StudentList extends Component{
         const props = this.props;
         const assignment_id = props.assignment_id;
         return(
-            <div>
+            <div className = "fade">
               <div className="top_bar">
               Canvas Grading Extension
               </div>

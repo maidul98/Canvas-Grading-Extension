@@ -20,12 +20,12 @@ class Assignment extends Component{
         const id = props.id;
 
         return(
-            <div>
+            <div className = "fade">
             <div className="top_bar">
               Canvas Grading Extension
             </div>
                 <Link to={"/students/"+id}>
-                <button className = "Button" id={id} key={id} onClick={this.handleClick}><strong>{name}</strong></button>
+                <button className = "Button fade" id={id} key={id} onClick={this.handleClick}><strong>{name}</strong></button>
                 </Link>
             </div>
         )
