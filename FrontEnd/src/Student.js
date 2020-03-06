@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Link} from "react-router-dom";
-import styles from './App.module.css';
+import './index.css';
 
 class Student extends Component{
     state = {
@@ -15,7 +15,7 @@ class Student extends Component{
 
         return(
                 <Link to = {"/dashboard/"+id}>
-                  <button className = {styles.Student} id={id}><strong>{name}</strong></button>
+                  <button className = "Student" id={id}><strong>{name}</strong></button>
                 </Link>
         )
     }

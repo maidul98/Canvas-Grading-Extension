@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Student from './Student';
 import StudentList from './StudentList';
-import styles from './App.module.css';
+import './index.css';
 import {Link, useHistory} from 'react-router-dom';
 
 
@@ -25,7 +25,7 @@ class Assignment extends Component{
               Canvas Grading Extension
             </div>
                 <Link to={"/students/"+id}>
-                <button className = {styles.Button} id={id} key={id} onClick={this.handleClick}><strong>{name}</strong></button>
+                <button className = "Button" id={id} key={id} onClick={this.handleClick}><strong>{name}</strong></button>
                 </Link>
             </div>
         )
