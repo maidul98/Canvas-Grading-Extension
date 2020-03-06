@@ -3,6 +3,7 @@
  * Canvas API. All database querying logic should be put in queries.js.
  */
 const axios = require('axios')
+const queries = require('./queries');
 const config = {
   //TODO: Factor out bearer tokens into another file that isn't publicly accessible.
   headers: { Authorization: `Bearer 9713~TYz9t4zPXdeHonsL9g19ac3kIucoU8BdskLUNZ1rijvusRvhhdbyQFMhXPDhDltZ` }
@@ -21,6 +22,7 @@ exports.student_enrollments = function (_, res) {
           };
         });
         res.json(result);
+        return result
       })
       .catch(err => res.send(err));
   }
@@ -34,7 +36,11 @@ exports.get_published_assignments = function (_, res) {
     .get('https://canvas.cornell.edu/api/v1/courses/15037/assignments', config)
     .then(result => {
       const assignmentJSONArray = result.data;
-      res.json(assignmentJSONArray.filter(assignment => assignment.published));
+      const filtered = assignmentJSONArray.filter(assignment => assignment.published);
+      queries.insertPublishedAssignments(filtered);
+      return filtered
+    }).then(json => {
+      res.json(json);
     })
     .catch(error => console.log(error));
 }
