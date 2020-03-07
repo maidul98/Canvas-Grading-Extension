@@ -57,6 +57,14 @@ function insertSingleAssignment(canvas_id, assignment_number, due_date, last_upd
   });
 };
 
+function insertSingleGrader(canvas_grader_id, grader_name, global_offset, grader_position, total_graded, weight, last_updated) {
+  let sql_query = "INSERT INTO graders (canvas_grader_id, grader_name, global_offset, grader_position, total_graded, weight, last_updated)";
+  db.query(sql_query, [canvas_grader_id, grader_name, global_offset, grader_position, total_graded, weight, last_updated], (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+  });
+}
 
 /**
  * Takes a JSON string for published assignments, parses it, and inserts each assignment into 
@@ -64,7 +72,7 @@ function insertSingleAssignment(canvas_id, assignment_number, due_date, last_upd
  */
 module.exports = {
   insertPublishedAssignments: function (json_string) {
-    let assignments = JSON.parse(json_string);
+    let assignments = json_string;
     assignments.forEach(e => {
       let canvas_id = e.id;
       let assignment_number = e.assignment_group_id;
@@ -73,6 +81,38 @@ module.exports = {
 
       insertSingleAssignment(canvas_id, assignment_number, due_date, last_updated);
     });
+  },
+
+  insertConflict: function (conflict_id, requester_id, reason, approved, reassigned_grader) {
+    let sql_query = "INSERT INTO conflicts (conflict_id, requester_id, reason, approved, reassigned_grader)";
+    db.query(sql_query, [conflict_id, requester_id, reason, approved, reassigned_grader], (err, _) => {
+      if (err) {
+        console.log(err);
+      }
+    })
+  },
+
+  insertAllGraders: function (json_string) {
+    json_string.forEach(e => {
+      let id = e.id;
+      let grader_name = e.user.name;
+      let global_offset = 0;
+
+      let grader_position;
+      if (e.type == 'TaEnrollment') {
+        grader_position = "TA";
+      } else if (e.type == "ObserverEnrollment") {
+        grader_position = "Grader";
+      } else {
+        grader_position = "Consultant";
+      }
+    })
+
+    let total_graded = 0;
+    let weight = -1;
+    let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
+
+    insertSingleGrader(id, grader_name, global_offset, grader_position, total_graded, weight, last_updated);
   }
 }
 

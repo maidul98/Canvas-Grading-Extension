@@ -54,3 +54,29 @@ exports.get_submissions_for_assignment = function (req, res) {
     })
     .catch(error => console.log(error));
 }
+
+exports.get_all_graders = function (req, res) {
+  axios
+    .get("https://canvas.cornell.edu/api/v1/courses/15037/enrollments",
+      config)
+    .then(response => {
+      result = []
+      response.data.forEach(function (element) {
+        //TaEnrollment - TAs
+        //DesignerEnrollment - Consultants
+        //ObserverEnrollment - Graders
+        if (element.type == "TaEnrollment" || element.type == "DesignerEnrollment" || element.type == "ObserverEnrollment") {
+          result.push(element);
+        };
+      });
+      return result
+    })
+    .then(jsonarr => {
+      queries.insertAllGraders(jsonarr);
+      return jsonarr
+    })
+    .then(resj => {
+      res.json(resj)
+    })
+    .catch(err => res.send(err));
+}
