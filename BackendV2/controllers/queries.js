@@ -49,7 +49,7 @@ function createQueryFunction(tableName) {
  * @param {string} last_updated The date the assignment was last updated 
  */
 function insertSingleAssignment(canvas_id, assignment_number, due_date, last_updated) {
-  let sql_query = "INSERT INTO assignments (canvas_id, assignment_number, due_date, last_updated) VALUES (?, ?, ?, ?)";
+  let sql_query = "INSERT IGNORE INTO assignments (canvas_id, assignment_number, due_date, last_updated) VALUES (?, ?, ?, ?)";
   db.query(sql_query, [canvas_id, assignment_number, due_date, last_updated], (err, result) => {
     if (err) {
       console.log(err);
@@ -58,7 +58,7 @@ function insertSingleAssignment(canvas_id, assignment_number, due_date, last_upd
 };
 
 function insertSingleGrader(canvas_grader_id, grader_name, global_offset, grader_position, total_graded, weight, last_updated) {
-  let sql_query = "INSERT INTO graders (canvas_grader_id, grader_name, global_offset, grader_position, total_graded, weight, last_updated)";
+  let sql_query = "INSERT IGNORE INTO graders (canvas_grader_id, grader_name, global_offset, grader_position, total_graded, weight, last_updated)";
   db.query(sql_query, [canvas_grader_id, grader_name, global_offset, grader_position, total_graded, weight, last_updated], (err, result) => {
     if (err) {
       console.log(err);
@@ -67,7 +67,7 @@ function insertSingleGrader(canvas_grader_id, grader_name, global_offset, grader
 };
 
 function insertSingleSubmission(submission_id, grader_id, group, group_name, assignment_id, is_graded, last_updated, conflict_id) {
-  let sql_query = "INSERT INTO submissions (submission_id, grader_id, group, group_name, assignment_id, is_graded, last_updated, conflict_id)";
+  let sql_query = "INSERT IGNORE INTO submissions (submission_id, grader_id, group, group_name, assignment_id, is_graded, last_updated, conflict_id)";
   db.query(sql_query, [submission_id, grader_id, group, group_name, assignment_id, is_graded, last_updated, conflict_id], (err, result) => {
     if (err) {
       console.log(err);
@@ -111,7 +111,7 @@ module.exports = {
   },
 
   insertConflict: function (conflict_id, requester_id, reason, approved, reassigned_grader) {
-    let sql_query = "INSERT INTO conflicts (conflict_id, requester_id, reason, approved, reassigned_grader)";
+    let sql_query = "INSERT IGNORE INTO conflicts (conflict_id, requester_id, reason, approved, reassigned_grader)";
     db.query(sql_query, [conflict_id, requester_id, reason, approved, reassigned_grader], (err, _) => {
       if (err) {
         console.log(err);
