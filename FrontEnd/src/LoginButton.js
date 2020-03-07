@@ -5,7 +5,7 @@ class LoginButton extends Component {
 
     render(){
       return (
-          <div className = "login_button">
+          <div className = "login_button fade">
             <Link to="/assignments">
               <button className="log_but"> Cornell Login</button>
             </Link>

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Student from './Student';
-import styles from './App.module.css';
+import './index.css';
 import {BrowserRouter, Route, Switch} from 'react-router-dom';
 
 /*
@@ -34,7 +34,7 @@ class StudentList extends Component{
         const props = this.props;
         const assignment_id = props.assignment_id;
         return(
-            <div>
+            <div className = "fade">
               <div className="top_bar">
               Canvas Grading Extension
               </div>

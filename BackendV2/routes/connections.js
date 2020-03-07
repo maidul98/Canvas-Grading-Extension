@@ -20,12 +20,16 @@ router.get('/', function (req, res, next) {
 router.get('/student-enrollments', apiCalls.student_enrollments);
 
 //TODO: create database queries in another file
-router.get('/datatest', queries.get_submission_table);
-router.get('/assignments', queries.get_assignments_table);
+// router.get('/datatest', queries.get_submission_table);
+// router.get('/assignments', queries.get_assignments_table);
 
 /** Get assignment list */
 router.get('/get-published-assignments', apiCalls.get_published_assignments);
 
 /** Get assignments for specific submission */
 router.get('/get-submissions/:assignment_id', apiCalls.get_submissions_for_assignment);
+
+/** Get all graders for enrolled on Canvas */
+router.get('/get-graders', apiCalls.get_all_graders);
+
 module.exports = router;
