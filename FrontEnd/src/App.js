@@ -3,7 +3,7 @@ import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import AssignmentList from './components/AssignmentList';
 import LoginButton from './components/LoginButton';
 import StudentList from './components/StudentList';
-import Dashboard from './components/dashboard'
+import DetailedAssignmentView from './components/DetailedAssignmentView'
 import './index.css';
 import NavigationMenu from './components/NavigationMenu';
 
@@ -17,7 +17,7 @@ class App extends React.Component {
             <Route path = "/" component={LoginButton} exact/>
             <Route path="/assignments" component={AssignmentList}/>
             <Route path="/students/:assignment_id" component={StudentList}/>
-            <Route path="/dashboard/:student_id" component={Dashboard}/>
+            <Route path="/dashboard/:student_id" component={DetailedAssignmentView}/>
           </Switch>
       </BrowserRouter>
     </div>

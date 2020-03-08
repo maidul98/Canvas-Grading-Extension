@@ -10,24 +10,13 @@ class Assignment extends Component{
         id: null, //assignment ID from Canvas
     };
 
-    handleClick = () => {
-        this.props.history.push("/students");
-    }
-
     render(){
-        const props = this.props;
-        const name = props.name;
-        const id = props.id;
-
         return(
-            // <div className = "fade">
-            //     <Link to={"/students/"+id}>
-            //     <button className = "Button fade" id={id} key={id} onClick={this.handleClick}><strong>{name}</strong></button>
-            //     </Link>
-            // </div>
             <div className="assignment">
                 <div className="student-name">
-                    <a href="#">Maidul islam</a>
+                <Link to={"/students/"+this.props['id']}>
+                    <a href="">{this.props['name']}</a>
+                </Link>
                 </div>
                 <div className="grade-status">
                     <div className="grade-icon"></div>

@@ -9,27 +9,77 @@ function renderAssignment(id, name){
 }
 
 class AssignmentList extends Component{
+    state = {
+        assignments: []
+    }
+    
+    async submissionsForAssignment(assignmentId=null){
+        await fetch('/student-enrollments')
+        .then(res => {return res.json()})
+        .then(res =>{
+            return res;
+        })
+        .catch(error=>
+            console.log(error)
+        );
+    }
+
+    async getAllPublishedAssignment(){
+        await fetch('/get-published-assignments')
+        .then(res => {return res.json()})
+        .then(res =>{
+            return res
+        })
+        .catch(error=>
+            console.log(error)
+        );
+    } 
+    
+    onChangeAssignment = () => {
+        console.log(this.state)
+    }
+
+
+    async componentDidMount(){
+        let assignment = await fetch('/get-published-assignments')
+        .then(res => {return res.json()})
+        .then(res =>{
+            return res;
+        })
+        .catch(error=>
+            console.log(error)
+        );
+
+        this.setState({assignments:assignment});
+        console.log(this.state)
+    }
+
     render(){
         return(
             
-            /*<div>
-                {this.props.assignments==null? 'Loading...' : 
-            this.props.assignments.map(d=>renderAssignment(this.props.name))}
-            </div>*/
+            // <div>
+            //     {this.props.assignments==null? 'Loading...' : 
+            // this.props.assignments.map(d=>renderAssignment(this.props.name))}
+            // </div>
             // <Assignment name="Test Assignment" id="0" history={this.props.history}/>
             
             <div className="container">
                 <div className="content-container">
                     <div id="select-assignment">
-                        <select id="dropdown-assignment-selector">
-                            <option value="1">Homework 1</option>
-                            <option value="2">Homework 2</option>
-                            <option value="3">Homework 3</option>
-                            <option value="4">Homework 4</option>
+                        <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
+                            { this.state['assignments'].map(
+                                (res)=> <option value={res.id}>{res.name}</option>
+                            )}
                         </select>
                     </div>
                     <div className="assignments-container">
-                        {[1,2,3,3,4,5,6,6,6,66,6,66].map(() => < Assignment/>)}
+                        {[{
+                            name:'Maidul Islam', 'user_id':234, 'assignment_id':9393}, 
+                            {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
+                            {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
+                            {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
+                            {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393}
+                         ].map((res) => < Assignment name={res.name} id={12} />)}
                     </div>
                 </div>
             </div>
