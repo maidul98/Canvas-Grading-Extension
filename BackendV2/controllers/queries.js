@@ -48,9 +48,9 @@ function createQueryFunction(tableName) {
  * @param {string} due_date The date the assignment is due
  * @param {string} last_updated The date the assignment was last updated 
  */
-function insertSingleAssignment(id, name, due_date, last_updated) {
-  let sql_query = "INSERT IGNORE INTO assignments (id, name, due_date, last_updated) VALUES (?, ?, ?, ?)";
-  db.query(sql_query, [id, name, due_date, last_updated], (err, result) => {
+function insertSingleAssignment(id, name, due_date, last_updated, points_possible) {
+  let sql_query = "INSERT IGNORE INTO assignments (id, name, due_date, last_updated, points_possible) VALUES (?, ?, ?, ?)";
+  db.query(sql_query, [id, name, due_date, last_updated, points_possible], (err, result) => {
     if (err) {
       console.log(err);
     }
