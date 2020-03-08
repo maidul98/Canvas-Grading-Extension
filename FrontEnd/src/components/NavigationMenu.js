@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import {Link} from "react-router-dom";
 
 class NavigationMenu extends Component {
 
@@ -21,7 +20,7 @@ class NavigationMenu extends Component {
                         </div>
                     </div>
                 </div>
-                
+
             </div>
         </header>
       )

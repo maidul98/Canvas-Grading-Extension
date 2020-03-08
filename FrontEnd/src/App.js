@@ -1,7 +1,7 @@
 import React from 'react';
-import {BrowserRouter, Route, Switch, Redirect} from 'react-router-dom';
+import {BrowserRouter, Route, Switch, Redirect, Link} from 'react-router-dom';
 import AssignmentList from './components/AssignmentList';
-import LoginButton from './components/LoginButton';
+//import LoginButton from './components/LoginButton';
 import StudentList from './components/StudentList';
 import DetailedAssignmentView from './components/DetailedAssignmentView'
 import './index.css';
@@ -19,6 +19,36 @@ const fakeAuth = {
   }
 }
 
+class LoginButton extends React.Component {
+    state = {
+      redirectToReferrer: false
+    }
+    login = () => {
+      fakeAuth.authenticate(() => {
+        this.setState(() => ({
+          redirectToReferrer: true
+        }))
+      })
+    }
+
+    render(){
+      const { from } = this.props.location.state || { from: { pathname: '/' }}
+      const { redirectToReferrer } = this.state
+
+      if (redirectToReferrer === true) {
+        return <Redirect to= {from} />
+      }
+
+      return (
+          <div className = "login_button fade">
+            <Link to="/assignments">
+              <button onClick={this.login} className="log_but"> Cornell Login</button>
+            </Link>
+          </div>
+      )
+    }
+  }
+
 const PrivateRoute = ({component: Component, ...rest}) => (
   <Route {...rest} render = {(props) => (
     fakeAuth.isAuthenticated === true
@@ -27,12 +57,12 @@ const PrivateRoute = ({component: Component, ...rest}) => (
   )} />
 )
 
-
 class App extends React.Component {
   render(){
     return (
     <div>
       <NavigationMenu/>
+
       <BrowserRouter>
           <Switch>
             <Route path = "/" component={LoginButton} exact/>
