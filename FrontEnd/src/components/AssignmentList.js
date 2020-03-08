@@ -67,6 +67,7 @@ class AssignmentList extends Component{
                 <div className="content-container">
                     <div id="select-assignment">
                         <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
+                            <option value="1">Homework 1</option>
                             { this.state['assignments'].map(
                                 (res)=> <option value={res.id}>{res.name}</option>
                             )}
