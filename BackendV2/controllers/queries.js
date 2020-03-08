@@ -121,22 +121,22 @@ module.exports = {
     json_string.forEach(e => {
       let id = e.id;
       let grader_name = e.user.name;
-      let global_offset = 0;
+      let offset = 0;
 
-      let grader_position;
+      let role;
       if (e.type == 'TaEnrollment') {
-        grader_position = "TA";
+        role = "TA";
       } else if (e.type == "ObserverEnrollment") {
-        grader_position = "Grader";
+        role = "Grader";
       } else {
-        grader_position = "Consultant";
+        role = "Consultant";
       }
 
       let total_graded = 0;
       let weight = -1;
       let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
   
-      insertSingleGrader(id, grader_name, global_offset, grader_position, total_graded, weight, last_updated);
+      insertSingleGrader(id, grader_name, offset, role, total_graded, weight, last_updated);
     })
   }
 }
