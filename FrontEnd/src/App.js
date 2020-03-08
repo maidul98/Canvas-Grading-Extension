@@ -32,7 +32,7 @@ class LoginButton extends React.Component {
     }
 
     render(){
-      const { from } = this.props.location.state || { from: { pathname: '/' }}
+      const { from } = this.props.location.state || { from: { pathname: '/assignments' }}
       const { redirectToReferrer } = this.state
 
       if (redirectToReferrer === true) {
@@ -41,9 +41,7 @@ class LoginButton extends React.Component {
 
       return (
           <div className = "login_button fade">
-            <Link to="/assignments">
               <button onClick={this.login} className="log_but"> Cornell Login</button>
-            </Link>
           </div>
       )
     }
