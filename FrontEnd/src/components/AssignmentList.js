@@ -1,13 +1,5 @@
 import React, { Component } from 'react';
 import Assignment from './Assignment';
-
-
-function renderAssignment(id, name){
-    return (
-        <Assignment name={name} id={id}/>
-    )
-}
-
 class AssignmentList extends Component{
     state = {
         assignments: []
@@ -51,18 +43,10 @@ class AssignmentList extends Component{
         );
 
         this.setState({assignments:assignment});
-        console.log(this.state)
     }
 
     render(){
         return(
-            
-            // <div>
-            //     {this.props.assignments==null? 'Loading...' : 
-            // this.props.assignments.map(d=>renderAssignment(this.props.name))}
-            // </div>
-            // <Assignment name="Test Assignment" id="0" history={this.props.history}/>
-            
             <div className="container">
                 <div className="content-container">
                     <div id="select-assignment">
