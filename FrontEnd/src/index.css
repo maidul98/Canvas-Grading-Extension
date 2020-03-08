@@ -1,3 +1,91 @@
+/*
+==============CSS Reset================
+From:https://dev.to/hankchizljaw/a-modern-css-reset-6p3
+*/
+
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove default padding */
+ul[class],
+ol[class] {
+  padding: 0;
+}
+
+/* Remove default margin */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+ul[class],
+ol[class],
+li,
+figure,
+figcaption,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+/* Set core body defaults */
+body {
+  min-height: 100vh;
+  scroll-behavior: smooth;
+  text-rendering: optimizeSpeed;
+  line-height: 1.5;
+}
+
+/* Remove list styles on ul, ol elements with a class attribute */
+ul[class],
+ol[class] {
+  list-style: none;
+}
+
+/* A elements that don't have a class get default styles */
+a:not([class]) {
+  text-decoration-skip-ink: auto;
+}
+
+/* Make images easier to work with */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Natural flow and rhythm in articles by default */
+article > * + * {
+  margin-top: 1em;
+}
+
+/* Inherit fonts for inputs and buttons */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Remove all animations and transitions for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+==============Global CSS=============
+*/
+
 body {
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -7,6 +95,38 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: rgb(235, 235, 235);
 }
+
+.container{
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+h1{
+  font-size: 1.5em;
+}
+
+h2{
+  font-size: 1.3em;
+}
+
+h3{
+  font-size: 1.0em;
+}
+
+.show{
+  display: block !important;
+}
+
+a{
+  text-decoration: none;
+  color:#707070;
+}
+
+
+
+/*
+==============To do: needs to be partitioned=============
+*/
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
@@ -154,4 +274,93 @@ code {
 
 h1{
   text-align: center;
+}
+
+
+/**
+==========Main Navigation Bar===========
+**/
+#navigation-container{
+  /* display:flex;
+  justify-content: space-between; */
+  padding: 10px 0;
+  background-color: #b31b1b;
+}
+
+#navigation-content{
+  display:flex;
+  justify-content: space-between;
+}
+
+#logo h1{
+  color:white;
+}
+
+#logo h1{
+  line-height:50px;
+}
+
+#user_menu_nav {
+  list-style: none;
+  position: absolute;
+  top: 60px;
+  background: #a50000;
+  padding: 20px 40px;
+  display: none;
+}
+
+#user_menu_nav a{
+  text-decoration: none;
+  color:white;
+}
+
+#user-profile-icon{
+  position: relative;
+  border-radius: 50%;
+  height:50px;
+  width:50px;
+  background-color: white;
+}
+
+#user-profile-icon:hover{
+  cursor: pointer;
+}
+
+/**
+==========Grader Dashboard (Assignments) ===========
+**/
+.content-container{
+margin-top: 120px;
+}
+
+.page-header{
+  margin:20px 0;
+}
+
+.assignments-container{
+  margin-top: 45px;
+}
+
+.assignment{
+  background-color: #F7F7F7;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.grade-icon{
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background-color: #049062;
+}
+
+#assignment-header{
+  display: flex;
+  justify-content: space-between;
+}
+
+#dropdown-assignment-selector{
+  padding: 10px;
 }

@@ -6,9 +6,6 @@ class Dashboard extends React.Component {
   render(){
     return (
       <div className = "fade">
-        <div className="top_bar">
-          Canvas Grading Extension
-        </div>
         <div className = "mid">
           Name of Student:
         </div>
