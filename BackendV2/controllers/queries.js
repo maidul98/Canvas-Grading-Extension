@@ -43,32 +43,32 @@ function createQueryFunction(tableName) {
 
 /**
  * Function that inserts a single assignment with relevant arguments into the database.
- * @param {string} canvas_id - ?
- * @param {string} assignment_number - ?
+ * @param {string} id - ?
+ * @param {string} name - ?
  * @param {string} due_date The date the assignment is due
  * @param {string} last_updated The date the assignment was last updated 
  */
-function insertSingleAssignment(canvas_id, assignment_number, due_date, last_updated) {
-  let sql_query = "INSERT IGNORE INTO assignments (canvas_id, assignment_number, due_date, last_updated) VALUES (?, ?, ?, ?)";
-  db.query(sql_query, [canvas_id, assignment_number, due_date, last_updated], (err, result) => {
+function insertSingleAssignment(id, name, due_date, last_updated, points_possible) {
+  let sql_query = "INSERT IGNORE INTO assignments (id, name, due_date, last_updated, points_possible) VALUES (?, ?, ?, ?)";
+  db.query(sql_query, [id, name, due_date, last_updated, points_possible], (err, result) => {
     if (err) {
       console.log(err);
     }
   });
 };
 
-function insertSingleGrader(canvas_grader_id, grader_name, global_offset, grader_position, total_graded, weight, last_updated) {
-  let sql_query = "INSERT IGNORE INTO graders (canvas_grader_id, grader_name, global_offset, grader_position, total_graded, weight, last_updated)";
-  db.query(sql_query, [canvas_grader_id, grader_name, global_offset, grader_position, total_graded, weight, last_updated], (err, result) => {
+function insertSingleGrader(id, name, offset, role, total_graded, weight, last_updated) {
+  let sql_query = "INSERT IGNORE INTO graders (id, name, offset, role, total_graded, weight, last_updated)";
+  db.query(sql_query, [id, name, offset, role, total_graded, weight, last_updated], (err, result) => {
     if (err) {
       console.log(err);
     }
   })
 };
 
-function insertSingleSubmission(submission_id, grader_id, group, group_name, assignment_id, is_graded, last_updated, conflict_id) {
-  let sql_query = "INSERT IGNORE INTO submissions (submission_id, grader_id, group, group_name, assignment_id, is_graded, last_updated, conflict_id)";
-  db.query(sql_query, [submission_id, grader_id, group, group_name, assignment_id, is_graded, last_updated, conflict_id], (err, result) => {
+function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, grade) {
+  let sql_query = "INSERT IGNORE INTO submissions (id, grader_id, assignment_id, is_graded, last_updated, grade)";
+  db.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, grade], (err, result) => {
     if (err) {
       console.log(err);
     }
@@ -86,33 +86,31 @@ module.exports = {
   insertPublishedAssignments: function (json_string) {
     let assignments = json_string;
     assignments.forEach(e => {
-      let canvas_id = e.id;
-      let assignment_number = e.assignment_group_id;
-      let due_date = e.due_at; // what to do about null due dates?
+      let id = e.id;
+      let name = e.name;
+      let due_date = e.due_at;
       let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
-
-      insertSingleAssignment(canvas_id, assignment_number, due_date, last_updated);
+      let points_possible = e.points_possible
+      insertSingleAssignment(id, name, due_date, last_updated, points_possible);
     });
   },
 
   insertAllSubmissions: function (json_string) {
     json_string.forEach(e => {
-      let submission_id = e.submission_id;
+      let id = e.id;
       let grader_id = e.grader_id;
-      let group = e.group;
-      let group_name = e.group_name;
       let assignment_id = e.assignment_id;
       let is_graded = e.is_graded;
       let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
-      let conflict_id = e.conflict_id;
+      let grade = e.grade;
 
-      insertSingleSubmission(submission_id, grader_id, group, group_name, assignment_id, is_graded, last_updated, conflict_id);
+      insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, grade);
     });
   },
 
-  insertConflict: function (conflict_id, requester_id, reason, approved, reassigned_grader) {
-    let sql_query = "INSERT IGNORE INTO conflicts (conflict_id, requester_id, reason, approved, reassigned_grader)";
-    db.query(sql_query, [conflict_id, requester_id, reason, approved, reassigned_grader], (err, _) => {
+  insertConflict: function (id, grader_id, reason, approved, reassigned_grader_id, submission_id) {
+    let sql_query = "INSERT IGNORE INTO conflicts (id, grader_id, reason, approved, reassigned_grader_id, submission_id)";
+    db.query(sql_query, [id, grader_id, reason, approved, reassigned_grader_id, submission_id], (err, _) => {
       if (err) {
         console.log(err);
       }
@@ -123,23 +121,23 @@ module.exports = {
     json_string.forEach(e => {
       let id = e.id;
       let grader_name = e.user.name;
-      let global_offset = 0;
+      let offset = 0;
 
-      let grader_position;
+      let role;
       if (e.type == 'TaEnrollment') {
-        grader_position = "TA";
+        role = "TA";
       } else if (e.type == "ObserverEnrollment") {
-        grader_position = "Grader";
+        role = "Grader";
       } else {
-        grader_position = "Consultant";
+        role = "Consultant";
       }
+
+      let total_graded = 0;
+      let weight = -1;
+      let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
+  
+      insertSingleGrader(id, grader_name, offset, role, total_graded, weight, last_updated);
     })
-
-    let total_graded = 0;
-    let weight = -1;
-    let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
-
-    insertSingleGrader(id, grader_name, global_offset, grader_position, total_graded, weight, last_updated);
   }
 }
 
