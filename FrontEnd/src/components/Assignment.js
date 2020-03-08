@@ -14,7 +14,7 @@ class Assignment extends Component{
         return(
             <div className="assignment">
                 <div className="student-name">
-                <Link to={"/students/"+this.props['id']}>
+                <Link to={"/detailed-view/"+this.props['id']}>
                     <a href="">{this.props['name']}</a>
                 </Link>
                 </div>

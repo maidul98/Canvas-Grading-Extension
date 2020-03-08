@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'; // ES6
 
 class DetailedAssignmentView extends React.Component {
   render(){
@@ -32,6 +34,10 @@ class DetailedAssignmentView extends React.Component {
                 <li>Download file #2</li>
               </ul>
             </div>
+            <ReactQuill placeholder="Enter your comments here"/>
+
+            <button className="btn" id="submit-feedback-btn">Submit feedback</button>
+            <div className="clearfix"></div>
           </div>
         </div>
       </div>

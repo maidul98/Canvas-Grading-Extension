@@ -122,7 +122,11 @@ a{
   color:#707070;
 }
 
-
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
 
 /*
 ==============To do: needs to be partitioned=============
@@ -327,7 +331,7 @@ h1{
 }
 
 /**
-==========Grader Dashboard (Assignments) ===========
+========== (Assignments) ===========
 **/
 .content-container{
 margin-top: 120px;
@@ -363,4 +367,41 @@ margin-top: 120px;
 
 #dropdown-assignment-selector{
   padding: 10px;
+}
+
+#detailed-view-box{
+
+}
+
+/**
+==========Detailed view of assignments ===========
+**/
+
+#detailed-view-box{
+  background-color: #F7F7F7;
+  padding: 30px;
+}
+
+#attachment-downloads{
+  list-style: none;
+  padding: 0;
+}
+
+#attachment-downloads li{
+  border: solid 1px gray;
+  display: inline-block;
+  padding: 10px 10px;
+  margin-right: 10px;
+}
+
+.btn{
+  border:none;
+  padding: 15px 8px;
+  background-color: #B31B1B;
+  color: white;
+  float: right;
+}
+
+#submit-feedback-btn{
+  margin:15px 0 0;
 }
