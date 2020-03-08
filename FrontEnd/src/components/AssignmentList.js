@@ -4,7 +4,7 @@ class AssignmentList extends Component{
     state = {
         assignments: []
     }
-    
+
     async submissionsForAssignment(assignmentId=null){
         await fetch('/student-enrollments')
         .then(res => {return res.json()})
@@ -25,8 +25,8 @@ class AssignmentList extends Component{
         .catch(error=>
             console.log(error)
         );
-    } 
-    
+    }
+
     onChangeAssignment = () => {
         console.log(this.state)
     }
@@ -52,14 +52,16 @@ class AssignmentList extends Component{
                     <div id="select-assignment">
                         <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
                             <option value="1">Homework 1</option>
-                            { this.state['assignments'].map(
+                             if (this.state['assignments']) {
+                              this.state['assignments'].map(
                                 (res)=> <option value={res.id}>{res.name}</option>
-                            )}
+                            )
+                          }
                         </select>
                     </div>
                     <div className="assignments-container">
                         {[{
-                            name:'Maidul Islam', 'user_id':234, 'assignment_id':9393}, 
+                            name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
                             {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
                             {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
                             {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
