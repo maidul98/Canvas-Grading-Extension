@@ -48,15 +48,17 @@ class AssignmentList extends Component{
         .catch(error=>
             console.log(error)
         );
+        this.setState({assignments: loadedAssignments});
 
         // set all pulled assignment to state
-        this.setState({assignments: loadedAssignments});
         if(loadedAssignments[0].id != undefined){
             this.submissionsForAssignment(loadedAssignments[0].id).then(
                 res =>{
                     this.setState({submissions:res})
                 }
-            )
+            ).catch(error =>{
+                console.log(error)
+            })
         }
     }
 
@@ -74,7 +76,17 @@ class AssignmentList extends Component{
                         </select>
                     </div>
                     <div className="assignments-container">
-                        {this.state['submissions'].map((res) => < Assignment key={res.id} submissionDetials={res}/>)}
+                    {(() => {
+                        if (!this.state.submissions.length) {
+                        return (
+                            <div className="error">
+                                <p>Looks like there are no submissions to grade for the selected assignment yet.</p>
+                            </div>
+                        )}
+                    })()
+                    }
+                    
+                    {this.state['submissions'].map((res) => < Assignment key={res.id} submissionDetials={res}/>)}
                     </div>
                 </div>
             </div>

@@ -10,6 +10,9 @@ class Assignment extends Component{
         id: null, //assignment ID from Canvas
     };
 
+    componentDidMount(){
+        console.log(this.props)
+    }
     render(){
         return(
             <div className="assignment">
