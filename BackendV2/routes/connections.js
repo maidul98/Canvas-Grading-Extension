@@ -6,6 +6,7 @@
  */
 var express = require('express');
 var router = express.Router();
+router.use(express.json())
 var apiCalls = require('../controllers/api-calls')
 var queries = require('../controllers/queries');
 
@@ -32,10 +33,10 @@ router.get('/get-submissions/:assignment_id', apiCalls.get_submissions_for_assig
 /** Get all graders for enrolled on Canvas */
 router.get('/get-graders', apiCalls.get_all_graders);
 
-/**
- * Get all the submissions that were assigned for this assigment and user 
- * Parms: assigment_id, user_id
-*/
-router.get('/get-assigned-submissions-for-assigment/:assigment_id/:user_id', queries.get_assigned_submissions_for_grader);
+router.get('/get-assigned-submissions-for-assigment', function(res, req){
+  return 1;
+});
+
+// router.get('/get-assigned-submissions-for-assigment', queries.test);
 
 module.exports = router;
