@@ -83,17 +83,17 @@ function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_up
  */
 module.exports = {
 
-  insertPublishedAssignments: function (json_string) {
-    let assignments = json_string;
-    assignments.forEach(e => {
-      let id = e.id;
-      let name = e.name;
-      let due_date = e.due_at;
-      let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
-      let points_possible = e.points_possible
-      insertSingleAssignment(id, name, due_date, last_updated, points_possible);
-    });
-  },
+  // insertPublishedAssignments: function (json_string) {
+  //   let assignments = json_string;
+  //   assignments.forEach(e => {
+  //     let id = e.id;
+  //     let name = e.name;
+  //     let due_date = e.due_at;
+  //     let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
+  //     let points_possible = e.points_possible
+  //     insertSingleAssignment(id, name, due_date, last_updated, points_possible);
+  //   });
+  // },
 
   insertAllSubmissions: function (json_string) {
     json_string.forEach(e => {
@@ -146,30 +146,27 @@ module.exports = {
     insertSingleGrader(id, grader_name, global_offset, grader_position, total_graded, weight, last_updated);
   },
 
-  /**
-   * This function takes in user_id and assigment_id and returns the list of submissions that are assigned for that user
-   * user that assigment
-   * @param {*} user_id 
-   * @param {*} assigment_id 
-   */
-  test: function (){
-    return 1;
+ /**
+ * This function takes in user_id and assigment_id and returns the list of submissions that are assigned for that user
+ * user that assigment
+ * @param {*} user_id 
+ * @param {*} assigment_id 
+ **/
+  get_assigned_submissions_for_assigment: function (req, res) {
     let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
     db.query(
-      sql_query,[assigment_id, user_id], 
+      sql_query,[req.query.assigment_id, req.query.user_id], 
       function (err, results) {
         if (err) {
           console.log(err);
         }else{
-          console.log(results)
+          res.json(results);
         }
       }
     );
   }
 
 }
-
-
 
 /** Gets the submission table */
 exports.get_submission_table = createQueryFunction("submission");

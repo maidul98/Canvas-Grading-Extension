@@ -2,19 +2,19 @@ import React, { Component } from 'react';
 import Assignment from './Assignment';
 class AssignmentList extends Component{
     state = {
-        current_assignment: null, //id of current selected assignment
-        assignments: []
+        assignments: [],
+        submissions: []
     }
 
-    async submissionsForAssignment(assignmentId=null){
-        await fetch('/student-enrollments')
+    submissionsForAssignment(assignmentId){
+        let  loadedSubmissions = fetch('/get-assigned-submissions-for-assigment?user_id=1&assigment_id='+assignmentId)
         .then(res => {return res.json()})
-        .then(res =>{
-            return res;
-        })
         .catch(error=>
             console.log(error)
         );
+
+        return loadedSubmissions;
+
     }
 
     async getAllPublishedAssignment(){
@@ -28,23 +28,36 @@ class AssignmentList extends Component{
         );
     }
 
-    onChangeAssignment = (event) => {
-        this.setState({current_assignment: event.target.value})
-        console.log(event.target.value);
+    onChangeAssignment = (event) =>  {
+        this.submissionsForAssignment(event.target.value).then( res =>{
+            this.setState({submissions:res})
+        })
     }
 
 
     async componentDidMount(){
-        let assignment = await fetch('/get-published-assignments')
+        let loadedAssignments = await fetch('/get-published-assignments')
         .then(res => {return res.json()})
         .then(res =>{
-            return res;
+            return res.sort(function compare(a, b) {
+                var dateA = new Date(a.due_at);
+                var dateB = new Date(b.due_at);
+                return dateB-dateA;
+            });
         })
         .catch(error=>
             console.log(error)
         );
 
-        this.setState({current_assignment: assignment[0].id, assignments:assignment});
+        // set all pulled assignment to state
+        this.setState({assignments: loadedAssignments});
+        if(loadedAssignments[0].id != undefined){
+            this.submissionsForAssignment(loadedAssignments[0].id).then(
+                res =>{
+                    this.setState({submissions:res})
+                }
+            )
+        }
     }
 
     render(){
@@ -55,19 +68,13 @@ class AssignmentList extends Component{
                         <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
                              if (this.state['assignments']) {
                               this.state['assignments'].map(
-                                (res)=> <option value={res.id}>{res.name}</option>
+                                (res)=> <option key={res.id} value={res.id}>{res.name}</option>
                             )
                           }
                         </select>
                     </div>
                     <div className="assignments-container">
-                        {[{
-                            name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
-                            {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
-                            {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
-                            {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
-                            {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393}
-                         ].map((res) => < Assignment name={res.name} assignment_id={this.state.current_assignment} student_id={res.user_id}/>)}
+                        {this.state['submissions'].map((res) => < Assignment key={res.id} submissionDetials={res}/>)}
                     </div>
                 </div>
             </div>
