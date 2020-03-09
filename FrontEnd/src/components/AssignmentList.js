@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Assignment from './Assignment';
 class AssignmentList extends Component{
     state = {
+        current_assignment: null, //id of current selected assignment
         assignments: []
     }
 
@@ -27,8 +28,9 @@ class AssignmentList extends Component{
         );
     }
 
-    onChangeAssignment = () => {
-        console.log(this.state)
+    onChangeAssignment = (event) => {
+        this.setState({current_assignment: event.target.value})
+        console.log(event.target.value);
     }
 
 
@@ -42,7 +44,7 @@ class AssignmentList extends Component{
             console.log(error)
         );
 
-        this.setState({assignments:assignment});
+        this.setState({current_assignment: assignment[0].id, assignments:assignment});
     }
 
     render(){
@@ -51,7 +53,6 @@ class AssignmentList extends Component{
                 <div className="content-container">
                     <div id="select-assignment">
                         <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
-                            <option value="1">Homework 1</option>
                              if (this.state['assignments']) {
                               this.state['assignments'].map(
                                 (res)=> <option value={res.id}>{res.name}</option>
@@ -66,7 +67,7 @@ class AssignmentList extends Component{
                             {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
                             {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393},
                             {name:'Maidul Islam', 'user_id':234, 'assignment_id':9393}
-                         ].map((res) => < Assignment name={res.name} id={12} />)}
+                         ].map((res) => < Assignment name={res.name} assignment_id={this.state.current_assignment} student_id={res.user_id}/>)}
                     </div>
                 </div>
             </div>
