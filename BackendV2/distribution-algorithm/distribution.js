@@ -57,6 +57,14 @@ function distribute(num_of_submissions, graders) {
   console.log('remaining assignments: ' + remainingAssignments)
 
   //sort graders in order of worst to best offsets 
+  graderArray.sort(function (a, b) {
+    if (b.offset === a.offset) return 0;
+    return b.offset > a.offset ? -1 : 1;
+  });
+
+  console.log(graderArray);
+
+  //const simpleSort = Array.from(strings).sort((a, b) => a - b);
 
 
   //distributes the remaining [num_of_submissions-currDist] assignments across
@@ -80,7 +88,7 @@ function distribute(num_of_submissions, graders) {
 //Create dummy graders
 let g1 = [1223, 2, 0]
 let g2 = [1224, 2, -1]
-let g3 = [1225, 3, 2]
+let g3 = [1225, 3, 3]
 let g4 = [1226, 3, -1]
 let g5 = [1227, 3, -1]
 
