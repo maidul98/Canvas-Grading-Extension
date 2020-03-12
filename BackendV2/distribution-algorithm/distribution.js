@@ -1,5 +1,6 @@
 var AssignmentGrader = require('./grader-model');
 
+//DATA WE WILL GET:
 //int num_of_submissions = (num of groups that actually submitted)
 
 //graders = 2D Array of [graders ids, weights]
@@ -16,10 +17,6 @@ function distribute(num_of_submissions, graders) {
   }, 0);
 
 
-  //shuffle grader 2D-array 
-  shuffle(graders);
-
-
   //computes num_weighted_assigned for each grader and fills in array of graders
   //takes into account only weights, and rounds down 
   let graderArray = []
@@ -30,6 +27,10 @@ function distribute(num_of_submissions, graders) {
   });
 
 
+  //shuffleS graderArray for random distribution of assignments 
+  shuffle(graderArray);
+
+
   //currDist = total number of [num_of_submissions] assignments that have actually
   //been distributed to graders as of now
   currDist = graderArray.reduce(function (total, element) {
@@ -37,13 +38,12 @@ function distribute(num_of_submissions, graders) {
   }, 0);
 
 
-
   //calculates difference between (num_of_submissions) and (currDist)
-
+  remainAssignments = num_of_submissions - currDist;
 
 
   //sort graders in order of worst to best offsets 
-
+  Array.sort
 
 
   //distributes the remaining [num_of_submissions-currDist] assignments across
