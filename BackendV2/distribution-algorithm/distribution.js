@@ -5,7 +5,7 @@ var AssignmentGrader = require('./grader-model');
 //graders = 2D Array of [graders ids, weights]
 //graders[r][0] = grader id of grader in row r 
 //graders[r][1] = weight of grader in row r
-//
+//graders[r][2] = offset of grader in row r 
 
 
 function distribute(num_of_submissions, graders) {
@@ -21,24 +21,20 @@ function distribute(num_of_submissions, graders) {
 
 
   //computes num_weighted_assigned for each grader and fills in array of graders
-  //takes into account weights AND offsets
-  //rounds down 
-
+  //takes into account only weights, and rounds down 
   let graderArray = []
   graders.forEach(element => {
-
-    assigned = Math.floor(element[1] * num_of_submissions / total_weight) + element[];
-
-    updated_offset = offset + curr_weighted_asigned - expected_weighted_asigned;
-
+    assigned = Math.floor(element[1] * num_of_submissions / total_weight);
     //grader_id, weight, offset, num_assigned
-    graderArray.push(AssignmentGrader(element[0], element[1], updated_offset, expected_weighted_asigned + updated_offset));
+    graderArray.push(AssignmentGrader(element[0], element[1], element[2], assigned));
   });
-
 
 
   //currDist = total number of [num_of_submissions] assignments that have actually
   //been distributed to graders as of now
+  currDist = graderArray.reduce(function (total, element) {
+    return total + element.num_assigned;
+  }, 0);
 
 
 
