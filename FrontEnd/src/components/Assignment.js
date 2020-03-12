@@ -10,12 +10,15 @@ class Assignment extends Component{
         id: null, //assignment ID from Canvas
     };
 
+    componentDidMount(){
+        console.log(this.props)
+    }
     render(){
         return(
             <div className="assignment">
                 <div className="student-name">
-                <Link to={"/detailed-view/"+this.props['id']}>
-                    <a href="">{this.props['name']}</a>
+                <Link to={"/detailed-view/"+this.props['assignment_id']+"/"+this.props['student_id']}>
+                    {this.props.submissionDetials['name']}
                 </Link>
                 </div>
                 <div className="grade-status">

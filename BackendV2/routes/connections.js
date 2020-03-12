@@ -32,4 +32,7 @@ router.get('/get-submissions/:assignment_id', apiCalls.get_submissions_for_assig
 /** Get all graders for enrolled on Canvas */
 router.get('/get-graders', apiCalls.get_all_graders);
 
+router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submissions_for_assigment);
+
+
 module.exports = router;

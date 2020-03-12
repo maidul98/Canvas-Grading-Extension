@@ -128,6 +128,13 @@ a{
   display: table;
 }
 
+.error{
+  color: #004085;
+  background-color: #cce5ff;
+  border-color: #b8daff;
+  padding: 10px;
+}
+
 /*
 ==============To do: needs to be partitioned=============
 */
@@ -304,12 +311,16 @@ h1{
   line-height:50px;
 }
 
+#user_menu {
+  width: 100%;
+}
+
 #user_menu_nav {
   list-style: none;
-  position: absolute;
+  position: relative;
   top: 60px;
+  width: 200%;
   background: #a50000;
-  padding: 20px 40px;
   display: none;
 }
 

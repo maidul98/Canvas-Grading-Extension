@@ -37,7 +37,7 @@ exports.get_published_assignments = function (_, res) {
     .then(result => {
       const assignmentJSONArray = result.data;
       const filtered = assignmentJSONArray.filter(assignment => assignment.published);
-      queries.insertPublishedAssignments(filtered);
+      // queries.insertPublishedAssignments(filtered);
       return filtered
     }).then(json => {
       res.json(json);
