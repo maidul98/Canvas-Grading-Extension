@@ -5,12 +5,11 @@
  * Weights: input by professor
  */
 
-function AssignmentGrader(grader_id, weight, offset, num_weighted_assigned, final_num_assigned) {
-  this.grader_id = grader_id
+function AssignmentGrader(grader_id, weight, offset, num_assigned) {
+  this.grader_id = grader_id;
   this.weight = weight;
   this.offset = offset;
-  this.num_weighted_assigned = num_weighted_assigned; //int (excludes offsets and rounding)
-  this.final_num_assigned = final_num_assigned; //int output of the algorithm
+  this.num_assigned = num_assigned; //int 
 }
 
 AssignmentGrader.prototype.updateWeight = function (weight) {
@@ -40,16 +39,6 @@ AssignmentGrader.prototype.updateNumAssigned = function (num_assigned) {
   }
 
   this.num_assigned = num_assigned
-}
-
-AssignmentGrader.prototype.updateFinalNumAssigned = function (final_num_assigned) {
-  if (typeof final_num_assigned != Number) {
-    throw new TypeError('final_num_assigned should be a integer');
-  }
-  if (final_num_assigned % 1 !== final_num_assigned) {
-    throw new TypeError('final_numnum_assigned should be an integer');
-  }
-  this.final_num_assigned = final_num_assigned
 }
 
 module.exports = AssignmentGrader
