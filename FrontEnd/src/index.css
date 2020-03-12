@@ -396,6 +396,7 @@ margin-top: 120px;
 #attachment-downloads{
   list-style: none;
   padding: 0;
+  max-width: 40%;
 }
 
 #attachment-downloads li{
@@ -403,6 +404,7 @@ margin-top: 120px;
   display: inline-block;
   padding: 10px 10px;
   margin-right: 10px;
+  margin-bottom: 5px;
 }
 
 .btn{
@@ -416,3 +418,41 @@ margin-top: 120px;
 #submit-feedback-btn{
   margin:15px 0 0;
 }
+
+#header-container{
+  display: flex;
+  justify-content: space-between;
+}
+
+#grade-box {
+  padding: 10px 15px;
+  margin-top: 15px;
+  font-weight: 600;
+  border: 1px solid gray;
+  background-color: white;
+  margin-bottom: 30px;
+}
+
+#grade {
+  font-size: 2em;
+  width: 60px;
+  height: 60px;
+  padding: 2px;
+  border: none;
+}
+
+#grade::-webkit-input-placeholder {
+    font-size: 10px;
+}
+
+span#out-of-text {
+  margin: 0 10px;
+  color: gray;
+}
+
+span#total-grade {
+  font-size: 2.8em;
+  color: gray;
+}
+
+

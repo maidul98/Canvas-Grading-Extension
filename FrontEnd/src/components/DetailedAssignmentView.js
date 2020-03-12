@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; // ES6
-import DownloadButton from './DownloadButton';
+import Button from './Button';
 
 class DetailedAssignmentView extends React.Component {
 
@@ -34,13 +34,22 @@ class DetailedAssignmentView extends React.Component {
       <div className="container">
         <div className="content-container">
           <div id="detailed-view-box">
-            <div id="attachments">
+            <div id="header-container">
               <ul id="attachment-downloads">
-    {this.state.submissions?this.state.submissions.map(d=>{return <DownloadButton key={d.id} url={d.url} filename={d.filename}/>}):null}
+                <li><Button url={"#"} title="Download file #1"/></li>
+                <li><Button url={"#"} title="Download file #1"/></li>
+                <li><Button url={"#"} title="Download file #1"/></li>
+                <li><Button url={"#"} title="Download file #1"/></li>
               </ul>
+              <div id="enter-grade">
+                <div id="grade-box">
+                  <input id="grade" max={100} min={0} placeholder="Enter grade" type="text"/>
+                  <span id="out-of-text">out of</span>
+                  <span id="total-grade">100</span>
+                </div>
+              </div>
             </div>
             <ReactQuill placeholder="Enter your comments here"/>
-
             <button className="btn" id="submit-feedback-btn">Submit feedback</button>
             <div className="clearfix"></div>
           </div>
