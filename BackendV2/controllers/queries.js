@@ -138,6 +138,7 @@ module.exports = {
   
       insertSingleGrader(id, grader_name, offset, role, total_graded, weight, last_updated);
     })
+    
   }
 }
 
