@@ -8,6 +8,17 @@ var AssignmentGrader = require('./grader-model');
 //graders[r][1] = weight of grader in row r
 //graders[r][2] = offset of grader in row r 
 
+/**
+ * Shuffles the array a, in place
+ * @param {Array} a: The array to be shuffled
+ */
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 function distribute(num_of_submissions, graders) {
 
