@@ -25,7 +25,7 @@ function distribute(num_of_submissions, graders) {
   //gets total weight
   total_weight = graders.reduce((total, element) => {
     return total + element[1];
-  });
+  }, 0);
   console.log('Total weight: ' + total_weight)
 
   //computes num_weighted_assigned for each grader and fills in array of graders
@@ -35,12 +35,14 @@ function distribute(num_of_submissions, graders) {
     assigned = Math.floor(element[1] * num_of_submissions / total_weight);
     console.log(`Number assigned to id ${element[0]}: ${assigned}`)
     //grader_id, weight, offset, num_assigned
-    graderArray.push(AssignmentGrader(element[0], element[1], element[2], assigned));
+    graderArray.push(new AssignmentGrader(element[0], element[1], element[2], assigned));
   });
+
+  console.log(graderArray);
 
 
   //shuffleS graderArray for random distribution of assignments 
-  Array.shuffle(graderArray);
+  shuffle(graderArray);
 
 
   //currDist = total number of [num_of_submissions] assignments that have actually
