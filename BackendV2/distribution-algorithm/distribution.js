@@ -12,23 +12,24 @@ var AssignmentGrader = require('./grader-model');
 function distribute(num_of_submissions, graders) {
 
   //gets total weight
-  total_weight = graders.reduce(function (total, element) {
+  total_weight = graders.reduce((total, element) => {
     return total + element[1];
-  }, 0);
-
+  });
+  console.log('Total weight: ' + total_weight)
 
   //computes num_weighted_assigned for each grader and fills in array of graders
   //takes into account only weights, and rounds down 
   let graderArray = []
   graders.forEach(element => {
     assigned = Math.floor(element[1] * num_of_submissions / total_weight);
+    console.log(`Number assigned to id ${element[0]}: ${assigned}`)
     //grader_id, weight, offset, num_assigned
     graderArray.push(AssignmentGrader(element[0], element[1], element[2], assigned));
   });
 
 
   //shuffleS graderArray for random distribution of assignments 
-  shuffle(graderArray);
+  Array.shuffle(graderArray);
 
 
   //currDist = total number of [num_of_submissions] assignments that have actually
@@ -36,14 +37,13 @@ function distribute(num_of_submissions, graders) {
   currDist = graderArray.reduce(function (total, element) {
     return total + element.num_assigned;
   }, 0);
-
+  console.log('CurrentDist: ' + currDist)
 
   //calculates difference between (num_of_submissions) and (currDist)
-  remainAssignments = num_of_submissions - currDist;
-
+  remainingAssignments = num_of_submissions - currDist;
+  console.log('remaining assignments: ' + remainingAssignments)
 
   //sort graders in order of worst to best offsets 
-  Array.sort
 
 
   //distributes the remaining [num_of_submissions-currDist] assignments across
@@ -61,6 +61,15 @@ function distribute(num_of_submissions, graders) {
 
 
 //TEST CASES 
-let testArr = [[1, 3], [2, 4], [4, 5], [4, 5]];
-distribute(0, 0, testArr);
+// let testArr = [[1, 3], [2, 4], [4, 5], [4, 5]];
+// distribute(0, 0, testArr);
 
+//Create dummy graders
+let g1 = [1223, 2, 0]
+let g2 = [1224, 2, -1]
+let g3 = [1225, 3, 2]
+let g4 = [1226, 3, -1]
+let g5 = [1227, 3, -1]
+
+let graders = [g1, g2, g3, g4, g5]
+distribute(50, graders)
