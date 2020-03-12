@@ -49,7 +49,7 @@ function createQueryFunction(tableName) {
  * @param {string} last_updated The date the assignment was last updated 
  */
 function insertSingleAssignment(id, name, due_date, last_updated, points_possible) {
-  let sql_query = "INSERT IGNORE INTO assignments (id, name, due_date, last_updated, points_possible) VALUES (?, ?, ?, ?)";
+  let sql_query = "INSERT IGNORE INTO assignment (id, name, due_date, last_updated, points_possible) VALUES (?, ?, ?, ?)";
   db.query(sql_query, [id, name, due_date, last_updated, points_possible], (err, result) => {
     if (err) {
       console.log(err);
@@ -58,7 +58,7 @@ function insertSingleAssignment(id, name, due_date, last_updated, points_possibl
 };
 
 function insertSingleGrader(id, name, offset, role, total_graded, weight, last_updated) {
-  let sql_query = "INSERT IGNORE INTO graders (id, name, offset, role, total_graded, weight, last_updated)";
+  let sql_query = "INSERT IGNORE INTO grader (id, name, offset, role, total_graded, weight, last_updated)";
   db.query(sql_query, [id, name, offset, role, total_graded, weight, last_updated], (err, result) => {
     if (err) {
       console.log(err);
@@ -67,25 +67,20 @@ function insertSingleGrader(id, name, offset, role, total_graded, weight, last_u
 };
 
 function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, grade) {
-  let sql_query = "INSERT IGNORE INTO submissions (id, grader_id, assignment_id, is_graded, last_updated, grade)";
+  let sql_query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, grade)";
   db.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, grade], (err, result) => {
     if (err) {
       console.log(err);
     }
   });
-
-
 }
 
-/**
- * Takes a JSON string for published assignments, parses it, and inserts each assignment into 
- * @param {*} json_string 
- */
+
 module.exports = {
 
-  // insertPublishedAssignments: function (json_string) {
-  //   let assignments = json_string;
-  //   assignments.forEach(e => {
+  // insertPublishedassignment: function (json_string) {
+  //   let assignment = json_string;
+  //   assignment.forEach(e => {
   //     let id = e.id;
   //     let name = e.name;
   //     let due_date = e.due_at;
@@ -95,7 +90,7 @@ module.exports = {
   //   });
   // },
 
-  insertAllSubmissions: function (json_string) {
+  insertAllSubmission: function (json_string) {
     json_string.forEach(e => {
       let id = e.id;
       let grader_id = e.grader_id;
@@ -117,7 +112,7 @@ module.exports = {
     })
   },
 
-  insertAllGraders: function (json_string) {
+  insertAllgrader: function (json_string) {
     json_string.forEach(e => {
       let id = e.id;
       let grader_name = e.user.name;
@@ -146,30 +141,40 @@ module.exports = {
     insertSingleGrader(id, grader_name, global_offset, grader_position, total_graded, weight, last_updated);
   },
 
- /**
- * This function takes in user_id and assigment_id and returns the list of submissions that are assigned for that user
+/**
+ * This function takes in user_id and assigment_id and returns the list of submission that are assigned for that user
  * user that assigment
  * @param {*} user_id 
  * @param {*} assigment_id 
  **/
-  get_assigned_submissions_for_assigment: function (req, res) {
+  get_assigned_submission_for_assigment: function (req, res) {
     let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
     db.query(
       sql_query,[req.query.assigment_id, req.query.user_id], 
       function (err, results) {
         if (err) {
-          console.log(err);
+          console.log(erri);
         }else{
           res.json(results);
         }
       }
     );
-  }
+  },
+
+
+
+  // TO DO:
+  // update grade in submission
+  // 
+  // 
+  // get data for submssion given submission ID
+  // 
+
 
 }
 
 /** Gets the submission table */
 exports.get_submission_table = createQueryFunction("submission");
 
-/** Gets the assignments table */
-exports.get_assignments_table = createQueryFunction("assignments");
+/** Gets the assignment table */
+exports.get_assignment_table = createQueryFunction("assignment");
