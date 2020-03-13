@@ -6,7 +6,14 @@ var AssignmentGrader = require('./grader-model');
 //graders = 2D Array of [graders ids, weights]
 //graders[r][0] = grader id of grader in row r 
 //graders[r][1] = weight of grader in row r
-//graders[r][2] = offset of grader in row r 
+//graders[r][2] = offset of grader in row r
+
+
+//NOTES AFTER CLIENT MEETING 
+//offset first and then dist
+//normalize offsets 
+//make sure the offsets dont "break" the implementation e.g. the grader thats "most ahead of schedule" should be assigned a fair non-zero number of assigbnments still 
+//rounding *
 
 /**
  * Shuffles the array a, in place
@@ -64,18 +71,32 @@ function distribute(num_of_submissions, graders) {
 
   console.log(graderArray);
 
-  //const simpleSort = Array.from(strings).sort((a, b) => a - b);
-
 
   //distributes the remaining [num_of_submissions-currDist] assignments across
   //graders till their offsets equal 0 & update grader's offsets 
   //*if none have offset = 0, distribute evenly 
 
+  var counter = 0;
 
+  while (remainingAssignments > 0 && counter < graderArray.length) {
+    if (graderArray[counter].offset < 0) {
+      if (remainingAssignments + graderArray[counter].offset >= 0) {
+        console.log(graderArray[counter].num_assigned + (-1 * graderArray[counter].offset) + '');
+        graderArray[counter].updateNumAssigned(graderArray[counter].num_assigned + (-1 * graderArray[counter].offset));
+        graderArray[counter].updateOffset(0);
+        remainingAssignments += graderArray[counter].offset;
+      } else {
+        console.log(graderArray[counter].num_assigned + remainingAssignments + '');
+        graderArray[counter].updateNumAssigned(graderArray[counter].num_assigned + remainingAssignments);
+        graderArray[counter].updateOffset(graderArray[counter].offset + remainingAssignments);
+        remainingAssignments = 0;
+        break
+      }
+    }
 
-
-
-
+    if (graderArray[counter].offset > 0 || graderArray[counter].offset == graderArray.length - 1) counter = 0;
+    else counter++;
+  }
 }
 
 

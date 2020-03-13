@@ -1,5 +1,5 @@
 import React from 'react';
-import {BrowserRouter, Route, Switch, Redirect, Link} from 'react-router-dom';
+import {BrowserRouter, Route, Switch, Redirect} from 'react-router-dom';
 import AssignmentList from './components/AssignmentList';
 //import LoginButton from './components/LoginButton';
 import StudentList from './components/StudentList';
@@ -66,6 +66,7 @@ class App extends React.Component {
             <Route path = "/" component={LoginButton} exact/>
             <PrivateRoute path="/assignments" component={AssignmentList}/>
             <PrivateRoute path="/students/:assignment_id" component={StudentList}/>
+            //Need to find fix for private path to detailed view
             <Route exact path="/detailed-view/:assignment_id/:student_id" render = {props => <DetailedAssignmentView assignment_id={props.match.params.assignment_id} student_id={props.match.params.student_id}/> } />
           </Switch>
       </BrowserRouter>
