@@ -95,12 +95,6 @@ function distribute(num_of_submissions, graders) {
     if (graderArray[counter].offset > 0 || graderArray[counter].offset == graderArray.length - 1) counter = 0;
     else counter++;
   }
-
-
-
-
-
-
 }
 
 
