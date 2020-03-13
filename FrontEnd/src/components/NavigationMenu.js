@@ -13,9 +13,9 @@ class NavigationMenu extends Component {
                     <div id="user-profile-icon" onClick={userProfileOnClick}>
                         <div id="user_menu">
                             <ul id="user_menu_nav">
-                                <li><a href="#">Profile</a></li>
-                                <li><a href="#">Setting</a></li>
-                                <li><a href="#">Logout</a></li>
+                                <li>Profile</li>
+                                <li>Setting</li>
+                                <li>Logout</li>
                             </ul>
                         </div>
                     </div>

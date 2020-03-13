@@ -51,7 +51,7 @@ class AssignmentList extends Component{
         this.setState({assignments: loadedAssignments});
 
         // set all pulled assignment to state
-        if(loadedAssignments[0].id != undefined){
+        if(loadedAssignments[0].id !== undefined){
             this.submissionsForAssignment(loadedAssignments[0].id).then(
                 res =>{
                     this.setState({submissions:res})
@@ -85,7 +85,7 @@ class AssignmentList extends Component{
                         )}
                     })()
                     }
-                    
+
                     {this.state['submissions'].map((res) => < Assignment key={res.id} submissionDetials={res}/>)}
                     </div>
                 </div>

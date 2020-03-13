@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import Student from './Student';
-import StudentList from './StudentList';
-import {Link, useHistory} from 'react-router-dom';
-import NavigationMenu from './NavigationMenu'
+// import Student from './Student';
+// import StudentList from './StudentList';
+import { Link } from 'react-router-dom';
+// import NavigationMenu from './NavigationMenu'
 
 
 class Assignment extends Component{

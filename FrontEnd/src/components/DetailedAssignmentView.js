@@ -29,7 +29,7 @@ class DetailedAssignmentView extends React.Component {
   }
 
   render(){
-    
+
     return (
       <div className="container">
         <div className="content-container">
@@ -64,4 +64,3 @@ class DetailedAssignmentView extends React.Component {
 ReactDOM.render(<DetailedAssignmentView/>, document.getElementById('root'));
 
 export default DetailedAssignmentView;
-
