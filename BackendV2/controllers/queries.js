@@ -140,14 +140,7 @@ module.exports = {
 
     insertSingleGrader(id, grader_name, global_offset, grader_position, total_graded, weight, last_updated);
   },
-
-/**
- * This function takes in user_id and assigment_id and returns the list of submission that are assigned for that user
- * user that assigment
- * @param {*} user_id 
- * @param {*} assigment_id 
- **/
-  get_assigned_submission_for_assigment: function (req, res) {
+  get_assigned_submission_for_assigment: function (req,res) {
     let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
     db.query(
       sql_query,[req.query.assigment_id, req.query.user_id], 
@@ -161,16 +154,25 @@ module.exports = {
     );
   },
 
-
-
-  // TO DO:
-  // update grade in submission
-  // 
-  // 
-  // get data for submssion given submission ID
-  // 
-
-
+/**
+ * This function takes in user_id and assigment_id and returns the list of submission that are assigned for that user
+ * user that assigment
+ * @param {*} user_id 
+ * @param {*} assigment_id 
+ **/
+  // get_assigned_submission_for_assigment: function (req, res) {
+  //   let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
+  //   db.query(
+  //     sql_query,[req.query.assigment_id, req.query.user_id], 
+  //     function (err, results) {
+  //       if (err) {
+  //         console.log(erri);
+  //       }else{
+  //         res.json(results);
+  //       }
+  //     }
+  //   );
+  // }
 }
 
 /** Gets the submission table */
