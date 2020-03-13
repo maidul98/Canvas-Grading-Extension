@@ -8,10 +8,14 @@ import NavigationMenu from './NavigationMenu'
 class Assignment extends Component{
     state = {
         id: null, //assignment ID from Canvas
+        clicked: false //for collapse/expand
     };
 
     componentDidMount(){
         console.log(this.props)
+    }
+    togglePanel(){
+        this.setState({clicked:!this.state.clicked})
     }
     render(){
         return(

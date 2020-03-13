@@ -18,14 +18,14 @@ class AssignmentList extends Component{
     }
 
     async getAllPublishedAssignment(){
-        await fetch('/get-published-assignments')
-        .then(res => {return res.json()})
-        .then(res =>{
-            return res
-        })
-        .catch(error=>
-            console.log(error)
-        );
+        // (await fetch('/get-published-assignments')
+        // .then(res => {return res.json()})
+        // .then(res =>{
+        //     return res
+        // })
+        // .catch(error=>
+        //     console.log(error)
+        // );
     }
 
     onChangeAssignment = (event) =>  {
@@ -68,11 +68,11 @@ class AssignmentList extends Component{
                 <div className="content-container">
                     <div id="select-assignment">
                         <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
-                             if (this.state['assignments']) {
+                             {this.state['assignments']?
                               this.state['assignments'].map(
                                 (res)=> <option key={res.id} value={res.id}>{res.name}</option>
-                            )
-                          }
+                            ):null}
+                          
                         </select>
                     </div>
                     <div className="assignments-container">
