@@ -104,7 +104,7 @@ module.exports = {
   },
 
   insertConflict: function (id, grader_id, reason, approved, reassigned_grader_id, submission_id) {
-    let sql_query = "INSERT IGNORE INTO conflicts (id, grader_id, reason, approved, reassigned_grader_id, submission_id)";
+    let sql_query = "INSERT IGNORE INTO conflict (id, grader_id, reason, approved, reassigned_grader_id, submission_id)";
     db.query(sql_query, [id, grader_id, reason, approved, reassigned_grader_id, submission_id], (err, _) => {
       if (err) {
         console.log(err);
