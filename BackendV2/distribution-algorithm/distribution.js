@@ -81,10 +81,12 @@ function distribute(num_of_submissions, graders) {
   while (remainingAssignments > 0 && counter < graderArray.length) {
     if (graderArray[counter].offset < 0) {
       if (remainingAssignments + graderArray[counter].offset >= 0) {
+        console.log(graderArray[counter].num_assigned + (-1 * graderArray[counter].offset) + '');
         graderArray[counter].updateNumAssigned(graderArray[counter].num_assigned + (-1 * graderArray[counter].offset));
         graderArray[counter].updateOffset(0);
         remainingAssignments += graderArray[counter].offset;
       } else {
+        console.log(graderArray[counter].num_assigned + remainingAssignments + '');
         graderArray[counter].updateNumAssigned(graderArray[counter].num_assigned + remainingAssignments);
         graderArray[counter].updateOffset(graderArray[counter].offset + remainingAssignments);
         remainingAssignments = 0;
