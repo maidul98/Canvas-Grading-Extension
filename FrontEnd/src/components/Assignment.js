@@ -25,7 +25,7 @@ class Assignment extends Component{
     }
     render(){
         return(
-            <div className="container">
+            <div>
                 <div className="assignment">
                     <div className="student-name">
                     <Link to={"/detailed-view/"+this.props['assignment_id']+"/"+this.props['student_id']}>

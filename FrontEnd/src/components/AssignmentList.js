@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Assignment from './Assignment';
 import Alert from 'react-bootstrap/Alert'
+import { trackPromise } from 'react-promise-tracker';
+
 class AssignmentList extends Component{
     state = {
         assignments: [],
@@ -19,46 +21,55 @@ class AssignmentList extends Component{
 
     }
 
-    async getAllPublishedAssignment(){
-        // (await fetch('/get-published-assignments')
-        // .then(res => {return res.json()})
-        // .then(res =>{
-        //     return res
-        // })
-        // .catch(error=>
-        //     console.log(error)
-        // );
-    }
-
     onChangeAssignment = (event) =>  {
         this.submissionsForAssignment(event.target.value).then( res =>{
-            this.setState({submissions:res})
+            if(res){
+                console.log(res)
+                this.setState({submissions:res})
+            }
         })
     }
+
 
     bulkEdit = (event) => {
         this.setState({bulk_edit:!this.state.bulk_edit})
     }
 
+    getAllPublishedAssignment(){
+        return fetch('/get-published-assignments')
+        .then(function(response){
+            return response.json();
+        }).then(function(json){
+            return json;
+        }).catch(
+            function(error){
+                console.log(error)
+            }
+        )
+    }
 
     async componentDidMount(){
-        let loadedAssignments = await fetch('/get-published-assignments')
-        .then(res => {return res.json()})
-        .then(res =>{
-            return res.sort(function compare(a, b) {
-                var dateA = new Date(a.due_at);
-                var dateB = new Date(b.due_at);
-                return dateB-dateA;
-            });
-        })
-        .catch(error=>
-            console.log(error)
-        );
-        this.setState({assignments: loadedAssignments});
+        let allAssignments = await this.getAllPublishedAssignment().then(
+            res=>{
+                let reOrdered = res.sort(function compare(a, b) {
+                    var dateA = new Date(a.due_at);
+                    var dateB = new Date(b.due_at);
+                    return dateB-dateA;
+                });
 
-        // set all pulled assignment to state
-        if(loadedAssignments[0].id !== undefined){
-            this.submissionsForAssignment(loadedAssignments[0].id).then(
+                this.setState({assignments: reOrdered});
+
+                return reOrdered;
+        }).catch(
+            function(error){
+                console.log(error)
+            }
+        )
+
+
+        // pull submissions for inital assignment
+        if(allAssignments[0]){
+            this.submissionsForAssignment(allAssignments[0].id).then(
                 res =>{
                     this.setState({submissions:res})
                 }
@@ -74,7 +85,7 @@ class AssignmentList extends Component{
                 <div className="content-container">
                     <button id="bulkEdit" onClick={this.bulkEdit}>{this.state.bulk_edit?"Switch to simple edit":"Bulk edit"}</button>
                     <div id="select-assignment">
-                    Assignments to grade <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
+                    <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
                              {this.state['assignments']?
                               this.state['assignments'].map(
                                 (res)=> <option key={res.id} value={res.id}>{res.name}</option>
