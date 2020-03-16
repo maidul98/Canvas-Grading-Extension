@@ -6,6 +6,7 @@ import StudentList from './components/StudentList';
 import DetailedAssignmentView from './components/DetailedAssignmentView'
 import './index.css';
 import NavigationMenu from './components/NavigationMenu';
+import 'bootstrap/dist/css/bootstrap.min.css'; // bootstrap
 
 const fakeAuth = {
   isAuthenticated: false,
