@@ -23,6 +23,7 @@ class LoginButton extends Component {
 
       return (
           <div className = "login_button fade">
+            <Button />
             <Link to="/assignments">
               <button onClick={this.login} className="log_but"> Cornell Login</button>
             </Link>

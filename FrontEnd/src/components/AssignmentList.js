@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Assignment from './Assignment';
-import Button from './Button';
-
+import Alert from 'react-bootstrap/Alert'
 class AssignmentList extends Component{
     state = {
         assignments: [],
@@ -87,9 +86,7 @@ class AssignmentList extends Component{
                     {(() => {
                         if (!this.state.submissions.length) {
                         return (
-                            <div className="error">
-                                <p>Looks like there are no submissions to grade for the selected assignment yet.</p>
-                            </div>
+                            <Alert variant="primary">Looks like there are no submissions to grade for the selected assignment yet.</Alert>
                         )}
                     })()
                     }
