@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import Assignment from './Assignment';
+import Button from './Button';
+
 class AssignmentList extends Component{
     state = {
         assignments: [],
-        submissions: []
+        submissions: [],
+        bulk_edit: false
     }
 
     submissionsForAssignment(assignmentId){
@@ -32,6 +35,10 @@ class AssignmentList extends Component{
         this.submissionsForAssignment(event.target.value).then( res =>{
             this.setState({submissions:res})
         })
+    }
+
+    bulkEdit = (event) => {
+        this.setState({bulk_edit:!this.state.bulk_edit})
     }
 
 
@@ -66,6 +73,7 @@ class AssignmentList extends Component{
         return(
             <div className="container">
                 <div className="content-container">
+                    <button id="bulkEdit" onClick={this.bulkEdit}>{this.state.bulk_edit?"Switch to simple edit":"Bulk edit"}</button>
                     <div id="select-assignment">
                     Assignments to grade <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
                              {this.state['assignments']?
@@ -86,7 +94,7 @@ class AssignmentList extends Component{
                     })()
                     }
 
-                    {this.state['submissions'].map((res) => < Assignment key={res.id} submissionDetails={res}/>)}
+                    {this.state['submissions'].map((res) => < Assignment key={res.id} submissionDetails={res} bulk_edit={this.state.bulk_edit}/>)}
                     </div>
                 </div>
             </div>

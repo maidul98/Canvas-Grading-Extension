@@ -9,15 +9,19 @@ import DetailedAssignmentView from './DetailedAssignmentView';
 class Assignment extends Component{
     state = {
         id: null, //assignment ID from Canvas
-        clicked: false //for collapse/expand
+        bulk_edit: false //for collapse/expand
     };
 
     componentDidMount(){
         console.log(this.props)
     }
+    componentDidUpdate(prevProps){
+        if(this.props.bulk_edit!=prevProps.bulk_edit){
+            this.setState({bulk_edit:this.props.bulk_edit});
+        }
+    }
     togglePanel = () => {
-        console.log("clicked")
-        this.setState({clicked:!this.state.clicked})
+        this.setState({bulk_edit:!this.state.bulk_edit})
     }
     render(){
         return(
@@ -32,7 +36,7 @@ class Assignment extends Component{
                         <div className="grade-icon"></div>
                     </div>
                 </div>
-                {this.state.clicked?<DetailedAssignmentView bulk_edit={true}/>:null}
+                {this.state.bulk_edit?<DetailedAssignmentView bulk_edit={true}/>:null}
             </div>
         )
     }

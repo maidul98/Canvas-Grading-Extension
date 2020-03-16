@@ -385,10 +385,9 @@ margin-top: 120px;
   padding: 10px;
 }
 
-#detailed-view-box{
-
+#bulkEdit{
+  float: right;
 }
-
 /**
 ==========Detailed view of assignments ===========
 **/
