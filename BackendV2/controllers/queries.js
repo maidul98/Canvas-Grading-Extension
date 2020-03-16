@@ -104,7 +104,7 @@ module.exports = {
   },
 
   insertConflict: function (id, grader_id, reason, approved, reassigned_grader_id, submission_id) {
-    let sql_query = "INSERT IGNORE INTO conflicts (id, grader_id, reason, approved, reassigned_grader_id, submission_id)";
+    let sql_query = "INSERT IGNORE INTO conflict (id, grader_id, reason, approved, reassigned_grader_id, submission_id)";
     db.query(sql_query, [id, grader_id, reason, approved, reassigned_grader_id, submission_id], (err, _) => {
       if (err) {
         console.log(err);
@@ -140,7 +140,14 @@ module.exports = {
 
     insertSingleGrader(id, grader_name, global_offset, grader_position, total_graded, weight, last_updated);
   },
-  get_assigned_submission_for_assigment: function (req,res) {
+
+/**
+ * This function takes in user_id and assigment_id and returns the list of submission that are assigned for that user
+ * user that assigment
+ * @param {*} user_id 
+ * @param {*} assigment_id 
+ **/
+  get_assigned_submission_for_assigment: function (req, res) {
     let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
     db.query(
       sql_query,[req.query.assigment_id, req.query.user_id], 
@@ -154,25 +161,16 @@ module.exports = {
     );
   },
 
-/**
- * This function takes in user_id and assigment_id and returns the list of submission that are assigned for that user
- * user that assigment
- * @param {*} user_id 
- * @param {*} assigment_id 
- **/
-  // get_assigned_submission_for_assigment: function (req, res) {
-  //   let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
-  //   db.query(
-  //     sql_query,[req.query.assigment_id, req.query.user_id], 
-  //     function (err, results) {
-  //       if (err) {
-  //         console.log(erri);
-  //       }else{
-  //         res.json(results);
-  //       }
-  //     }
-  //   );
-  // }
+
+
+  // TO DO:
+  // update grade in submission
+  // 
+  // 
+  // get data for submssion given submission ID
+  // 
+
+
 }
 
 /** Gets the submission table */
