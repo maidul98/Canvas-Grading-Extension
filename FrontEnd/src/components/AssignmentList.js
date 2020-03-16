@@ -67,7 +67,7 @@ class AssignmentList extends Component{
             <div className="container">
                 <div className="content-container">
                     <div id="select-assignment">
-                        <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
+                    Assignments to grade <select id="dropdown-assignment-selector" onChange={this.onChangeAssignment}>
                              {this.state['assignments']?
                               this.state['assignments'].map(
                                 (res)=> <option key={res.id} value={res.id}>{res.name}</option>
@@ -86,7 +86,7 @@ class AssignmentList extends Component{
                     })()
                     }
 
-                    {this.state['submissions'].map((res) => < Assignment key={res.id} submissionDetials={res}/>)}
+                    {this.state['submissions'].map((res) => < Assignment key={res.id} submissionDetails={res}/>)}
                     </div>
                 </div>
             </div>

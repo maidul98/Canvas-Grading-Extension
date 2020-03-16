@@ -348,6 +348,11 @@ h1{
 margin-top: 120px;
 }
 
+.content-container-bulk-edit{
+  margin-bottom: 10px;
+  margin-top: -10px;
+}
+
 .page-header{
   margin:20px 0;
 }
