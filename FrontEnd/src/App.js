@@ -1,12 +1,13 @@
 import React from 'react';
 import {BrowserRouter, Route, Switch, Redirect, Link} from 'react-router-dom';
-import Breadcrumbs from 'react-breadcrumbs';
 import AssignmentList from './components/AssignmentList';
 //import LoginButton from './components/LoginButton';
 import StudentList from './components/StudentList';
 import DetailedAssignmentView from './components/DetailedAssignmentView'
 import './index.css';
 import NavigationMenu from './components/NavigationMenu';
+import Breadcrumbs from './components/Breadcrumbs';
+
 import 'bootstrap/dist/css/bootstrap.min.css'; // bootstrap
 
 const fakeAuth = {
@@ -64,11 +65,12 @@ class App extends React.Component {
       <NavigationMenu/>
 
       <BrowserRouter>
+      <Breadcrumbs/>
           <Switch>
             <Route path = "/" component={LoginButton} exact/>
-            <PrivateRoute path="/assignments" component={AssignmentList}/>
+            <PrivateRoute exact path="/assignments" component={AssignmentList}/>
             <PrivateRoute path="/students/:assignment_id" component={StudentList}/>
-            <Route  path="/detailed-view/:assignment_id/:student_id" component={DetailedAssignmentView} />
+            <Route  path="/assignments/:assignment_id/:student_id" component={DetailedAssignmentView} />
             {/* <Route exact path="/detailed-view/:assignment_id/:student_id" render = {props => <DetailedAssignmentView assignment_id={props.match.params.assignment_id} student_id={props.match.params.student_id}/> } /> */}
           </Switch>
       </BrowserRouter>

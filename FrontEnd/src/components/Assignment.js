@@ -28,7 +28,7 @@ class Assignment extends Component{
             <div>
                 <div className="assignment">
                     <div className="student-name">
-                    <Link to={"/detailed-view/"+this.props['assignment_id']+"/"+this.props['student_id']}>
+                    <Link to={"/assignments/"+this.props['assignment_id']+"/"+this.props['student_id']}>
                         {this.props.submissionDetails['name']}
                     </Link>
                     </div>
