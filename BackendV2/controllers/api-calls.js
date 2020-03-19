@@ -63,9 +63,9 @@ exports.get_assignments_table = function (req, res) {
       res.json(submissionsJSONArray);
     })
     .catch(error => console.log(error));
-  }
+}
 
-exports.get_all_graders = function (req, res) {
+exports.get_all_graders = function (_, res) {
   axios
     .get("https://canvas.cornell.edu/api/v1/courses/15037/enrollments",
       config)
@@ -75,7 +75,7 @@ exports.get_all_graders = function (req, res) {
         //TaEnrollment - TAs
         //DesignerEnrollment - Consultants
         //ObserverEnrollment - Graders
-        if (element.type == "TaEnrollment" || element.type == "DesignerEnrollment" || element.type == "ObserverEnrollment") {
+        if (element.type === "TaEnrollment" || element.type === "DesignerEnrollment" || element.type === "ObserverEnrollment") {
           result.push(element);
         };
       });
@@ -89,4 +89,27 @@ exports.get_all_graders = function (req, res) {
       res.json(resj)
     })
     .catch(err => res.send(err));
+}
+
+exports.grade_single_submission = function (req, res) {
+  let data = {
+    'comment[text_comment]': req.body.comment,
+    'comment[group_comment]': req.body.is_group_comment,
+    'submission[posted_grade]': req.body.assigned_grade
+  }
+
+  let headerData = {
+    headers: {
+      // "Accept": "application/json",
+      // "Content-type": "application/json",
+      "Authorization": `Bearer 9713~TYz9t4zPXdeHonsL9g19ac3kIucoU8BdskLUNZ1rijvusRvhhdbyQFMhXPDhDltZ`
+    }
+  }
+
+  axios
+    .put(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}`, data, config)
+    .then(r => {
+      res.status(r.status);
+    })
+    .catch(err => console.log(err));
 }

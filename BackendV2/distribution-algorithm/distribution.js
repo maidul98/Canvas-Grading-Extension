@@ -39,7 +39,8 @@ function distribute(num_of_submissions, graders) {
   //takes into account only weights, and rounds down 
   let graderArray = []
   graders.forEach(element => {
-    assigned = Math.floor(element[1] * num_of_submissions / total_weight);
+    //assigned = Math.floor(element[1] * num_of_submissions / total_weight);
+    assigned = Math.floor((num_of_submissions - element[2]) * element[1] / total_weight);
     console.log(`Number assigned to id ${element[0]}: ${assigned}`)
     //grader_id, weight, offset, num_assigned
     graderArray.push(new AssignmentGrader(element[0], element[1], element[2], assigned));
@@ -76,27 +77,27 @@ function distribute(num_of_submissions, graders) {
   //graders till their offsets equal 0 & update grader's offsets 
   //*if none have offset = 0, distribute evenly 
 
-  var counter = 0;
+  // var counter = 0;
 
-  while (remainingAssignments > 0 && counter < graderArray.length) {
-    if (graderArray[counter].offset < 0) {
-      if (remainingAssignments + graderArray[counter].offset >= 0) {
-        console.log(graderArray[counter].num_assigned + (-1 * graderArray[counter].offset) + '');
-        graderArray[counter].updateNumAssigned(graderArray[counter].num_assigned + (-1 * graderArray[counter].offset));
-        graderArray[counter].updateOffset(0);
-        remainingAssignments += graderArray[counter].offset;
-      } else {
-        console.log(graderArray[counter].num_assigned + remainingAssignments + '');
-        graderArray[counter].updateNumAssigned(graderArray[counter].num_assigned + remainingAssignments);
-        graderArray[counter].updateOffset(graderArray[counter].offset + remainingAssignments);
-        remainingAssignments = 0;
-        break
-      }
-    }
+  // while (remainingAssignments > 0 && counter < graderArray.length) {
+  //   if (graderArray[counter].offset < 0) {
+  //     if (remainingAssignments + graderArray[counter].offset >= 0) {
+  //       console.log(graderArray[counter].num_assigned + (-1 * graderArray[counter].offset) + '');
+  //       graderArray[counter].updateNumAssigned(graderArray[counter].num_assigned + (-1 * graderArray[counter].offset));
+  //       graderArray[counter].updateOffset(0);
+  //       remainingAssignments += graderArray[counter].offset;
+  //     } else {
+  //       console.log(graderArray[counter].num_assigned + remainingAssignments + '');
+  //       graderArray[counter].updateNumAssigned(graderArray[counter].num_assigned + remainingAssignments);
+  //       graderArray[counter].updateOffset(graderArray[counter].offset + remainingAssignments);
+  //       remainingAssignments = 0;
+  //       break
+  //     }
+  //   }
 
-    if (graderArray[counter].offset > 0 || graderArray[counter].offset == graderArray.length - 1) counter = 0;
-    else counter++;
-  }
+  //   if (graderArray[counter].offset > 0 || graderArray[counter].offset == graderArray.length - 1) counter = 0;
+  //   else counter++;
+  // }
 }
 
 

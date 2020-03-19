@@ -32,6 +32,9 @@ router.get('/get-submissions/:assignment_id', apiCalls.get_submissions_for_assig
 /** Get all graders for enrolled on Canvas */
 router.get('/get-graders', apiCalls.get_all_graders);
 
+/** Upload grades and comments for a specific user's submission for an assignment */
+router.put('/upload-submission-grades/:assignment_id/:user_id', apiCalls.grade_single_submission);
+
 router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submission_for_assigment);
 
 
