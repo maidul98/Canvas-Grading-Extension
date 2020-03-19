@@ -3,20 +3,14 @@ var AssignmentGrader = require('./grader-model');
 //***PRE-CONDITION: ALL GRADER ID'S MUST BE > 0. 
 
 //******SOME CHANGES THAT NEED TO BE MADE: 
-//Currenly, I update offsets/num_assigned using "=" rather than the methods 
-//I need to test all possible edge cases...but everything seems to be working really well as of now
-//The num_assigned need to be pushed back to graders array ? 
-//actual assignments need to be dsitributed randomly to each grader according to their [num_assigned] ....i can do this only
+//Currenly, I update offsets/num_assigned using "=" rather than the methods - which i shall change tom :) 
+//we have setter methods for AssignmentGrader.....should i also add getter methods?! i feel like i should 
+//I need to test all possible edge cases...but everything seems to be working really well as of now!! YAY :D 
+
+//currently, all of the vital info lies in the [num_assigned] cell of graderArray
+//actual assignments need to be dsitributed randomly to each grader according to their [num_assigned] in graderArray ....i can do this only
 //after i have more info about how the assignments are represented ... through URL's or what???
 
-
-//DATA WE WILL GET:
-//int num_of_submissions = (num of groups that actually submitted)
-
-//graders = 2D Array of [graders ids, weights]
-//graders[r][0] = grader id of grader in row r 
-//graders[r][1] = weight of grader in row r
-//graders[r][2] = offset of grader in row r
 
 
 /**
@@ -33,6 +27,12 @@ function shuffle(a) {
 
 
 
+/**
+ * Fairly distributes [num_of_submissions] assignments among [graders] 
+ * according to the graders' weights and offsets. 
+ * @param {int} num_of_submissions: Total number of assignments that need to be distributed
+ * @param {Array} graders: A 2D-array containing [graders id, weight, offset]
+ */
 function distribute(num_of_submissions, graders) {
 
   //intial set-up; populate [num_assigned] cells later on 
@@ -43,7 +43,6 @@ function distribute(num_of_submissions, graders) {
   });
 
 
-
   //sort graders in order of worst to best offsets 
   //greater offset = worse offset
   //smaller offset = better offset 
@@ -51,7 +50,6 @@ function distribute(num_of_submissions, graders) {
     if (b.offset === a.offset) return 0;
     return b.offset > a.offset ? 1 : -1;
   });
-
 
 
   //normalize offsets such that the least offset equals 0; and
