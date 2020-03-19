@@ -2,6 +2,14 @@ var AssignmentGrader = require('./grader-model');
 
 //***PRE-CONDITION: ALL GRADER ID'S MUST BE > 0. 
 
+//******SOME CHANGES THAT NEED TO BE MADE: 
+//Currenly, I update offsets/num_assigned using "=" rather than the methods 
+//I need to test all possible edge cases...but everything seems to be working really well as of now
+//The num_assigned need to be pushed back to graders array ? 
+//actual assignments need to be dsitributed randomly to each grader according to their [num_assigned] ....i can do this only
+//after i have more info about how the assignments are represented ... through URL's or what???
+
+
 //DATA WE WILL GET:
 //int num_of_submissions = (num of groups that actually submitted)
 
