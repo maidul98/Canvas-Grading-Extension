@@ -23,6 +23,8 @@ var AssignmentGrader = require('./grader-model');
 //valid is determined by Graders who didn't opt out, who didn't take "leave of absence"
 //if a grader took a "leave of absence", then we must update their offset (increase their offset accordingly - by an amount that a grader with the same weight got assigned - solely acc to their weight & NOT their offset )
 
+//**lastly, we must consider the specific case where we are on the LAST assignment!! --> discuss with client about how that should be handled 
+
 /**
  * Shuffles the array a, in place
  * @param {Array} a: The array to be shuffled
