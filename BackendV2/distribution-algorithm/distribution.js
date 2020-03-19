@@ -2,16 +2,26 @@ var AssignmentGrader = require('./grader-model');
 
 //***PRE-CONDITION: ALL GRADER ID'S MUST BE > 0. 
 
+
+//IMPORTANT NOTES: 
+
 //******SOME CHANGES THAT NEED TO BE MADE: 
 //Currenly, I update offsets/num_assigned using "=" rather than the methods - which i shall change tom :) 
 //we have setter methods for AssignmentGrader.....should i also add getter methods?! i feel like i should 
 //I need to test all possible edge cases...but everything seems to be working really well as of now!! YAY :D 
 
-//currently, all of the vital info lies in the [num_assigned] cell of graderArray
+//currently, all of the vital (output) info lies in the [num_assigned] cell of graderArray
 //actual assignments need to be dsitributed randomly to each grader according to their [num_assigned] in graderArray ....i can do this only
 //after i have more info about how the assignments are represented ... through URL's or what???
 
+//also....where does code "lie" for 
+//if a grader can't grade a few assignments, then we need to create set of "valid graders that can take on extra assignments" and UPDATE OFFSETS 
+//and distribute these "currently ungrade-able assignments" FAIRLY according to grader's NORMALIZED offsets
+//if all offsets are 0, then randomly distribute "currently ungrade-able assignments"
 
+//changes:  the first step should be ....all "valid" graders should only make it to array graderArray ***
+//valid is determined by Graders who didn't opt out, who didn't take "leave of absence"
+//if a grader took a "leave of absence", then we must update their offset (increase their offset accordingly - by an amount that a grader with the same weight got assigned - solely acc to their weight & NOT their offset )
 
 /**
  * Shuffles the array a, in place
