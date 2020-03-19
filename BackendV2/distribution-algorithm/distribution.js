@@ -179,7 +179,6 @@ function distribute(num_of_submissions, graders) {
   }
   console.log(" ") //PRINTING STATEMENT USED FOR TESTING 
   console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING 
-<<<<<<< HEAD
 
 
   //sort graders in order of worst to best offsets 
@@ -199,9 +198,6 @@ function distribute(num_of_submissions, graders) {
   console.log(" ") //PRINTING STATEMENT USED FOR TESTING 
   console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING 
 
-
-=======
->>>>>>> 8e18844d429fea1b85c7f15ed657380d2270af75
 }
 
 
