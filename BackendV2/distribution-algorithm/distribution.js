@@ -1,8 +1,5 @@
 var AssignmentGrader = require('./grader-model');
 
-//***PRE-CONDITION: ALL GRADER ID'S MUST BE > 0. 
-
-
 //IMPORTANT NOTES: 
 
 //******SOME CHANGES THAT NEED TO BE MADE: 
@@ -24,6 +21,8 @@ var AssignmentGrader = require('./grader-model');
 //if a grader took a "leave of absence", then we must update their offset (increase their offset accordingly - by an amount that a grader with the same weight got assigned - solely acc to their weight & NOT their offset )
 
 //**lastly, we must consider the specific case where we are on the LAST assignment!! --> discuss with client about how that should be handled 
+
+
 
 /**
  * Shuffles the array a, in place
@@ -65,7 +64,7 @@ function distribute(num_of_submissions, graders) {
 
 
   //normalize offsets such that the least offset equals 0; and
-  //grader.offset = number of assignments that grader [grader] is behind on.
+  //grader.offset = relative number of assignments that grader [grader] is behind on.
   normalizing_constant = 0 - graderArray[graderArray.length - 1].offset;
   for (var i = 0; i < graderArray.length; i++)
     graderArray[i].offset += normalizing_constant;
@@ -92,7 +91,7 @@ function distribute(num_of_submissions, graders) {
 
     for (var j = 0; j < graderArray.length; j++) {
       for (var i = 0; i < graderArray[j].offset; i++) {
-        tier[i][j] = graderArray[j].grader_id;
+        tier[i][j] = 1;
       }
     }
 
@@ -151,7 +150,7 @@ function distribute(num_of_submissions, graders) {
         graderArray[i] += addedAssignments;
       }
     }
-    leftAssign -= addedAssignments * graderArray.length;
+    leftAssign -= (addedAssignments * graderArray.length);
 
     /*randomly distribute [leftAssign] remaining assignments AND update offsets*/
 
@@ -162,12 +161,12 @@ function distribute(num_of_submissions, graders) {
 
     console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING 
 
-    let randomArr = [graderArray.length];
+    let randomArr = [];
 
     for (var p = 0; p < graderArray.length; p++)
       randomArr[p] = p;
 
-    for (var c = 0; c < Math.floor((Math.random() * 7) + 3); c++)
+    for (var c = 0; c < Math.floor((Math.random() * 4) + 3); c++)
       shuffle(randomArr);
 
     for (var q = 0; q < leftAssign; q++) {
@@ -178,6 +177,24 @@ function distribute(num_of_submissions, graders) {
     console.log(randomArr); //PRINTING STATEMENT USED FOR TESTING 
 
   }
+
+
+  console.log(" ") //PRINTING STATEMENT USED FOR TESTING 
+  console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING 
+
+
+  //sort graders in order of worst to best offsets 
+  graderArray.sort(function (a, b) {
+    if (b.offset === a.offset) return 0;
+    return b.offset > a.offset ? 1 : -1;
+  });
+
+
+  //normalize offsets so the professor can easily update offsets if s/he wishes
+  //to before the next set of assignments are distributed 
+  normalizing_cons = 0 - graderArray[graderArray.length - 1].offset;
+  for (var i = 0; i < graderArray.length; i++)
+    graderArray[i].offset += normalizing_cons;
 
 
   console.log(" ") //PRINTING STATEMENT USED FOR TESTING 
