@@ -167,7 +167,7 @@ function distribute(num_of_submissions, graders) {
     for (var p = 0; p < graderArray.length; p++)
       randomArr[p] = p;
 
-    for (var c = 0; c < Math.floor((Math.random() * 7) + 1); c++)
+    for (var c = 0; c < Math.floor((Math.random() * 7) + 3); c++)
       shuffle(randomArr);
 
     for (var q = 0; q < leftAssign; q++) {
