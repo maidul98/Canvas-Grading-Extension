@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Student from './Student';
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
 
 /*
 StudentList takes in an assignment id and TA id and displays a list of students for that assignment and that TA.
@@ -30,8 +29,8 @@ class StudentList extends Component{
     }
 
     render(){
-        const props = this.props;
-        const assignment_id = props.assignment_id;
+        // const props = this.props;
+        // const assignment_id = props.assignment_id;
         return(
             <div className = "fade">
               <h1>
