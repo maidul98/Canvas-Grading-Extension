@@ -4,6 +4,7 @@
  */
 const axios = require('axios')
 const queries = require('./queries');
+const qs = require('qs')
 const config = {
   //TODO: Factor out bearer tokens into another file that isn't publicly accessible.
   headers: { Authorization: `Bearer 9713~TYz9t4zPXdeHonsL9g19ac3kIucoU8BdskLUNZ1rijvusRvhhdbyQFMhXPDhDltZ` }
@@ -92,7 +93,8 @@ exports.get_all_graders = function (_, res) {
 }
 
 exports.grade_single_submission = function (req, res) {
-  let data = {
+
+  let formData = {
     'comment[text_comment]': req.body.comment,
     'comment[group_comment]': req.body.is_group_comment,
     'submission[posted_grade]': req.body.assigned_grade
@@ -100,16 +102,14 @@ exports.grade_single_submission = function (req, res) {
 
   let headerData = {
     headers: {
-      // "Accept": "application/json",
-      // "Content-type": "application/json",
+      'Accept': 'application/json',
       "Authorization": `Bearer 9713~TYz9t4zPXdeHonsL9g19ac3kIucoU8BdskLUNZ1rijvusRvhhdbyQFMhXPDhDltZ`
     }
   }
-
   axios
-    .put(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}`, data, config)
+    .put(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}`, qs.stringify(formData), headerData)
     .then(r => {
-      res.status(r.status);
+      res.send('done');
     })
     .catch(err => console.log(err));
 }

@@ -178,12 +178,8 @@ function distribute(num_of_submissions, graders) {
     console.log(randomArr); //PRINTING STATEMENT USED FOR TESTING 
 
   }
-
-
   console.log(" ") //PRINTING STATEMENT USED FOR TESTING 
   console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING 
-
-
 }
 
 
