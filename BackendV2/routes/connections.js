@@ -35,6 +35,7 @@ router.get('/get-graders', apiCalls.get_all_graders);
 /** Upload grades and comments for a specific user's submission for an assignment */
 router.put('/upload-submission-grades/assignments/:assignment_id/submissions/:user_id', apiCalls.grade_single_submission);
 
+router.post('/upload-submission-grades/assignments/:assignment_id/submissions/batch-update-grades', apiCalls.grade_batch_submissions);
 router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submission_for_assigment);
 
 

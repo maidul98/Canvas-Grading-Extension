@@ -113,3 +113,43 @@ exports.grade_single_submission = function (req, res) {
     })
     .catch(err => console.log(err));
 }
+
+/** Sample json in req.body:
+ *[
+    {
+      "id": 2278,
+      "comment": "Update1",
+      "is_group_comment": false,
+      "assigned_grade": 89.89
+    },
+    {
+      "id": 59714,
+      "comment": "Update2",
+      "is_group_comment": false,
+      "assigned_grade": 80.00
+    }
+  ]
+ */
+exports.grade_batch_submissions = function (req, res) {
+  let formData = {}
+  req.body.forEach(j => {
+    console.log(j)
+    formData[`grade_data[${j.id}][text_comment]`] = j.comment;
+    formData[`grade_data[${j.id}][group_comment]`] = j.is_group_comment;
+    formData[`grade_data[${j.id}][posted_grade]`] = j.assigned_grade;
+  });
+  console.log(formData)
+  let headerData = {
+    headers: {
+      'Accept': 'application/json',
+      "Authorization": `Bearer 9713~TYz9t4zPXdeHonsL9g19ac3kIucoU8BdskLUNZ1rijvusRvhhdbyQFMhXPDhDltZ`
+    }
+  }
+
+  axios
+    .post(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), headerData)
+    .then(result => {
+      res.send('success')
+    })
+    .catch(err => console.log(err));
+}
