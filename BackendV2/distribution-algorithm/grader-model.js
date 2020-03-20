@@ -13,10 +13,6 @@ function AssignmentGrader(grader_id, weight, offset, num_assigned) {
   this.num_assigned = num_assigned; //int 
 }
 
-
-
-
-
 AssignmentGrader.prototype.updateWeight = function (weight) {
   // if (Number.isInteger(wieght)) {
   //   throw new TypeError('num_assigned should be an integer')
@@ -52,9 +48,9 @@ AssignmentGrader.prototype.incrementWeight = function (weight) {
 }
 
 
-AssignmentGrader.prototype.decrementOffset = function () {
-  this.offset -= 1;
-}
+// AssignmentGrader.prototype.decrementOffset = function () {
+//   this.offset -= 1;
+// }
 
 
 AssignmentGrader.prototype.decrementOffset = function (offset) {
@@ -75,9 +71,9 @@ AssignmentGrader.prototype.incrementOffset = function (offset) {
 
 
 
-AssignmentGrader.prototype.incrementNumAssigned = function () {
-  this.num_assigned += 1;
-}
+// AssignmentGrader.prototype.incrementNumAssigned = function () {
+//   this.num_assigned += 1;
+// }
 
 AssignmentGrader.prototype.incrementNumAssigned = function (num_assigned) {
   // if (!Number.isInteger(num_assigned)) {

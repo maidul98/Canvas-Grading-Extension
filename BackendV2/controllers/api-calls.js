@@ -133,7 +133,6 @@ exports.grade_single_submission = function (req, res) {
 exports.grade_batch_submissions = function (req, res) {
   let formData = {}
   req.body.forEach(j => {
-    console.log(j)
     formData[`grade_data[${j.id}][text_comment]`] = j.comment;
     formData[`grade_data[${j.id}][group_comment]`] = j.is_group_comment;
     formData[`grade_data[${j.id}][posted_grade]`] = j.assigned_grade;
