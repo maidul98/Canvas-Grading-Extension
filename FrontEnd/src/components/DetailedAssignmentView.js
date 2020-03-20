@@ -14,15 +14,15 @@ class DetailedAssignmentView extends React.Component {
   }
 
   async componentDidMount(){
-    let url = '/get-submissions/'+this.state.assignment_id;
-    let submissions = await fetch(url).then(resp=>resp.json());
-    let files = []
-    if(submissions[0].attachments){
-      submissions[0].attachments.forEach(d=>{
-        files.push(d);
-      })
-    }
-    this.setState({submissions:files});
+    // let url = '/get-submissions/'+this.state.assignment_id;
+    // let submissions = await fetch(url).then(resp=>resp.json());
+    // let files = []
+    // if(submissions[0].attachments){
+    //   submissions[0].attachments.forEach(d=>{
+    //     files.push(d);
+    //   })
+    // }
+    // this.setState({submissions:files});
   }
 
   download(event){

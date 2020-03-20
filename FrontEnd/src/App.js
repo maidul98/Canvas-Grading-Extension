@@ -7,7 +7,6 @@ import DetailedAssignmentView from './components/DetailedAssignmentView'
 import './index.css';
 import NavigationMenu from './components/NavigationMenu';
 import Breadcrumbs from './components/Breadcrumbs';
-
 import 'bootstrap/dist/css/bootstrap.min.css'; // bootstrap
 
 const fakeAuth = {
@@ -59,13 +58,15 @@ const PrivateRoute = ({component: Component, ...rest}) => (
 )
 
 class App extends React.Component {
+  state = {
+    fatal_error: [],
+  }
   render(){
     return (
     <div>
       <NavigationMenu/>
-
       <BrowserRouter>
-      <Breadcrumbs/>
+      <Breadcrumbs className="bread_crumbs"/>
           <Switch>
             <Route path = "/" component={LoginButton} exact/>
             <PrivateRoute exact path="/assignments" component={AssignmentList}/>
