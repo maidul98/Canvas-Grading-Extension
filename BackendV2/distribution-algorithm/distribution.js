@@ -2,11 +2,6 @@ var AssignmentGrader = require('./grader-model');
 
 //IMPORTANT NOTES: 
 
-//******SOME CHANGES THAT NEED TO BE MADE: 
-//Currenly, I update offsets/num_assigned using "=" rather than the methods - which i shall change tom :) 
-//we have setter methods for AssignmentGrader.....should i also add getter methods?! i feel like i should 
-//I need to test all possible edge cases...but everything seems to be working really well as of now!! YAY :D 
-
 //currently, all of the vital (output) info lies in the [num_assigned] cell of graderArray
 //actual assignments need to be dsitributed randomly to each grader according to their [num_assigned] in graderArray ....i can do this only
 //after i have more info about how the assignments are represented ... through URL's or what???
@@ -46,7 +41,7 @@ function shuffle(a) {
  */
 function distribute(num_of_submissions, graders) {
 
-  //intial set-up; populate [num_assigned] cells later on 
+  //intial set-up; will populate [num_assigned] cells later on 
   let graderArray = []
   graders.forEach(element => {
     //grader_id, weight, offset, num_assigned
@@ -103,8 +98,8 @@ function distribute(num_of_submissions, graders) {
       var counter = 0;
       while (tier[i][counter] > 0) {
         if (num_of_submissions == 0) break;
-        graderArray[counter].incrementNumAssigned(1); //WEIRDDDDDD
-        graderArray[counter].decrementOffset(1); //WEIRDDD
+        graderArray[counter].incrementNumAssigned(1);
+        graderArray[counter].decrementOffset(1);
         counter++;
         num_of_submissions--;
       }
@@ -173,8 +168,8 @@ function distribute(num_of_submissions, graders) {
       shuffle(randomArr);
 
     for (var q = 0; q < leftAssign; q++) {
-      graderArray[randomArr[q]].incrementNumAssigned(1); //WEIRD: graderArray[randomArr[q]].incrementNumAssigned(); DOES NOT WORK even though it does the same exact thing
-      graderArray[randomArr[q]].decrementOffset(1); //WEIRD: graderArray[randomArr[q]].decrementOffset(); DOES NOT WORK WHEN IT SHOULD 
+      graderArray[randomArr[q]].incrementNumAssigned(1);
+      graderArray[randomArr[q]].decrementOffset(1);
     }
 
     console.log(randomArr); //PRINTING STATEMENT USED FOR TESTING 
