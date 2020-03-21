@@ -10,7 +10,6 @@ class DetailedAssignmentView extends React.Component {
     assignment_id: this.props.assignment_id,
     student_id: this.props.student_id,
     submissions: [],
-    bulk_edit: false
   }
 
   async componentDidMount(){
@@ -37,16 +36,15 @@ class DetailedAssignmentView extends React.Component {
 
     return (
       <div className="container">
-        <div className={this.props.bulk_edit?"content-container-bulk-edit":"content-container"}>
+        <div className="content-container">
           <div id="detailed-view-box">
             <div id="header-container">
-              {!this.props.bulk_edit?
               <ul id="attachment-downloads">
                 <li><Button url={"#"} title="Download file #1"/></li>
                 <li><Button url={"#"} title="Download file #1"/></li>
                 <li><Button url={"#"} title="Download file #1"/></li>
                 <li><Button url={"#"} title="Download file #1"/></li>
-              </ul>:null}
+              </ul>
               <div id="enter-grade">
                 <div id="grade-box">
                   <input id="grade" max={100} min={0} placeholder="Enter grade" type="text"/>

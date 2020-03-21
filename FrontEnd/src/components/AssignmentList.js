@@ -1,5 +1,6 @@
 import React, { Component, useEffect, useState} from 'react';
 import Assignment from './Assignment';
+import Form from './Form';
 import Alert from 'react-bootstrap/Alert'
 import LoadingIcon from './LoadingIcon';
 import { useFetch } from "../useFetch";
@@ -49,7 +50,7 @@ function Submissions(props){
             ? <Alert variant={alertMessage['type']}>{alertMessage['message']}</Alert>
             : <></>
         }
-        {submissions.map(res => <Assignment key={res.id} submissionDetails={res} bulk_edit={false}/>)}
+        {submissions.map(res => <div key={"container-"+res.id}><Assignment key={res.id} submissionDetails={res} bulk_edit={props.bulk_edit}/>{props.bulk_edit?<Form key={"form-"+res.id} id={res.id}/>:null}</div>)}
         </div>
         )
 }
@@ -79,20 +80,25 @@ function AssignmentList(props) {
         }
     }
 
+    function bulkEdit(){
+        setBulk_edit(!bulk_edit);
+    }
+
     return (
         <div className="container">
-        {(isLoading)? <LoadingIcon show={true}/> : <></>}
-        <div className="content-container">
-            <Button variant="dark" class="float-right" size="lg">Bulk edit</Button>
-            <div id="select-assignment">
-            <select id="dropdown-assignment-selector" onChange={handleOnChange}>
-                {assignments.map((res)=> <option key={res.id} value={res.id}>{res.name}</option>)}
-            </select>
+            {(isLoading)? <LoadingIcon show={true}/> : <></>}
+            <div className="content-container">
+                <Button variant="dark" className="float-right" size="lg" onClick={bulkEdit}>{bulk_edit?"Switch to simple edit":"Bulk edit"}</Button>
+                <div id="select-assignment">
+                <select id="dropdown-assignment-selector" onChange={handleOnChange}>
+                    {assignments.map((res)=> <option key={res.id} value={res.id}>{res.name}</option>)}
+                </select>
+                </div>
+                <div className="assignments-container">
+                    <Submissions assignment_id={current_assignment_id} bulk_edit={bulk_edit}/>
+                </div>
+                {bulk_edit?<Button>Submit feedback for all students</Button>:null}
             </div>
-            <div className="assignments-container">
-                <Submissions assignment_id={current_assignment_id} />
-            </div>
-        </div>
         </div>
     );
 }
