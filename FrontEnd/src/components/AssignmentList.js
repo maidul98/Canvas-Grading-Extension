@@ -2,8 +2,8 @@ import React, { Component, useEffect, useState} from 'react';
 import Assignment from './Assignment';
 import Alert from 'react-bootstrap/Alert'
 import LoadingIcon from './LoadingIcon';
-import {handleErrors, showErrorMessage} from '../Functions/Helper';
 import { useFetch } from "../useFetch";
+import Button from 'react-bootstrap/Button'
 
 function Submissions(props){
     const [submissions, setSubmissions] = useState([])
@@ -24,7 +24,6 @@ function Submissions(props){
 
     }, [props, data, submissions.length])
 
-    console.log(submissions.length)
 
     if (isLoading) return <LoadingIcon show={true}/>;
 
@@ -41,7 +40,6 @@ function Submissions(props){
 }
 
 function AssignmentList(props) {
-    //states
     const [assignments, setAssignments] = useState([])
     const [bulk_edit, setBulk_edit]     = useState(false)
     const [current_assignment_id, setCurrent_assignment_id] = useState(0)
@@ -71,7 +69,7 @@ function AssignmentList(props) {
     return (
         <div className="container">
         <div className="content-container">
-            <button id="bulkEdit">{bulk_edit?"Switch to simple edit":"Bulk edit"}</button>
+            <Button variant="dark" class="float-right" size="lg">Bulk edit</Button>
             <div id="select-assignment">
             <select id="dropdown-assignment-selector" onChange={handleOnChange}>
                 {assignments.map((res)=> <option key={res.id} value={res.id}>{res.name}</option>)}
