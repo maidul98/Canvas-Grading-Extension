@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-
-/*  Example
-    initialUrl: "/_api/jobs"
-    initialData: [] //usually empty array or object
-*/
-export const UseOurApi = (initialUrl, initialData) => {
+export const useFetch = (initialUrl, initialData) => {
   const [url, setUrl] = useState(initialUrl);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -30,7 +25,6 @@ export const UseOurApi = (initialUrl, initialData) => {
 
     if (initialUrl && !unmounted)
       fetchData().then(data => !unmounted && setFetchedData(data));
-
     return () => {
       unmounted = true;
     };
