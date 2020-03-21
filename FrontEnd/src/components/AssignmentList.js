@@ -5,6 +5,22 @@ import LoadingIcon from './LoadingIcon';
 import { useFetch } from "../useFetch";
 import Button from 'react-bootstrap/Button'
 
+// function PushGrades(){
+//     const requestType = {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({"name":"test","salary":"123","age":"23"})
+//     }
+
+//     const { data, isLoading, hasError} = useFetch("http://dummy.restapiexample.com/api/v1/create",{}, requestType);
+
+//     useEffect(()=>{
+//     console.log(data)
+//     }, [data])
+
+//     return(<div>Push grade</div>)
+// }
+
 function Submissions(props){
     const [submissions, setSubmissions] = useState([])
     const { data, isLoading, hasError, setUrl} = useFetch("/get-assigned-submissions-for-assigment?user_id=1&assigment_id=0",[]);
@@ -24,11 +40,10 @@ function Submissions(props){
 
     }, [props, data, submissions.length])
 
-
-    if (isLoading) return <LoadingIcon show={true}/>;
-
     return (
         <div>
+        {/* <PushGrades/> */}
+        {(isLoading)? <LoadingIcon show={true}/> : <></>}
         { 
             (submissions.length == 0)
             ? <Alert variant={alertMessage['type']}>{alertMessage['message']}</Alert>
@@ -43,7 +58,7 @@ function AssignmentList(props) {
     const [assignments, setAssignments] = useState([])
     const [bulk_edit, setBulk_edit]     = useState(false)
     const [current_assignment_id, setCurrent_assignment_id] = useState(0)
-    const { data, isLoading, hasError, setUrl} = useFetch("/get-published-assignments",[]);
+    const { data, isLoading, hasError} = useFetch("/get-published-assignments",[]);
 
     useEffect(()=>{
         if(Array.isArray(data)){
@@ -64,10 +79,9 @@ function AssignmentList(props) {
         }
     }
 
-    if (isLoading) return <LoadingIcon show={true}/>;
-
     return (
         <div className="container">
+        {(isLoading)? <LoadingIcon show={true}/> : <></>}
         <div className="content-container">
             <Button variant="dark" class="float-right" size="lg">Bulk edit</Button>
             <div id="select-assignment">
