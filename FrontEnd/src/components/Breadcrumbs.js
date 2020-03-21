@@ -23,6 +23,7 @@ const getPaths = (pathname) => {
   });
 
   return paths;
+  
 };
 
 const BreadcrumbsItem = ({ match, ...rest }) => {
@@ -56,6 +57,8 @@ const Breadcrumbs = ({ location : { pathname }, match, ...rest }) => {
 
 export default props => (
   <div>
-    <Route path="/:path" component={Breadcrumbs} {...props} />
+    <div className="container">
+      <Route path="/:path" component={Breadcrumbs} {...props} />
+    </div>
   </div>
 );

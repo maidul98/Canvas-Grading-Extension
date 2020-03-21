@@ -345,7 +345,7 @@ h1{
 ========== (Assignments) ===========
 **/
 .content-container{
-margin-top: 120px;
+margin-top: 80px;
 }
 
 .content-container-bulk-edit{
@@ -459,4 +459,45 @@ span#total-grade {
   color: gray;
 }
 
+/*===================Spinner loading icon=======================*/
+#spinner_icon{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transform: -webkit-translate(-50%, -50%);
+  transform: -moz-translate(-50%, -50%);
+  transform: -ms-translate(-50%, -50%);
+  z-index: 999;
+}
+
+#spinner_icon .spinner-border.spinner-border-lg{
+  height: 5em;
+  width: 5em;
+}
+
+#overlay {
+  background: #ffffff;
+  color: #666666;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  z-index: 5000;
+  top: 0;
+  left: 0;
+  float: left;
+  text-align: center;
+  padding-top: 25%;
+  opacity: .80;
+}
+
+/*======================Bread crumbs=====================*/
+ol.breadcrumb{
+  margin-top: 40px;
+  font-size: 18px;
+}
+
+.breadcrumb{
+  background-color: white !important;
+}
 
