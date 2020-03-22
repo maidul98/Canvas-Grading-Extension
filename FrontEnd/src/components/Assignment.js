@@ -32,12 +32,12 @@ class Assignment extends Component{
                         {this.props.submissionDetails['name']}
                     </Link>
                     </div>
-                    {this.props["bulk_edit"]?
-                    <div id="grade-box-bulk"><span>Grade out of 100 </span><input id="grade" max={100} min={0}></input></div>
-                    :
+                    {!this.props["bulk_edit"]?
+                    // <div id="grade-box-bulk"><span>Grade out of 100 </span><input id="grade" max={100} min={0}></input></div>
+                    // :
                     <div className="grade-status">
                         <div className="grade-icon"></div>
-                    </div>
+                    </div>:null
                     }
                 </div>
             </div>

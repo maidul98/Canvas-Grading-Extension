@@ -26,7 +26,72 @@ function Submissions(props){
     const [submissions, setSubmissions] = useState([])
     const { data, isLoading, hasError, setUrl} = useFetch("/get-assigned-submissions-for-assigment?user_id=1&assigment_id=0",[]);
     const [alertMessage, setAlertMessage] = useState({})
-    
+    const [gradesAndComments, setGradesAndComments] = useState({})
+
+    //handle forms for bulk edits
+    //field is either 'assigned_grade' or 'comment'
+    const handleFormChange = (submission_id, field, value) => {
+        setGradesAndComments({...gradesAndComments, [submission_id]:{...gradesAndComments[submission_id], [field]: value}})
+        console.log(gradesAndComments);
+    }
+
+    const submitForms = () => {
+        console.log("submit");
+        function validateGrade(grade){
+            if(grade==null || grade<0 || grade>100){
+                return false
+            }
+            return true
+        }
+        function validateComment(comment){
+            if(comment==null || comment.trim()==""){
+                return false
+            }
+            return true
+        }
+        //assumes that comment is not null and not empty, returns a sanitized comment
+        function sanitizeComment(comment){
+            return comment
+        }
+        let formData = [] //this is what will be sent to Canvas
+        let missingGrades = false
+        let missingComments = false
+        for (const id in gradesAndComments){
+            let grade = gradesAndComments[id]["assigned_grade"]
+            let comment = gradesAndComments[id]["comment"]
+            let gradeIsValid = validateGrade(grade)
+            let commentIsValid = validateComment(comment)
+            if(gradeIsValid && commentIsValid){
+                let sanitizedComment = sanitizeComment(comment)
+                formData.push({"id":id, "assigned_grade":grade, "comment":sanitizedComment, "is_group_comment":false})
+            }
+            else{
+                if(!gradeIsValid && !commentIsValid){
+                    missingGrades = true
+                    missingComments = true
+                    //alert grader of missing grade
+                }
+                else if(!gradeIsValid){
+                    missingGrades = true
+                    //alert grader of missing grade
+                }
+                else{
+                    missingComments = true
+                    formData.push({"id":id, "assigned_grade":grade, "comment":"", "is_group_comment":false})
+                }
+            }
+        }
+        if(!missingGrades && !missingComments){
+            //submit data to backend with POST
+            console.log(formData);
+        }
+        else{
+            if(missingComments){
+                console.log("missing comment")
+                setAlertMessage({type:"warning", message:"Some submissions do not have comments. Are you sure you want to submit?"})
+            }
+        }
+    }
     useEffect(()=>{
         setUrl("/get-assigned-submissions-for-assigment?user_id=1&assigment_id="+props.assignment_id)
         setSubmissions(data)
@@ -50,7 +115,12 @@ function Submissions(props){
             ? <Alert variant={alertMessage['type']}>{alertMessage['message']}</Alert>
             : <></>
         }
-        {submissions.map(res => <div key={"container-"+res.id}><Assignment key={res.id} submissionDetails={res} bulk_edit={props.bulk_edit}/>{props.bulk_edit?<Form key={"form-"+res.id} id={res.id}/>:null}</div>)}
+        {submissions.map(res => 
+            <div key={"container-"+res.id}>
+            <Assignment key={res.id} submissionDetails={res} bulk_edit={props.bulk_edit}/>
+            {props.bulk_edit?<Form key={"form-"+res.id} id={res.id} onChange={handleFormChange}/>:null}
+            </div>)}
+        {   props.bulk_edit&&submissions.length>0?<Button type="submit" onClick={submitForms}>Submit feedback for all students</Button>:null}
         </div>
         )
 }
@@ -97,7 +167,6 @@ function AssignmentList(props) {
                 <div className="assignments-container">
                     <Submissions assignment_id={current_assignment_id} bulk_edit={bulk_edit}/>
                 </div>
-                {bulk_edit?<Button>Submit feedback for all students</Button>:null}
             </div>
         </div>
     );

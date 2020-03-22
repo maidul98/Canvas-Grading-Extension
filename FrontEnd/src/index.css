@@ -135,6 +135,10 @@ a{
   padding: 10px;
 }
 
+.float-right{
+  float:right;
+}
+
 /*
 ==============To do: needs to be partitioned=============
 */
@@ -511,9 +515,15 @@ ol.breadcrumb{
   height: 100px;
 }
 
+.grade-box-bulk{
+  display: flex;
+  position: relative;
+  top: -80px;
+  padding: 15px;
+}
 .auto-save-show{
   color: #3CB371;
-  display: inline-block;
+  display: block;
 }
 
 .auto-save-hidden{

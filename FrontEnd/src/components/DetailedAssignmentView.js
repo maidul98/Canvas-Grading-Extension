@@ -47,7 +47,7 @@ class DetailedAssignmentView extends React.Component {
               </ul>
               <div id="enter-grade">
                 <div id="grade-box">
-                  <input id="grade" max={100} min={0} placeholder="Enter grade" type="text"/>
+                  <input id="grade" max={100} min={0} placeholder="Enter grade" type="number"/>
                   <span id="out-of-text">out of</span>
                   <span id="total-grade">100</span>
                 </div>
