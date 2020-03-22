@@ -8,10 +8,10 @@ class Button extends Component{
 
         return(
             <a href={url}>{title}</a> 
-        )
+        );
     }
 }
 
-ReactDOM.render(<Button/>, document.getElementById("root"));
+ReactDOM.render(<Button/>, document.getElementById('root'));
 
 export default Button;
