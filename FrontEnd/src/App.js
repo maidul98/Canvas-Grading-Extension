@@ -2,7 +2,6 @@ import React from 'react';
 import {BrowserRouter, Route, Switch, Redirect, Link} from 'react-router-dom';
 import AssignmentList from './components/AssignmentList';
 //import LoginButton from './components/LoginButton';
-import StudentList from './components/StudentList';
 import DetailedAssignmentView from './components/DetailedAssignmentView'
 import './index.css';
 import NavigationMenu from './components/NavigationMenu';
@@ -70,7 +69,6 @@ class App extends React.Component {
           <Switch>
             <Route path = "/" component={LoginButton} exact/>
             <PrivateRoute exact path="/assignments" component={AssignmentList}/>
-            <PrivateRoute path="/students/:assignment_id" component={StudentList}/>
             <Route  path="/assignments/:assignment_id/:student_id" component={DetailedAssignmentView} />
             {/* <Route exact path="/detailed-view/:assignment_id/:student_id" render = {props => <DetailedAssignmentView assignment_id={props.match.params.assignment_id} student_id={props.match.params.student_id}/> } /> */}
           </Switch>

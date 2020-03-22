@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
-
-/*  Example
-    initialUrl: "/_api/jobs"
-    initialData: [] //usually empty array or object
-*/
-export const UseOurApi = (initialUrl, initialData) => {
+export const useFetch = (initialUrl, initialData, requestType) => {
   const [url, setUrl] = useState(initialUrl);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [fetchedData, setFetchedData] = useState(initialData);
+  const [requestParam, setRequestParam] = useState(requestType);
 
   useEffect(() => {
     let unmounted = false;
@@ -23,18 +19,17 @@ export const UseOurApi = (initialUrl, initialData) => {
 
     const fetchData = () => {
       setIsLoading(true);
-      return fetch(url, { credentials: 'include' })
+      return fetch(url, requestParam==undefined? { credentials: 'include' }: requestParam )
         .then(handleFetchResponse)
         .catch(handleFetchResponse);
     };
 
     if (initialUrl && !unmounted)
       fetchData().then(data => !unmounted && setFetchedData(data));
-
     return () => {
       unmounted = true;
     };
-  }, [url]);
+  }, [url, requestParam]);
 
-  return { isLoading, hasError, setUrl, data: fetchedData };
+  return { isLoading, hasError, setUrl, setRequestParam, data: fetchedData };
 };

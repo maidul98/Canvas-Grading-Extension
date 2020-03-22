@@ -60,6 +60,9 @@ exports.get_published_assignments = function (_, res) {
 }
 
 exports.get_submissions_for_assignment = function (req, res) {
+  // console.log('hey')
+  // res.status(400);
+  // res.send('None shall pass');
   axios
     .get(`https://canvas.cornell.edu//api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions`, config)
     .then(result => {
