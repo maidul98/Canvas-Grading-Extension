@@ -37,8 +37,6 @@ AssignmentGrader.prototype.updateNumAssigned = function (num_assigned) {
 }
 
 
-
-
 AssignmentGrader.prototype.decrementWeight = function (weight) {
   if (Number.isInteger(wieght)) {
     throw new TypeError('wieght should be an integer')

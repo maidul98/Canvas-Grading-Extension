@@ -5,6 +5,9 @@
 const axios = require('axios')
 const queries = require('./queries');
 const qs = require('qs')
+const http = require('http')
+const fs = require('fs')
+
 const config = {
   //TODO: Factor out bearer tokens into another file that isn't publicly accessible.
   headers: { Authorization: `Bearer 9713~TYz9t4zPXdeHonsL9g19ac3kIucoU8BdskLUNZ1rijvusRvhhdbyQFMhXPDhDltZ` }
@@ -33,17 +36,19 @@ exports.student_enrollments = function (_, res) {
 }
 
 
-exports.downloading_single_submission = function (req, res) {
+exports.download_single_submission = function (req, res) {
+  console.log('method called')
   axios
-    .get(`https://canvas.cornell.edu/api/v1/courses/15037/??????`, config)
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/${req.params.assignment_id}/submissions/${req.params.user_id}`, config)
     .then(result => {
-
-      //logic goes here   
-      //update url above 
+      const attachments = result.attachments
+      attachments.forEach(attachment => {
+        console.log(attachment.url)
+        res.download(attachment.url)
+      })
     })
     .catch(error => console.log(error));
 }
-
 
 exports.get_published_assignments = function (_, res) {
   axios
@@ -64,7 +69,7 @@ exports.get_submissions_for_assignment = function (req, res) {
   // res.status(400);
   // res.send('None shall pass');
   axios
-    .get(`https://canvas.cornell.edu//api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions`, config)
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions`, config)
     .then(result => {
       const submissionsJSONArray = result.data;
       res.json(submissionsJSONArray);
@@ -74,7 +79,7 @@ exports.get_submissions_for_assignment = function (req, res) {
 
 exports.get_assignments_table = function (req, res) {
   axios
-    .get(`https://canvas.cornell.edu//api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions`, config)
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions`, config)
     .then(result => {
       const submissionsJSONArray = result.data;
       res.json(submissionsJSONArray);
