@@ -274,4 +274,4 @@ let ag20 = [4444, 3, 4]
 let graders = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12, g13, g14, g15, g16, g17, g18, g19, g20,
   ag1, ag2, ag3, ag4, ag5, ag6, ag7, ag8, ag9, ag10, ag11, ag12, ag13, ag14, ag15, ag16, ag17, ag18, ag19, ag20]
 
-distribute(4, graders)
+distribute(567, graders)

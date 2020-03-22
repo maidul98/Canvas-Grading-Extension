@@ -32,6 +32,19 @@ exports.student_enrollments = function (_, res) {
   }
 }
 
+
+exports.downloading_single_submission = function (req, res) {
+  axios
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/??????`, config)
+    .then(result => {
+
+      //logic goes here   
+      //update url above 
+    })
+    .catch(error => console.log(error));
+}
+
+
 exports.get_published_assignments = function (_, res) {
   axios
     .get('https://canvas.cornell.edu/api/v1/courses/15037/assignments', config)
