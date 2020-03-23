@@ -492,12 +492,32 @@ span#total-grade {
 
 /*======================Bread crumbs=====================*/
 ol.breadcrumb{
-  margin-top: 40px;
   font-size: 18px;
 }
 
 .breadcrumb{
   background-color: white !important;
+  margin-top: 40px;
+}
+
+.bc_a {
+  text-decoration: none;
+  color: #6c757d;
+}
+
+.bc_a {
+  text-decoration: none;
+  color: #6c757d;
+}
+
+.bc_a:hover {
+  text-decoration: none;
+  color: #2D3B45;
+  text-decoration: underline;
+}
+
+.bc {
+  display: inline;
 }
 
 /*======================Bulk edit form======================*/

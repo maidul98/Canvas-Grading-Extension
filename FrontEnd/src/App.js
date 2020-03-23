@@ -5,8 +5,8 @@ import AssignmentList from './components/AssignmentList';
 import DetailedAssignmentView from './components/DetailedAssignmentView'
 import './index.css';
 import NavigationMenu from './components/NavigationMenu';
-import Breadcrumbs from './components/Breadcrumbs';
 import 'bootstrap/dist/css/bootstrap.min.css'; // bootstrap
+import Breadcrumbs from './components/Breadcrumbs';
 
 const fakeAuth = {
   isAuthenticated: false,
@@ -65,7 +65,7 @@ class App extends React.Component {
     <div>
       <NavigationMenu/>
       <BrowserRouter>
-      <Breadcrumbs className="bread_crumbs"/>
+      <Breadcrumbs />
           <Switch>
             <Route path = "/" component={LoginButton} exact/>
             <PrivateRoute exact path="/assignments" component={AssignmentList}/>
