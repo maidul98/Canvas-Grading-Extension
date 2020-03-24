@@ -142,8 +142,7 @@ module.exports = {
   },
 
 /**
- * This function takes in user_id and assigment_id and returns the list of submission that are assigned for that user
- * user that assigment
+ * This function takes in grader_id and assigment_id and returns the list of submissions that are assigned for that grader
  * @param {*} user_id 
  * @param {*} assigment_id 
  **/
