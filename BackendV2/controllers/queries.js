@@ -117,7 +117,6 @@ module.exports = {
       let id = e.id;
       let grader_name = e.user.name;
       let offset = 0;
-      console.log(id, grader_name, offset);
 
       let role;
       if (e.type == 'TaEnrollment') {
