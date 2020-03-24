@@ -158,7 +158,8 @@ exports.grade_batch_submissions = function (req, res) {
         formData[`grade_data[${j.id}][group_comment]`] = j.is_group_comment;
         formData[`grade_data[${j.id}][posted_grade]`] = j.assigned_grade;
     });
-    console.log(formData);
+
+    //header
     let headerData = {
         headers: {
             'Accept': 'application/json',
@@ -166,10 +167,14 @@ exports.grade_batch_submissions = function (req, res) {
         }
     };
 
+    //send grades to Canvas
     axios
         .post(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), headerData)
         .then(result => {
-            res.send('success');
+            res.send({status:"success", data: result.data})
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            res.status(406)
+            .send({status:"success", data:req.body});
+        });
 };

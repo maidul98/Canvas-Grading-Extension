@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-export const useFetch = (initialUrl, initialData, requestType) => {
+export const useFetch = (initialUrl, initialData, requestType=undefined, who) => {
     const [url, setUrl] = useState(initialUrl);
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
     const [fetchedData, setFetchedData] = useState(initialData);
     const [requestParam, setRequestParam] = useState(requestType);
+    const [calledBy, setCalledBy] = useState(who);
 
     useEffect(() => {
         let unmounted = false;
@@ -31,5 +32,5 @@ export const useFetch = (initialUrl, initialData, requestType) => {
         };
     }, [url, requestParam]);
 
-    return { isLoading, hasError, setUrl, setRequestParam, data: fetchedData };
+    return { isLoading, calledBy, hasError, setUrl, setRequestParam, data: fetchedData, setCalledBy};
 };

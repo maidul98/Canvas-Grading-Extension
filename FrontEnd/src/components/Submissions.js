@@ -8,14 +8,20 @@ import Button from 'react-bootstrap/Button';
 
 export default function Submissions(props){
     const [submissions, setSubmissions] = useState([]);
-    const { data, isLoading, hasError, setUrl} = useFetch('/get-assigned-submissions-for-assigment?user_id=1&assigment_id='+props.assignment_id,[]);
-    const { data2, isLoading2, hasError2, setUrl2, setRequestParam} = useFetch('https://jsonplaceholder.typicode.com/posts',[]);
+    const { data, isLoading, hasError, calledBy, setUrl, setCalledBy, setRequestParam} = useFetch('/get-assigned-submissions-for-assigment?user_id=1&assigment_id='+props.assignment_id,[], undefined, "get-assigned-submissions");
     const [alertMessage, setAlertMessage] = useState({});
     const gradesAndComments = []
+    const [show, setShow] = useState(true);
+    const successQuickEdit = false 
 
     useEffect(()=>{
-        setUrl('/get-assigned-submissions-for-assigment?user_id=1&assigment_id='+props.assignment_id);
-        setSubmissions(data);
+        if(calledBy == "get-assigned-submissions"){
+            setCalledBy('get-assigned-submissions');
+            setRequestParam(undefined)
+            setUrl('/get-assigned-submissions-for-assigment?user_id=1&assigment_id='+props.assignment_id);
+            setSubmissions(data);
+
+        }
 
         if(submissions.length == 0){
             setAlertMessage({type:'primary', message:'Looks like there are no submissions to grade for the selected assignment yet.'});
@@ -25,7 +31,7 @@ export default function Submissions(props){
             setAlertMessage({});
         }
 
-    }, [props, data, submissions.length, data2]);
+    }, [props, data, submissions.length]);
 
     
     const handleFormChange = (newSubmission) => {
@@ -38,19 +44,15 @@ export default function Submissions(props){
         }
     };
 
-//still in beta    
     const submitForms = () => {
         const requestType = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(gradesAndComments)
         }
-
-        fetch('upload-submission-grades/assignments/'+props.assignment_id+'/submissions/batch-update-grades', requestType).then(response=>{
-            return response.json()
-        }).then(result =>{
-            console.log(result)
-        })
+        setCalledBy('upload-submission-grades');
+        setRequestParam(requestType)
+        setUrl('upload-submission-grades/assignments/'+props.assignment_id+'/submissions/batch-update-grades')
     }
     const submitFormss = () => {
         console.log('submit');
@@ -126,7 +128,24 @@ export default function Submissions(props){
                     ?<QuickEditSubmission key={'form-'+res.id} id={res.id} submissionDetails={res} onChange={handleFormChange}/>
                     :<SingleSubmission key={res.id} submissionDetails={res}/>
                     }
-                </div>)}
+                </div>)
+            }
+            
+            {
+            (calledBy == "upload-submission-grades" & hasError == false)
+            ?<Alert variant="success" onClose={() => setShow("hide")} dismissible className={show}>
+                Your grade submissions have been submited
+            </Alert>
+            :<></>
+            }
+
+            {
+            (calledBy == "upload-submission-grades" & hasError)
+            ?<Alert variant="danger" onClose={() => setShow("hide")} dismissible className={show}>
+                Opps, something went wrong, please try again
+            </Alert>
+            :<></>
+            }
             <Button onClick={submitForms} className={props.bulk_edit?"visible":"invisible"}>Submit feedback for all students</Button>
         </div>
     );
