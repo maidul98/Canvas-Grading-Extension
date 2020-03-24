@@ -6,12 +6,12 @@
  */
 var express = require('express');
 var router = express.Router();
-var apiCalls = require('../controllers/api-calls')
+var apiCalls = require('../controllers/api-calls');
 var queries = require('../controllers/queries');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
+    res.render('index', { title: 'Express' });
 });
 
 /** Request for submissions */

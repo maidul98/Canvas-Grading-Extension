@@ -49,7 +49,7 @@ function createQueryFunction(tableName) {
  * @param {string} last_updated The date the assignment was last updated 
  */
 function insertSingleAssignment(id, name, due_date, last_updated, points_possible) {
-  let sql_query = "INSERT IGNORE INTO assignment (id, name, due_date, last_updated, points_possible) VALUES (?, ?, ?, ?)";
+  let sql_query = "INSERT IGNORE INTO assignment (id, name, due_date, last_updated, points_possible) VALUES (?, ?, ?, ?, ?)";
   db.query(sql_query, [id, name, due_date, last_updated, points_possible], (err, result) => {
     if (err) {
       console.log(err);
@@ -58,7 +58,7 @@ function insertSingleAssignment(id, name, due_date, last_updated, points_possibl
 };
 
 function insertSingleGrader(id, name, offset, role, total_graded, weight, last_updated) {
-  let sql_query = "INSERT IGNORE INTO grader (id, name, offset, role, total_graded, weight, last_updated)";
+  let sql_query = "INSERT IGNORE INTO grader (id, name, offset, role, total_graded, weight, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?)";
   db.query(sql_query, [id, name, offset, role, total_graded, weight, last_updated], (err, result) => {
     if (err) {
       console.log(err);
@@ -67,7 +67,7 @@ function insertSingleGrader(id, name, offset, role, total_graded, weight, last_u
 };
 
 function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, grade) {
-  let sql_query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, grade)";
+  let sql_query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, grade) VALUES (?, ?, ?, ?)";
   db.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, grade], (err, result) => {
     if (err) {
       console.log(err);
@@ -104,7 +104,7 @@ module.exports = {
   },
 
   insertConflict: function (id, grader_id, reason, approved, reassigned_grader_id, submission_id) {
-    let sql_query = "INSERT IGNORE INTO conflict (id, grader_id, reason, approved, reassigned_grader_id, submission_id)";
+    let sql_query = "INSERT IGNORE INTO conflict (id, grader_id, reason, approved, reassigned_grader_id, submission_id) VALUES (?, ?, ?, ?, ?, ?)";
     db.query(sql_query, [id, grader_id, reason, approved, reassigned_grader_id, submission_id], (err, _) => {
       if (err) {
         console.log(err);
@@ -112,7 +112,7 @@ module.exports = {
     })
   },
 
-  insertAllgrader: function (json_string) {
+  insertAllGraders: function (json_string) {
     json_string.forEach(e => {
       let id = e.id;
       let grader_name = e.user.name;
@@ -133,17 +133,10 @@ module.exports = {
   
       insertSingleGrader(id, grader_name, offset, role, total_graded, weight, last_updated);
     })
-
-    let total_graded = 0;
-    let weight = -1;
-    let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
-
-    insertSingleGrader(id, grader_name, global_offset, grader_position, total_graded, weight, last_updated);
   },
 
 /**
- * This function takes in user_id and assigment_id and returns the list of submission that are assigned for that user
- * user that assigment
+ * This function takes in grader_id and assigment_id and returns the list of submissions that are assigned for that grader
  * @param {*} user_id 
  * @param {*} assigment_id 
  **/

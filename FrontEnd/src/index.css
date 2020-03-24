@@ -135,6 +135,10 @@ a{
   padding: 10px;
 }
 
+.float-right{
+  float:right;
+}
+
 /*
 ==============To do: needs to be partitioned=============
 */
@@ -488,15 +492,35 @@ span#total-grade {
 
 /*======================Bread crumbs=====================*/
 ol.breadcrumb{
-  margin-top: 40px;
   font-size: 18px;
 }
 
 .breadcrumb{
   background-color: white !important;
+  margin-top: 40px;
 }
 
-/*======================Grade feedback form======================*/
+.bc_a {
+  text-decoration: none;
+  color: #6c757d;
+}
+
+.bc_a {
+  text-decoration: none;
+  color: #6c757d;
+}
+
+.bc_a:hover {
+  text-decoration: none;
+  color: #2D3B45;
+  text-decoration: underline;
+}
+
+.bc {
+  display: inline;
+}
+
+/*======================Bulk edit form======================*/
 .feedback-container{
   background-color: #F7F7F7;
   padding: 20px;
@@ -506,14 +530,68 @@ ol.breadcrumb{
   margin-bottom: 15px;
 }
 
+#name-grade-container{
+  display: flex;
+  justify-content: space-between;
+}
+
+.quick-edit-submission {
+  background-color: #F7F7F7;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+
+#student_name{
+  font-size: 1em;
+  font-weight: 500;
+}
+
+#grade_input{
+  padding: 0;
+  margin: 0;
+}
+
+#grade_input input input::-webkit-outer-spin-button,
+#grade_input  input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#grade_input input[type=number] {
+  -moz-appearance: textfield;
+}
+
+
+#student_name::first-letter {
+  text-transform: uppercase;
+}
+
 .feedback-form{
+  width: 100%;
+  height: 100px;
+  resize: none;
+  margin-top: 10px;
+}
+
+.out-of-text{
+  margin-right: 10px;
+}
+/* .feedback-form{
   width: 100%;
   height: 100px;
 }
 
-.auto-save-show{
+.grade-box-bulk{
+  display: flex;
+  position: relative;
+  top: -80px;
+  padding: 15px;
+} */
+.auto-save-show {
   color: #3CB371;
-  display: inline-block;
+  display: block;
+  margin: 0;
+  margin-top: 5px;
 }
 
 .auto-save-hidden{
