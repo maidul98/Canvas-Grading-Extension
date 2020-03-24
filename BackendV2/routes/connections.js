@@ -38,6 +38,8 @@ router.put('/upload-submission-grades/assignments/:assignment_id/submissions/:us
 router.post('/upload-submission-grades/assignments/:assignment_id/submissions/batch-update-grades', apiCalls.grade_batch_submissions);
 router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submission_for_assigment);
 
+router.get('/get-unassigned-submissions', queries.get_unassigned_submissions)
+
 /** Downloads a single submission */
 router.get('download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
 

@@ -48,15 +48,25 @@ function createQueryFunction(tableName) {
  * @param {string} due_date The date the assignment is due
  * @param {string} last_updated The date the assignment was last updated 
  */
-function insertSingleAssignment(id, name, due_date, last_updated, points_possible) {
-  let sql_query = "INSERT IGNORE INTO assignment (id, name, due_date, last_updated, points_possible) VALUES (?, ?, ?, ?, ?)";
-  db.query(sql_query, [id, name, due_date, last_updated, points_possible], (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-  });
-};
+// function insertSingleAssignment(id, name, due_date, last_updated, points_possible) {
+//   let sql_query = "INSERT IGNORE INTO assignment (id, name, due_date, last_updated, points_possible) VALUES (?, ?, ?, ?, ?)";
+//   db.query(sql_query, [id, name, due_date, last_updated, points_possible], (err, result) => {
+//     if (err) {
+//       console.log(err);
+//     }
+//   });
+// };
 
+/**
+ * Function that inserts a single grader with relevant arguments into the database.
+ * @param {int} id - Unique ID for the grader
+ * @param {string} name - Grader name
+ * @param {int} offset - Offset of submissions for the grader
+ * @param {string} role - The type of grader (TA, consultant, grader)
+ * @param {int} total_graded - Total number of submissions graded
+ * @param {int} weight - Submission weight assigned to grader
+ * @param {string} last_updated - When the grader was last updated
+ */
 function insertSingleGrader(id, name, offset, role, total_graded, weight, last_updated) {
   let sql_query = "INSERT IGNORE INTO grader (id, name, offset, role, total_graded, weight, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?)";
   db.query(sql_query, [id, name, offset, role, total_graded, weight, last_updated], (err, result) => {
@@ -73,8 +83,22 @@ function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_up
       console.log(err);
     }
   });
-}
+};
 
+
+/**
+ * A function that updates the grader for a submission
+ * @param {int} grader_id - A unique id for a grader
+ * @param {int} submission_id - An id for the submission
+ */
+function assignGraderToSubmission(grader_id, submission_id) {
+  let sql_query = "UPDATE submission SET grader_id = ? WHERE id = ?";
+  db.query(sql_query, [grader_id, submission_id], (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+  })
+};
 
 module.exports = {
 
@@ -154,6 +178,16 @@ module.exports = {
     );
   },
 
+  get_unassigned_submissions: function (_, res, _) {
+    let sql_query = "SELECT * FROM submission WHERE grader_id IS NULL";
+    db.query(sql_query, (err, results) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(results);
+      }
+    });
+  }
 
 
   // TO DO:
