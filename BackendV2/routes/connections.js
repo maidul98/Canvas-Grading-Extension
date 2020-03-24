@@ -41,6 +41,6 @@ router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submi
 router.get('/get-unassigned-submissions', queries.get_unassigned_submissions)
 
 /** Downloads a single submission */
-router.get('download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
+router.get('/download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
 
 module.exports = router;

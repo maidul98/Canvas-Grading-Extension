@@ -24,11 +24,11 @@ var AssignmentGrader = require('./grader-model');
  * @param {Array} a: The array to be shuffled
  */
 function shuffle(a) {
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 
@@ -41,192 +41,193 @@ function shuffle(a) {
  */
 function distribute(num_of_submissions, graders) {
 
-    if (num_of_submissions <= 0) {
-        console.log('There are currently no assignments to distribute.');
-        return;
-    }
+  if (num_of_submissions <= 0) {
+    console.log("There are currently no assignments to distribute.");
+    return [];
+  }
 
-    //intial set-up; will populate [num_assigned] cells later on 
-    let graderArray = [];
-    graders.forEach(element => {
+  //intial set-up; will populate [num_assigned] cells later on 
+  let graderArray = [];
+  graders.forEach(element => {
     //grader_id, weight, offset, num_assigned
-        graderArray.push(new AssignmentGrader(element[0], element[1], element[2], 0));
-    });
+    graderArray.push(new AssignmentGrader(element[0], element[1], element[2], 0));
+  });
 
 
-    //sort graders in order of worst to best offsets 
-    //greater offset = worse offset
-    //smaller offset = better offset 
-    graderArray.sort(function (a, b) {
-        if (b.offset === a.offset) return 0;
-        return b.offset > a.offset ? 1 : -1;
-    });
+  //sort graders in order of worst to best offsets 
+  //greater offset = worse offset
+  //smaller offset = better offset 
+  graderArray.sort(function (a, b) {
+    if (b.offset === a.offset) return 0;
+    return b.offset > a.offset ? 1 : -1;
+  });
 
 
-    //normalize offsets such that the least offset equals 0; and
-    //grader.offset = relative number of assignments that grader [grader] is behind on.
-    normalizing_constant = 0 - graderArray[graderArray.length - 1].offset;
-    for (var i = 0; i < graderArray.length; i++)
-        graderArray[i].incrementOffset(normalizing_constant);
+  //normalize offsets such that the least offset equals 0; and
+  //grader.offset = relative number of assignments that grader [grader] is behind on.
+  normalizing_constant = 0 - graderArray[graderArray.length - 1].offset;
+  for (var i = 0; i < graderArray.length; i++)
+    graderArray[i].incrementOffset(normalizing_constant);
 
 
-    console.log(graderArray); //PRINT STATEMENT FOR TESTING 
-    console.log(' ');
+  console.log(graderArray); //PRINT STATEMENT FOR TESTING 
+  console.log(' ');
 
 
 
 
-    //computes sum of all graders' offsets
-    totalOffset = graderArray.reduce((total, element) => {
-        return total + element.offset;
-    }, 0);
+  //computes sum of all graders' offsets
+  totalOffset = graderArray.reduce((total, element) => {
+    return total + element.offset;
+  }, 0);
 
 
-    if (num_of_submissions < totalOffset) {
+  if (num_of_submissions < totalOffset) {
     /* In this case, since the sum of the offsets exceeds the total number of 
     assignments that need to be distributed, there will be no assignments left
     to be distributed based on the graders' weights. */
 
 
-        console.log('Assignmented will be distributed solely by offsets. '); //PRINTING STATEMENT USED FOR TESTING 
-        console.log(' '); //PRINTING STATEMENT USED FOR TESTING
+    console.log("Assignmented will be distributed solely by offsets. ") //PRINTING STATEMENT USED FOR TESTING 
+    console.log(" "); //PRINTING STATEMENT USED FOR TESTING
 
-        max_offset = graderArray[0].offset;
-        //create a 2D int array called tiers 
-        //dimensions: [max_offset] by [total number of graders] 
-        tier = [...Array(max_offset)].map(x => Array(graderArray.length).fill(-1));
+    max_offset = graderArray[0].offset;
+    //create a 2D int array called tiers 
+    //dimensions: [max_offset] by [total number of graders] 
+    tier = [...Array(max_offset)].map(x => Array(graderArray.length).fill(-1));
 
-        for (var j = 0; j < graderArray.length; j++) {
-            for (var i = 0; i < graderArray[j].offset; i++) {
-                tier[i][j] = 1;
-            }
-        }
-
-        //distributes assignments according to offsets (according to tiers) AND update offsets 
-        for (var i = tier.length - 1; i >= 0; i--) {
-            var counter = 0;
-            while (tier[i][counter] > 0) {
-                if (num_of_submissions == 0) break;
-                graderArray[counter].incrementNumAssigned(1);
-                graderArray[counter].decrementOffset(1);
-                counter++;
-                num_of_submissions--;
-            }
-        }
+    for (var j = 0; j < graderArray.length; j++) {
+      for (var i = 0; i < graderArray[j].offset; i++) {
+        tier[i][j] = 1;
+      }
     }
 
-    else {
+    //distributes assignments according to offsets (according to tiers) AND update offsets 
+
+    for (var i = tier.length - 1; i >= 0; i--) {
+      var counter = 0;
+      while (tier[i][counter] > 0) {
+        if (num_of_submissions == 0) break;
+        graderArray[counter].incrementNumAssigned(1);
+        graderArray[counter].decrementOffset(1);
+        counter++;
+        num_of_submissions--;
+      }
+    }
+  }
+  else {
     /*In this case, assignments will be distirbuted according to offsets first, 
     and then according to weights. */
 
 
-        console.log('Assignmented will be distributed by weigths AND offsets. '); //PRINTING STATEMENT USED FOR TESTING 
-        console.log(' '); //PRINTING STATEMENT USED FOR TESTING
+    console.log('Assignmented will be distributed by weigths AND offsets. '); //PRINTING STATEMENT USED FOR TESTING 
+    console.log(' '); //PRINTING STATEMENT USED FOR TESTING
 
 
-        //first, distribute [totalOffset] assignments according to offsets AND update offsets 
-        for (var i = 0; i < graderArray.length; i++) {
-            graderArray[i].updateNumAssigned(graderArray[i].offset);
-            graderArray[i].updateOffset(0);
-        }
+    //first, distribute [totalOffset] assignments according to offsets AND update offsets 
+    for (var i = 0; i < graderArray.length; i++) {
+      graderArray[i].updateNumAssigned(graderArray[i].offset);
+      graderArray[i].updateOffset(0);
+    }
 
-        console.log('Assignments distributed by offsets first:');
-        console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING
-        console.log(' '); //PRINTING STATEMENT USED FOR TESTING
-
-
-        //number of assignments to be distributed according to weights
-        distBasedWeights = num_of_submissions - totalOffset;
-
-        //computes total weight
-        total_weight = graderArray.reduce((total, element) => {
-            return total + element.weight;
-        }, 0);
-
-        //then, distribute [distBasedWeights] assignments according to weights
-        //IMPORTANT: OFFSETS ARE NOT ALTERED IN THIS STEP 
-        for (var i = 0; i < graderArray.length; i++) {
-            assigned = Math.floor(graderArray[i].weight * distBasedWeights / total_weight);
-            graderArray[i].incrementNumAssigned(assigned);
-        }
+    console.log('Assignments distributed by offsets first:');
+    console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING
+    console.log(' '); //PRINTING STATEMENT USED FOR TESTING
 
 
-        console.log('Assignments distributed by weights now:');
-        console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING
-        console.log(' '); //PRINTING STATEMENT USED FOR TESTING
+    //number of assignments to be distributed according to weights
+    distBasedWeights = num_of_submissions - totalOffset;
+
+    //computes total weight
+    total_weight = graderArray.reduce((total, element) => {
+      return total + element.weight;
+    }, 0);
+
+    //then, distribute [distBasedWeights] assignments according to weights
+    //IMPORTANT: OFFSETS ARE NOT ALTERED IN THIS STEP 
+    for (var i = 0; i < graderArray.length; i++) {
+      assigned = Math.floor(graderArray[i].weight * distBasedWeights / total_weight);
+      graderArray[i].incrementNumAssigned(assigned);
+    }
 
 
-        //TOTAL number of assignments that have been distributed
-        distAssign = graderArray.reduce((total, element) => {
-            return total + element.num_assigned;
-        }, 0);
-
-        //number of assignments that still need to be distributed due to rounding
-        leftAssign = num_of_submissions - distAssign;
-
-        //At this point in the program, all of the graders have an equal offset of 0.
-
-        /*distribute remaining assignments evenly at first, if possible*/
-        addedAssignments = Math.floor(leftAssign / graderArray.length);
-        if (addedAssignments > 0) {
-            for (var i = 0; i < graderArray.length; i++) {
-                graderArray[i].incrementNumAssigned(addedAssignments);
-            }
-        }
-        leftAssign -= (addedAssignments * graderArray.length);
-
-        /*randomly distribute [leftAssign] remaining assignments AND update offsets*/
-
-        //Random distribution: 
-        //An array is populated with numbers [0] to [graderArray.length-1] (represents graders).
-        //The array is shuffled a random number of times.
-        //The first [leftAssign] elements of the resulting array are chosen. 
-
-        let randomArr = [];
-
-        for (var p = 0; p < graderArray.length; p++)
-            randomArr[p] = p;
-
-        for (var c = 0; c < Math.floor((Math.random() * 4) + 3); c++)
-            shuffle(randomArr);
-
-        for (var q = 0; q < leftAssign; q++) {
-            graderArray[randomArr[q]].incrementNumAssigned(1);
-            graderArray[randomArr[q]].decrementOffset(1);
-        }
+    console.log('Assignments distributed by weights now:');
+    console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING
+    console.log(' '); //PRINTING STATEMENT USED FOR TESTING
 
 
-        console.log('Assignments completely distributed by rounding errors now:');
-        console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING
-        console.log(' '); //PRINTING STATEMENT USED FOR TESTING
+    //TOTAL number of assignments that have been distributed
+    distAssign = graderArray.reduce((total, element) => {
+      return total + element.num_assigned;
+    }, 0);
+
+    //number of assignments that still need to be distributed due to rounding
+    leftAssign = num_of_submissions - distAssign;
+
+    //At this point in the program, all of the graders have an equal offset of 0.
+
+    /*distribute remaining assignments evenly at first, if possible*/
+    addedAssignments = Math.floor(leftAssign / graderArray.length);
+    if (addedAssignments > 0) {
+      for (var i = 0; i < graderArray.length; i++) {
+        graderArray[i].incrementNumAssigned(addedAssignments);
+      }
+    }
+    leftAssign -= (addedAssignments * graderArray.length);
+
+    /*randomly distribute [leftAssign] remaining assignments AND update offsets*/
+
+    //Random distribution: 
+    //An array is populated with numbers [0] to [graderArray.length-1] (represents graders).
+    //The array is shuffled a random number of times.
+    //The first [leftAssign] elements of the resulting array are chosen. 
+
+    let randomArr = [];
+
+    for (var p = 0; p < graderArray.length; p++)
+      randomArr[p] = p;
+
+    for (var c = 0; c < Math.floor((Math.random() * 4) + 3); c++)
+      shuffle(randomArr);
+
+    for (var q = 0; q < leftAssign; q++) {
+      graderArray[randomArr[q]].incrementNumAssigned(1);
+      graderArray[randomArr[q]].decrementOffset(1);
+    }
 
 
-    } //end of else statement
+    console.log('Assignments completely distributed by rounding errors now:');
+    console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING
+    console.log(' '); //PRINTING STATEMENT USED FOR TESTING
 
 
-    //sort graders in order of worst to best offsets 
-    graderArray.sort(function (a, b) {
-        if (b.offset === a.offset) return 0;
-        return b.offset > a.offset ? 1 : -1;
-    });
+  } //end of else statement
 
-    //normalize offsets so the professor can easily update offsets if s/he wishes
-    //to before the next set of assignments are distributed 
-    normalizing_cons = 0 - graderArray[graderArray.length - 1].offset;
-    for (var i = 0; i < graderArray.length; i++)
-        graderArray[i].incrementOffset(normalizing_cons);
 
-    //sort graders by weigths 
-    graderArray.sort(function (a, b) {
-        if (b.weight === a.weight) return 0;
-        return b.weight > a.weight ? 1 : -1;
-    });
+  //sort graders in order of worst to best offsets 
+  graderArray.sort(function (a, b) {
+    if (b.offset === a.offset) return 0;
+    return b.offset > a.offset ? 1 : -1;
+  });
 
-    console.log('FINAL OUTPUT: '); //PRINTING STATEMENT USED FOR TESTING 
-    console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING 
-    return;
+  //normalize offsets so the professor can easily update offsets if s/he wishes
+  //to before the next set of assignments are distributed 
+  normalizing_cons = 0 - graderArray[graderArray.length - 1].offset;
+  for (var i = 0; i < graderArray.length; i++)
+    graderArray[i].incrementOffset(normalizing_cons);
+
+  //sort graders by weigths 
+  graderArray.sort(function (a, b) {
+    if (b.weight === a.weight) return 0;
+    return b.weight > a.weight ? 1 : -1;
+  });
+
+  console.log("FINAL OUTPUT: ") //PRINTING STATEMENT USED FOR TESTING 
+  console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING 
+  return graderArray;
 
 }
+
 
 
 //Create dummy graders
@@ -272,6 +273,6 @@ let ag19 = [1223, 3, 0];
 let ag20 = [4444, 3, 4];
 
 let graders = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12, g13, g14, g15, g16, g17, g18, g19, g20,
-    ag1, ag2, ag3, ag4, ag5, ag6, ag7, ag8, ag9, ag10, ag11, ag12, ag13, ag14, ag15, ag16, ag17, ag18, ag19, ag20];
+  ag1, ag2, ag3, ag4, ag5, ag6, ag7, ag8, ag9, ag10, ag11, ag12, ag13, ag14, ag15, ag16, ag17, ag18, ag19, ag20];
 
 distribute(567, graders);
