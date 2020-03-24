@@ -43,7 +43,7 @@ function distribute(num_of_submissions, graders) {
 
   if (num_of_submissions <= 0) {
     console.log("There are currently no assignments to distribute.");
-    return;
+    return [];
   }
 
   //intial set-up; will populate [num_assigned] cells later on 
@@ -103,6 +103,7 @@ function distribute(num_of_submissions, graders) {
     }
 
     //distributes assignments according to offsets (according to tiers) AND update offsets 
+
     for (var i = tier.length - 1; i >= 0; i--) {
       var counter = 0;
       while (tier[i][counter] > 0) {
@@ -224,7 +225,7 @@ function distribute(num_of_submissions, graders) {
 
   console.log("FINAL OUTPUT: ") //PRINTING STATEMENT USED FOR TESTING 
   console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING 
-  return;
+  return graderArray;
 
 }
 

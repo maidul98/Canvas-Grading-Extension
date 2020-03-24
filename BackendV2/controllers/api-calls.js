@@ -8,6 +8,7 @@ const qs = require('qs')
 const http = require('http')
 const fs = require('fs')
 
+
 const config = {
   //TODO: Factor out bearer tokens into another file that isn't publicly accessible.
   headers: { Authorization: `Bearer 9713~TYz9t4zPXdeHonsL9g19ac3kIucoU8BdskLUNZ1rijvusRvhhdbyQFMhXPDhDltZ` }
@@ -37,18 +38,70 @@ exports.student_enrollments = function (_, res) {
 
 
 exports.download_single_submission = function (req, res) {
-  console.log('method called')
+
+  /*
+    const http = require('http');
+    const fs = require('fs');
+  
+    const file = fs.createWriteStream("file.pdf");
+  
+    const request = http.get("http://canvas.cornell.edu/files/1232064/download?download_frd=1&verifier=Oq1Xai22llhOx6N9I3koRdGHzDNBhG3JPdQbV9tV", function (response) {
+      response.pipe(file);
+    });
+  */
+
+  // URL = "http://canvas.cornell.edu/files/1232064/download?download_frd=1&verifier=Oq1Xai22llhOx6N9I3koRdGHzDNBhG3JPdQbV9tV"
+
   axios
-    .get(`https://canvas.cornell.edu/api/v1/courses/15037/${req.params.assignment_id}/submissions/${req.params.user_id}`, config)
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions`, config)
     .then(result => {
-      const attachments = result.attachments
-      attachments.forEach(attachment => {
-        console.log(attachment.url)
-        res.download(attachment.url)
-      })
+      const submissionsJSONArray = result.data;
+      //the first "[0]" represents the appropriate user_id that you want the submission of 
+      //which i've hardcoded rn for testing purposes 
+
+
+      var url = result.data[0].attachments[0].url;
+      URL = "http://" + url.substring(8);
+
+      //var url = result.data[0].attachments[0].url.substring(8);
+
+      // res.send(url);
+
+
+      // const http = require('http');
+      // const fs = require('fs');
+
+      // const file = fs.createWriteStream("file.pdf");
+      // const request = http.get(url, function (response) {
+      //   response.pipe(file);
+      // });
+
+
+
+      // http.get(URL, function (response) {
+      //   response.pipe(file);
+      //   file.on('finish', function () {
+      //     file.close(cb);  // close() is async, call cb after close completes.
+      //   });
+      // }).on('error', function (err) { // Handle errors
+      //   fs.unlink(dest); // Delete the file async. (But we don't check the result)
+      //   if (cb) cb(err.message);
+      // })
+
+
+      http.get(URL, function (file) {
+        file.pipe(res);
+      });
+
+      // file.on('finish', function () {
+      //   file.close(cb);
+      // });
+
     })
     .catch(error => console.log(error));
 }
+
+
 
 exports.get_published_assignments = function (_, res) {
   axios
