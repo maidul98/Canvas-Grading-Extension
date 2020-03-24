@@ -104,6 +104,7 @@ exports.get_all_graders = function (_, res) {
             return result;
         })
         .then(jsonarr => {
+            console.log(jsonarr);
             queries.insertAllGraders(jsonarr);
             return jsonarr;
         })
