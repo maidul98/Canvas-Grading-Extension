@@ -35,12 +35,16 @@ router.get('/get-graders', apiCalls.get_all_graders);
 /** Upload grades and comments for a specific user's submission for an assignment */
 router.put('/upload-submission-grades/assignments/:assignment_id/submissions/:user_id', apiCalls.grade_single_submission);
 
+/** Uploads all grades and comments for all submissions for a specific assignment */
 router.post('/upload-submission-grades/assignments/:assignment_id/submissions/batch-update-grades', apiCalls.grade_batch_submissions);
+
+/** Get all assigned submissions for an assignment */
 router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submission_for_assigment);
 
+/** Get all unassigned submissions for an assignment */
 router.get('/get-unassigned-submissions', queries.get_unassigned_submissions)
 
-/** Downloads a single submission */
+/** Downloads a specific user's submission for a specific assignment */
 router.get('/download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
 
 module.exports = router;
