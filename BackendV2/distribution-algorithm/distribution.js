@@ -216,11 +216,6 @@ function distribute(num_of_submissions, graders) {
   for (var i = 0; i < graderArray.length; i++)
     graderArray[i].incrementOffset(normalizing_cons);
 
-  //sort graders by weigths 
-  graderArray.sort(function (a, b) {
-    if (b.weight === a.weight) return 0;
-    return b.weight > a.weight ? 1 : -1;
-  });
 
   console.log("FINAL OUTPUT: ") //PRINTING STATEMENT USED FOR TESTING 
   console.log(graderArray); //PRINTING STATEMENT USED FOR TESTING 
