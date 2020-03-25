@@ -38,10 +38,10 @@ router.put('/upload-submission-grades/assignments/:assignment_id/submissions/:us
 /** Uploads all grades and comments for all submissions for a specific assignment */
 router.post('/upload-submission-grades/assignments/:assignment_id/submissions/batch-update-grades', apiCalls.grade_batch_submissions);
 
-/** Get all assigned submissions for an assignment */
+/** Get all assigned submissions for a specific submission */
 router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submission_for_assigment);
 
-/** Get all unassigned submissions for an assignment */
+/** Get all unassigned submissions */
 router.get('/get-unassigned-submissions', queries.get_unassigned_submissions)
 
 /** Downloads a specific user's submission for a specific assignment */
