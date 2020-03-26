@@ -9,6 +9,27 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import FormControl from 'react-bootstrap/FormControl'
 
 export default function Dashboard(){
+    const [assignments, setAssignments] = useState([]);
+    const fetchAssignments = useRequest(url => url, {
+        manual: true,
+        onSuccess: (result, params) => {
+                let reOrdered = result.sort(function compare(a, b) {
+                    var dateA = new Date(a.due_at);
+                    var dateB = new Date(b.due_at);
+                    return dateB-dateA;
+                });
+                setAssignments(reOrdered);
+        },
+        onError: (error, params) => {
+            console.log(error)
+        },
+        formatResult: []
+    });
+
+    useEffect(()=>{
+        fetchAssignments.run('/get-published-assignments')
+    },[]);
+
     return (
         <div className="container">
             <Table bordered hover  id="dashboardTable">
@@ -44,8 +65,6 @@ export default function Dashboard(){
                             <ProgressBar now={30} label={`${30}%`} />
                         </td>
                     </tr>
-
-                    
                 </tbody>
             </Table>
         </div>
