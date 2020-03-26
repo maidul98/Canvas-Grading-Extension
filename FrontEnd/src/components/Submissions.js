@@ -1,9 +1,8 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState} from 'react';
 import SingleSubmission from './SingleSubmission';
 import QuickEditSubmission from './QuickEditSubmission';
 import Alert from 'react-bootstrap/Alert';
 import LoadingIcon from './LoadingIcon';
-import { useFetch } from '../useFetch';
 import Button from 'react-bootstrap/Button';
 import { useRequest } from '@umijs/hooks';
 
