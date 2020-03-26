@@ -313,6 +313,11 @@ h1{
 
 #logo h1{
   line-height:50px;
+  font-size: 2em;
+}
+
+#navigation-content a{
+  text-decoration: none;
 }
 
 #user_menu {
@@ -596,4 +601,13 @@ ol.breadcrumb{
 
 .auto-save-hidden{
   display: none;
+}
+
+/*===================PROFESSOR: DASHBOARD===============*/
+#selectAssignments{
+  width: 100%;
+}
+
+#dashboardTable td{
+  background-color: white;
 }

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
+import {Link} from 'react-router-dom';
 
 class NavigationMenu extends Component {
     render(){
@@ -12,14 +13,20 @@ class NavigationMenu extends Component {
             <header id="navigation-container">
                 <div className="container">
                     <div id="navigation-content">
-                        <div id="logo">
-                            <h1>Canvas grading extension</h1>
-                        </div>
+                        <a href="/assignments">
+                            <div id="logo">
+                                <h1>Canvas grading extension</h1>
+                            </div>
+                        </a>
                         <div id="user-profile-icon">
                             <Dropdown>
                                 <Dropdown.Toggle as={CustomToggle}></Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                    <Dropdown.Item href="#/action-1">Profile</Dropdown.Item>
+                                {/* Professor/Dashboard.js */}
+                                    {/* <Link to="/professor/dashboard">
+                                        <Dropdown.Item>Dashboard</Dropdown.Item>
+                                    </Link> */}
+                                    <Dropdown.Item href="/dashboard">Dashboard</Dropdown.Item>
                                     <Dropdown.Item href="#/action-2">Setting</Dropdown.Item>
                                     <Dropdown.Item href="#/action-3">Logout</Dropdown.Item>
                                 </Dropdown.Menu>
