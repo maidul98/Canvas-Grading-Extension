@@ -7,6 +7,7 @@ import './index.css';
 import NavigationMenu from './components/NavigationMenu';
 import 'bootstrap/dist/css/bootstrap.min.css'; // bootstrap
 import Breadcrumbs from './components/Breadcrumbs';
+import Dashboard from './components/Professor/Dashboard'
 
 const fakeAuth = {
   isAuthenticated: false,
@@ -70,6 +71,7 @@ class App extends React.Component {
             <Route path = "/" component={LoginButton} exact/>
             <PrivateRoute exact path="/assignments" component={AssignmentList}/>
             <Route  path="/assignments/:assignment_id/:student_id" component={DetailedAssignmentView} />
+            <Route path = "/dashboard" component={Dashboard}/>
             {/* <Route exact path="/detailed-view/:assignment_id/:student_id" render = {props => <DetailedAssignmentView assignment_id={props.match.params.assignment_id} student_id={props.match.params.student_id}/> } /> */}
           </Switch>
       </BrowserRouter>
