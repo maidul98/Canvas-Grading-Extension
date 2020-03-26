@@ -1,4 +1,5 @@
 import React, { Component, useEffect, useState} from 'react';
+import { useRequest } from '@umijs/hooks';
 import SingleSubmission from './SingleSubmission';
 import Form from './QuickEditSubmission';
 import Alert from 'react-bootstrap/Alert';
@@ -13,7 +14,17 @@ export default function AssignmentList(props) {
     const [current_assignment_id, setCurrent_assignment_id] = useState(0);
     const { data, isLoading, hasError} = useFetch('/get-published-assignments',[]);
 
+    // const { run, fetches } = useRequest({ url: '/get-published-assignments', method: 'get' }, {
+    //     fetchKey: id => id,
+    //     onSuccess: (result, params) => {
+    //       console.log("params")
+    //     }
+    //   });
+
+    // console.log(fetches)
     useEffect(()=>{
+        // run({ url: '/get-published-assignments', method: 'get' })
+        // console.log(fetches)
         if(Array.isArray(data)){
             let reOrdered = data.sort(function compare(a, b) {
                 var dateA = new Date(a.due_at);
@@ -22,7 +33,7 @@ export default function AssignmentList(props) {
             });
             setAssignments(reOrdered);
         }
-    }, [data]);
+    },[data]);
 
     return (
         <div className="container">
