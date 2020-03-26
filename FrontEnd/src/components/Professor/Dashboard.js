@@ -5,15 +5,39 @@ import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table'
 import ProgressBar from 'react-bootstrap/ProgressBar'
+import InputGroup from 'react-bootstrap/InputGroup'
+import FormControl from 'react-bootstrap/FormControl'
 
 export default function Dashboard(){
+    const [assignments, setAssignments] = useState([]);
+    const fetchAssignments = useRequest(url => url, {
+        manual: true,
+        onSuccess: (result, params) => {
+                let reOrdered = result.sort(function compare(a, b) {
+                    var dateA = new Date(a.due_at);
+                    var dateB = new Date(b.due_at);
+                    return dateB-dateA;
+                });
+                setAssignments(reOrdered);
+        },
+        onError: (error, params) => {
+            console.log(error)
+        },
+        formatResult: []
+    });
+
+    useEffect(()=>{
+        fetchAssignments.run('/get-published-assignments')
+    },[]);
+
     return (
         <div className="container">
-            <Table striped bordered hover id="dashboardTable">
+            <Table bordered hover  id="dashboardTable">
                 <thead>
                     <tr>
                     <th>Name</th>
                     <th>Weights</th>
+                    <th>Missed</th>
                     <th>
                         <select id="selectAssignments">
                             <option value="volvo">Progres for Homework 1</option>
@@ -27,26 +51,20 @@ export default function Dashboard(){
                 <tbody>
                     <tr>
                         <td>Maidul Islam</td>
-                        <td>10%</td>
+                        <td className="width-10"><FormControl placeholder="Enter" /></td>
+                        <td className="width-10">4</td>
                         <td>
                             <ProgressBar now={30} label={`${30}%`} />
                         </td>
                     </tr>
                     <tr>
-                        <td>Bob Flake</td>
-                        <td>70%</td>
+                        <td>Maidul Islam</td>
+                        <td className="width-10"><FormControl placeholder="Enter" /></td>
+                        <td className="width-10">4</td>
                         <td>
-                            <ProgressBar now={90} label={`${90}%`} />
+                            <ProgressBar now={30} label={`${30}%`} />
                         </td>
                     </tr>
-                    <tr>
-                        <td>Rob cat</td>
-                        <td>20%</td>
-                        <td>
-                            <ProgressBar now={10} label={`${10}%`} />
-                        </td>
-                    </tr>
-                    
                 </tbody>
             </Table>
         </div>

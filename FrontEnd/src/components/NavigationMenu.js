@@ -22,10 +22,6 @@ class NavigationMenu extends Component {
                             <Dropdown>
                                 <Dropdown.Toggle as={CustomToggle}></Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                {/* Professor/Dashboard.js */}
-                                    {/* <Link to="/professor/dashboard">
-                                        <Dropdown.Item>Dashboard</Dropdown.Item>
-                                    </Link> */}
                                     <Dropdown.Item href="/dashboard">Dashboard</Dropdown.Item>
                                     <Dropdown.Item href="#/action-2">Setting</Dropdown.Item>
                                     <Dropdown.Item href="#/action-3">Logout</Dropdown.Item>
