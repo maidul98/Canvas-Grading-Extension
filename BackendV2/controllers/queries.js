@@ -187,8 +187,22 @@ module.exports = {
         res.json(results);
       }
     });
-  }
+  },
 
+  // inputs: (none), output: get us all the data for graders ( all rows in graders table)
+  // inputs:(grader_id, weight), output: update weights for that given grader_id in graders table. if error, send 406 with this object {status: "fail", "message":Something went wrong}
+  // we need a route where we get the progress for a given assignment_id. it should return {"out_of": number, "graded":number}, if error send 406 with this object {status: "fail", "message":Something went wrong}
+
+  get_graders: function (_, res,  _) {
+    let sql_query = "SELECT * FROM grader";
+    db.query(sql_query, (err, results) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(results);
+      }
+    })
+  }
 
   // TO DO:
   // update grade in submission
