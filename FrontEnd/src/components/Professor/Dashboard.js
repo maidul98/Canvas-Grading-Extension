@@ -123,7 +123,7 @@ export default function Dashboard(){
                     {graders.map(grader=>
                         <tr key={grader.user.id}>
                             <td>{grader.user.name}</td>
-                            <td className="width-10"><FormControl placeholder="Enter" type="number" id={grader.user.id} onChange={event=>setWeights({...weights, [event.target.id] : event.target.value})}></FormControl></td>
+                            <td className="width-10"><FormControl placeholder="Enter" type="number" id={grader.user.id} onChange={event=>{setWeights({...weights, [event.target.id] : event.target.value}); setChanged(true);}}></FormControl></td>
                             <td className="width-10">4</td>
                             <td>
                             <ProgressBar now={30} label={`${30}%`} />
