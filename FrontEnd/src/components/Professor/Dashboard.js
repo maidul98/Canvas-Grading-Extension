@@ -13,6 +13,7 @@ export default function Dashboard(){
     const [changed, setChanged] = useState(false);
     const [graders, setGraders] = useState([]);
     const [gradersData, setGradersData] = useState([]);
+    const [assignment_id, setAssignmentID] = useState(null);
     /* weights obj:
     {
         grader_id: weight
@@ -44,10 +45,11 @@ export default function Dashboard(){
     const fetchGradersData = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
+            console.log(result);
             if(result.length==0){
                 setFetchGradersStatus([{type:"primary", message:"There are no graders yet"}]);
             }
-            setGradersData(result)
+            setGradersData(result);
         },
         onError: (error, params) => {
             setFetchGradersStatus([{type:"warning", message:"Something went wrong while fetching graders, please try refreshing the page."}])
@@ -97,7 +99,8 @@ export default function Dashboard(){
     },[]);
 
     useEffect(()=>{
-        fetchGraders.run('/get-graders')
+        //fetchGraders.run('/get-graders')
+        fetchGradersData.run('/get-grading-progress-for-assignment?assignment_id='+assignment_id);
     }, [])
 
     if(submitWeights.loading | fetchAssignments.loading | fetchGraders.loading) return <LoadingIcon />
@@ -114,7 +117,7 @@ export default function Dashboard(){
                     <th>Missed</th>
                     <th>
                         <select id="selectAssignments">
-                            {assignments.map(assignment=><option value={assignment.id}>Progress for {assignment.name}</option>)}
+                            {assignments.map(assignment=><option value={assignment.id} key={assignment.id} onChange={event=>{setAssignmentID(assignment.id)}}>Progress for {assignment.name}</option>)}
                         </select>
                     </th>
                     </tr>
