@@ -14,6 +14,7 @@ var db = mysql.createPool({
   user: "be9696052936bb",
   password: "4f1c4dfa",
   database: "heroku_aff64052225438d",
+  multipleStatements: true,
   port: 3306,
   connectTimeout: 100000,
   max_questions: 5000
@@ -227,10 +228,10 @@ module.exports = {
   },
 
   /**
-   * This function gets the progress for a given assignment_id
+   * This function gets the overall progress for a given assignment_id
    * @param {*} assigment_id
    */
-  get_grading_progress: function (req, res) {
+  get_grading_progress_for_assignment: function (req, res) {
     let sql_query = "SELECT * FROM submission WHERE assignment_id=?";
     db.query(sql_query, [req.query.assigment_id], (err, results) => {
       if (err) {
@@ -246,6 +247,48 @@ module.exports = {
             completed += 1};
         });
         res.json({"out of": total, "graded": completed});
+      }
+    });
+  },
+
+    /**
+   * This function gets the grading progress for each grader given assignment_id
+   * @param {*} assigment_id
+   * @param {*} grader_id
+   */
+  get_grading_progress_for_every_grader: function (req, res) {
+    let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id IS NOT NULL";
+    db.query(sql_query, [req.query.assigment_id], (err, results) => {
+      if (err) {
+        res.status(406).send({
+          status: "fail",
+          message: "Something went wrong"
+        });
+      } else {
+        var graders = [];
+        var progress = [];
+        results.forEach((submission) => {
+          if (!(graders.includes(submission.grader_id))) {
+            graders.push(submission.grader_id);
+          }
+        });
+
+        graders.forEach((grader) => {
+          let grader_total = 0;
+          let grader_completed = 0;
+          results.forEach((submission) => {
+            if (submission.grader_id == grader) {
+              grader_total += 1;
+              if (submission.is_graded == 1) {
+                grader_completed += 1;
+              }
+            }
+          })
+
+          progress.push({"grader": grader, "progress": {"total": grader_total, "completed": grader_completed}})
+        })
+
+        res.json(progress);
       }
     });
   }

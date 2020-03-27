@@ -51,7 +51,10 @@ router.get('/get-grader-table', queries.get_grader_table);
 router.post('/update-grader-weight', queries.update_grader_weight);
 
 /** Get grading progress for a specific assignment */
-router.get('/get-grading-progress', queries.get_grading_progress);
+router.get('/get-grading-progress-for-assignment', queries.get_grading_progress_for_assignment);
+
+/** Get grading progress for a specific assignment */
+router.get('/get-grading-progress-for-every-grader', queries.get_grading_progress_for_every_grader);
 
 /** Downloads a specific user's submission for a specific assignment */
 router.get('/download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
