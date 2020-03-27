@@ -294,11 +294,21 @@ module.exports = {
     });
   },
 
+  /** returns a list of AssignmentGrader objects, which will be input in the 
+   * algorithm. 
+   * 
+   * This method will query a list of all the graders, and create 
+   * AssignmentGrader instances for each of those graders with their respective
+   * id, current weight and offset, and the curr_assigned initialized to 0. 
+   * 
+   * @param {*} callback A standard callback function 
+   */
   get_grader_objects: function (callback) {
     let sql_query = "SELECT * FROM grader"
     db.query(sql_query, (err, results) => {
       if (err) {
         console.log(err)
+        callback(null)
       } else {
         grader_array = []
         results.forEach(grader => {
@@ -308,11 +318,34 @@ module.exports = {
           let graderObj = new AssignmentGrader(id, weight, offset, 0)
           grader_array.push(graderObj)
         })
-        console.log(grader_array)
-        return callback(grader_array)
+        callback(grader_array)
       }
     })
+  },
+
+  update_grader_entries: function (grader_array, callback) {
+    async.forEachOf(grader_array, function (grader, _, inner_callback) {
+      let sql_query = "UPDATE grader SET offset=? WHERE id=?"
+      db.query(sql_query, [grader.offset, grader.id], (err, results) => {
+        if (err) {
+          console.log(err)
+          inner_callback(err)
+          callback(err)
+        } else {
+          inner_callback(null)
+        }
+      });
+    }, function (err) {
+      if (err) {
+        console.log(err);
+        callback(err)
+      } else {
+        callback(null)
+      }
+    });
   }
+
+
 
 
 
@@ -326,9 +359,3 @@ module.exports = {
 
 
 }
-
-// /** Gets the submission table */
-// exports.get_submission_table = createQueryFunction("submission");
-
-// /** Gets the assignment table */
-// exports.get_assignment_table = createQueryFunction("assignment");
