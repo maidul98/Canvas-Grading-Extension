@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; // ES6
-import Button from './Button';
+import Button from 'react-bootstrap/Button'
 
 class DetailedAssignmentView extends React.Component {
 
@@ -33,31 +33,30 @@ class DetailedAssignmentView extends React.Component {
   }
 
   render(){
-
     return (
       <div className="container">
-        <div className="content-container">
-          <div id="detailed-view-box">
-            <div id="header-container">
-              <ul id="attachment-downloads">
-                <li><Button url={"#"} title="Download file #1"/></li>
-                <li><Button url={"#"} title="Download file #1"/></li>
-                <li><Button url={"#"} title="Download file #1"/></li>
-                <li><Button url={"#"} title="Download file #1"/></li>
-              </ul>
-              <div id="enter-grade">
-                <div id="grade-box">
-                  <input id="grade" max={100} min={0} placeholder="Enter grade" type="number"/>
-                  <span id="out-of-text">out of</span>
-                  <span id="total-grade">100</span>
-                </div>
-              </div>
-            </div>
-            <ReactQuill placeholder="Enter your comments here"/>
-            <button className="btn" id="submit-feedback-btn" onClick={this.submit}>Submit feedback</button>
-            <div className="clearfix"></div>
-          </div>
+        <div id="assignmentDetails">
+          <h2>Grading <em>mi252</em> on Homework 2</h2>
         </div>
+        <hr></hr>
+          <div className="row">
+            <div className="col-2">
+              <h6>Files attached</h6>
+              <ul id="download-files">
+                <a href=""><li>home.js</li></a>
+                <a href=""><li>store.js</li></a>
+              </ul>
+            </div>
+            <div className="col-10">
+              <div className="float-right" id="detiledAssignmentGrade">
+                <span>Grade our of 100</span>
+                <input type="text"/>
+              </div>
+              <textarea id="detiledAssignmentComment" placeholder="Enter your text feedback here" cols="30" rows="10"></textarea>
+            </div>
+          </div>
+          <Button className="float-right" id="gradeSubmitBtn" variant="primary">Submit feedback</Button>
+          <div className="clearfix"></div>
       </div>
     )
   }

@@ -11,18 +11,21 @@ export default function Submissions(props){
     const gradesAndComments = []    
     const [submissionsError, SetSubmissionError] = useState([])
     const [gradeSubmitStatus, SetGradeSubmitStatus] = useState([])
+    const [show, setShow] = useState(true);
 
     const fetchSubmissions = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
             setSubmissions(result)
             if(result.length == 0){
+                setShow(true)
                 SetSubmissionError([{type:"primary", message:"You do not have any assigned submissions at this time"}])
             }else{
                 SetSubmissionError([])
             }
         },
         onError: (error, params) => {
+            setShow(true)
             SetSubmissionError([{type:"warning",message:'Something went wrong when pulling your submissions, please try refreshing the page.'}])
         }
     });
@@ -71,7 +74,7 @@ export default function Submissions(props){
 
     return (
         <div>
-            {submissionsError.map((obj) =><Alert variant={obj['type']}>{obj['message']}</Alert>)}
+            {submissionsError.map((obj) =><Alert  onClose={() => setShow(false)} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
             {submissions.map(res => 
                 <div key={'container-'+res.id}>
                     {
@@ -81,7 +84,7 @@ export default function Submissions(props){
                     }
                 </div>)
             }
-            {gradeSubmitStatus.map((obj) =><Alert variant={obj['type']}>{obj['message']}</Alert>)}
+            {gradeSubmitStatus.map((obj) =><Alert onClose={() => setShow(false)} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
             <Button onClick={submitForms} className={props.bulk_edit?"visible":"invisible"}>Submit feedback for all students</Button>
         </div>
     );

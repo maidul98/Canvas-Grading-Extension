@@ -396,72 +396,39 @@ margin-top: 80px;
 ==========Detailed view of assignments ===========
 **/
 
-#detailed-view-box{
-  background-color: #F7F7F7;
-  padding: 30px;
+#detiledAssignmentComment{
+  width: 100%;
+  max-height: 150px;
+  padding: 8px;
 }
 
-#attachment-downloads{
+ul#download-files {
   list-style: none;
   padding: 0;
-  max-width: 40%;
 }
 
-#attachment-downloads li{
-  border: solid 1px gray;
-  display: inline-block;
-  padding: 10px 10px;
+#detiledAssignmentGrade input{
+  margin-bottom: 10px;
+  max-width: 50px;
+}
+
+#detiledAssignmentGrade span{
   margin-right: 10px;
-  margin-bottom: 5px;
 }
 
-.btn{
-  border:none;
-  padding: 15px 8px;
-  background-color: #B31B1B;
-  color: white;
-  float: right;
+#gradeSubmitBtn{
+  margin-top: 20px;
 }
 
-#submit-feedback-btn{
-  margin:15px 0 0;
+#assignmentDetails h4{
+  font-weight: normal;
 }
 
-#header-container{
-  display: flex;
-  justify-content: space-between;
+#assignmentDetails{
+  text-align: left;
 }
 
-#grade-box {
-  padding: 10px 15px;
-  margin-top: 15px;
-  font-weight: 600;
-  border: 1px solid gray;
-  background-color: white;
-  margin-bottom: 30px;
-}
-
-#grade {
-  font-size: 2em;
-  width: 60px;
-  height: 60px;
-  padding: 2px;
-  border: none;
-}
-
-#grade::-webkit-input-placeholder {
-    font-size: 10px;
-}
-
-span#out-of-text {
-  margin: 0 10px;
-  color: gray;
-}
-
-span#total-grade {
-  font-size: 2.8em;
-  color: gray;
-}
+/* #F7F7F7 */
 
 /*===================Spinner loading icon=======================*/
 #spinner_icon{
