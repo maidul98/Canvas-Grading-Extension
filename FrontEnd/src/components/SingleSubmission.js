@@ -1,20 +1,17 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
-class SingleSubmission extends Component{
-    state = {
-        id: null, //assignment ID from Canvas
-    };
-    
-    
+class SingleSubmission extends Component{    
     render(){
+        console.log('poop')
+        console.log(this.props)
         return(
             <div>
                 <div className="assignment">
                     <div className="student-name">
-                    <Link to={"/assignments/"+this.props['assignment_id']+"/"+this.props['student_id']}>
-                        {this.props.submissionDetails['name']}
-                    </Link>
+                        <Link to={"/assignments/"+this.props['submissionDetails']['assignment_id']+"/"+this.props['submissionDetails']['id']}>
+                            {this.props.submissionDetails['name']}
+                        </Link>
                     </div>
                     <div className="grade-status">
                         <div className="grade-icon"></div>

@@ -428,6 +428,10 @@ ul#download-files {
   text-align: left;
 }
 
+#alert-detail-submit-error {
+  margin-top: 10px;
+}
+
 /* #F7F7F7 */
 
 /*===================Spinner loading icon=======================*/
