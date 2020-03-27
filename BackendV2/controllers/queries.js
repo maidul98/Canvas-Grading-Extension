@@ -257,7 +257,7 @@ module.exports = {
    * @param {*} grader_id
    */
   get_grading_progress_for_every_grader: function (req, res) {
-    let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id IS NOT NULL";
+    let sql_query = "SELECT submission.id, grader_id, assignment_id, is_graded, offset, weight, total_graded FROM submission JOIN grader ON submission.grader_id = grader.id WHERE assignment_id=? AND grader_id IS NOT NULL";
     db.query(sql_query, [req.query.assigment_id], (err, results) => {
       if (err) {
         res.status(406).send({
@@ -265,15 +265,14 @@ module.exports = {
           message: "Something went wrong"
         });
       } else {
-        var graders = [];
-        var progress = [];
+        let graders = {};
+        let progress = [];
         results.forEach((submission) => {
-          if (!(graders.includes(submission.grader_id))) {
-            graders.push(submission.grader_id);
+          if (!(submission.grader_id in graders)) {
+            graders[submission.grader_id] = [submission.weight, submission.offset];
           }
         });
-
-        graders.forEach((grader) => {
+        Object.keys(graders).forEach((grader) => {
           let grader_total = 0;
           let grader_completed = 0;
           results.forEach((submission) => {
@@ -284,10 +283,8 @@ module.exports = {
               }
             }
           })
-
-          progress.push({"grader": grader, "progress": {"total": grader_total, "completed": grader_completed}})
+          progress.push({"grader": grader[0], "global": {"weight": graders[grader][0], "offset": graders[grader][1]}, "progress": {"total": grader_total, "completed": grader_completed}})
         })
-
         res.json(progress);
       }
     });
