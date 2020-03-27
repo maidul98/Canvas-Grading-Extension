@@ -71,11 +71,6 @@ export default function Dashboard(){
         formatResult: []
     });
 
-    const handleChange = (event) => {
-        setWeights({...weights, [event.target.id] : event.target.value})
-        console.log(weights);
-    }
-
     const submitWeights = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
