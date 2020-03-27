@@ -159,11 +159,11 @@ module.exports = {
     })
   },
 
-/**
- * This function takes in grader_id and assigment_id and returns the list of submissions that are assigned for that grader
- * @param {*} user_id 
- * @param {*} assigment_id 
- **/
+  /**
+  * This function takes in grader_id and assigment_id and returns the list of submissions that are assigned for that grader
+  * @param {*} user_id 
+  * @param {*} assigment_id 
+  */
   get_assigned_submission_for_assigment: function (req, res) {
     let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
     db.query(
@@ -178,6 +178,9 @@ module.exports = {
     );
   },
 
+  /**
+   * This function returns the list of unassigned submissions
+   */
   get_unassigned_submissions: function (_, res, _) {
     let sql_query = "SELECT * FROM submission WHERE grader_id IS NULL";
     db.query(sql_query, (err, results) => {
@@ -187,7 +190,66 @@ module.exports = {
         res.json(results);
       }
     });
+  },
+
+  /**
+   * This function returns the list of all graders
+   */
+  get_grader_table: function (_, res, _) {
+    let sql_query = "SELECT * FROM grader";
+    db.query(sql_query, (err, results) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(results);
+      }
+    });
+  },
+
+  /**
+   * This function takes in a grader_id and updates the weight for that grader
+   * @param {*} grader_id
+   * @param {*} weight 
+   */
+  update_grader_weight: function (req, res) {
+    let sql_query = "UPDATE grader SET weight=? WHERE id=?";
+    db.query(sql_query, [req.body.weight, req.body.grader_id], (err) => {
+        if (err) {
+          res.status(406).send({
+            status: "fail",
+            message: "Something went wrong"
+          });
+        } else {
+          res.send("success");
+        }
+      }
+    );
+  },
+
+  /**
+   * This function gets the progress for a given assignment_id
+   * @param {*} assigment_id
+   */
+  get_grading_progress: function (req, res) {
+    let sql_query = "SELECT * FROM submission WHERE assignment_id=?";
+    db.query(sql_query, [req.query.assigment_id], (err, results) => {
+      if (err) {
+        res.status(406).send({
+          status: "fail",
+          message: "Something went wrong"
+        });
+      } else {
+        let total = results.length;
+        let completed = 0;
+        results.forEach((submission) => {
+          if (submission.is_graded == 1) {
+            completed += 1};
+        });
+        res.json({"out of": total, "graded": completed});
+      }
+    });
   }
+
 
 
   // TO DO:
@@ -200,8 +262,8 @@ module.exports = {
 
 }
 
-/** Gets the submission table */
-exports.get_submission_table = createQueryFunction("submission");
+// /** Gets the submission table */
+// exports.get_submission_table = createQueryFunction("submission");
 
-/** Gets the assignment table */
-exports.get_assignment_table = createQueryFunction("assignment");
+// /** Gets the assignment table */
+// exports.get_assignment_table = createQueryFunction("assignment");
