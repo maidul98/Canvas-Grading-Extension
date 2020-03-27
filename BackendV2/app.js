@@ -25,12 +25,7 @@ app.use('/', indexRouter);
 
 //app.use('/users', usersRouter);
 //example use of getting grader objects
-let a;
-queries.get_grader_objects(function (result) {
-    a = result;
-    console.log(a)
-})
-console.log(a)
+queries.get_grader_objects().then(result => console.log(result))
 //a[0].offset = 5
 // queries.update_grader_entries(a, function (err) {
 //     if (err) {

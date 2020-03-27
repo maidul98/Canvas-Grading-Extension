@@ -284,7 +284,7 @@ module.exports = {
               }
             }
           })
-          progress.push({"grader": grader[0], "global": {"weight": graders[grader][0], "offset": graders[grader][1]}, "progress": {"total": grader_total, "completed": grader_completed}})
+          progress.push({ "grader": grader[0], "global": { "weight": graders[grader][0], "offset": graders[grader][1] }, "progress": { "total": grader_total, "completed": grader_completed } })
         })
         res.json(progress);
       }
@@ -298,25 +298,29 @@ module.exports = {
    * AssignmentGrader instances for each of those graders with their respective
    * id, current weight and offset, and the curr_assigned initialized to 0. 
    * 
-   * @param {*} callback A standard callback function 
+   * @returns A new Promise object
    */
-  get_grader_objects: function (callback) {
-    let sql_query = "SELECT * FROM grader"
-    db.query(sql_query, (err, results) => {
-      if (err) {
-        console.log(err)
-        callback(null)
-      } else {
-        grader_array = []
-        results.forEach(grader => {
-          let id = grader.id
-          let offset = grader.offset
-          let weight = grader.weight
-          let graderObj = new AssignmentGrader(id, weight, offset, 0)
-          grader_array.push(graderObj)
-        })
-        callback(grader_array)
-      }
+  get_grader_objects: function () {
+    return new Promise(function (resolve, reject) {
+
+      let sql_query = "SELECT * FROM grader"
+      db.query(sql_query, (err, results) => {
+        if (err) {
+          console.log(err)
+          return reject(err)
+        } else {
+          grader_array = []
+          results.forEach(grader => {
+            let id = grader.id
+            let offset = grader.offset
+            let weight = grader.weight
+            let graderObj = new AssignmentGrader(id, weight, offset, 0)
+            grader_array.push(graderObj)
+          })
+          resolve(grader_array)
+        }
+      })
+
     })
   },
 
