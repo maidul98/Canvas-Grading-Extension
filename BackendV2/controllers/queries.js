@@ -4,7 +4,7 @@
  * MySQL database. 
  */
 var mysql = require('mysql');
-
+var AssignmentGrader = require('../distribution-algorithm/grader-model');
 /** Configure Heroku Connection */
 /** TODO: Store all these constants in a separate file, gitignore it and figure 
  * out deployment mechanism - where will these pins be stored? That is a later 
@@ -155,7 +155,7 @@ module.exports = {
       let total_graded = 0;
       let weight = -1;
       let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
-  
+
       insertSingleGrader(id, grader_name, offset, role, total_graded, weight, last_updated);
     })
   },
@@ -168,11 +168,11 @@ module.exports = {
   get_assigned_submission_for_assigment: function (req, res) {
     let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
     db.query(
-      sql_query,[req.query.assigment_id, req.query.user_id], 
+      sql_query, [req.query.assigment_id, req.query.user_id],
       function (err, results) {
         if (err) {
           console.log(err);
-        }else{
+        } else {
           res.json(results);
         }
       }
@@ -215,15 +215,15 @@ module.exports = {
   update_grader_weight: function (req, res) {
     let sql_query = "UPDATE grader SET weight=? WHERE id=?";
     db.query(sql_query, [req.body.weight, req.body.grader_id], (err) => {
-        if (err) {
-          res.status(406).send({
-            status: "fail",
-            message: "Something went wrong"
-          });
-        } else {
-          res.send("success");
-        }
+      if (err) {
+        res.status(406).send({
+          status: "fail",
+          message: "Something went wrong"
+        });
+      } else {
+        res.send("success");
       }
+    }
     );
   },
 
@@ -244,18 +244,19 @@ module.exports = {
         let completed = 0;
         results.forEach((submission) => {
           if (submission.is_graded == 1) {
-            completed += 1};
+            completed += 1
+          };
         });
-        res.json({"out of": total, "graded": completed});
+        res.json({ "out of": total, "graded": completed });
       }
     });
   },
 
-    /**
-   * This function gets the grading progress for each grader given assignment_id
-   * @param {*} assigment_id
-   * @param {*} grader_id
-   */
+  /**
+ * This function gets the grading progress for each grader given assignment_id
+ * @param {*} assigment_id
+ * @param {*} grader_id
+ */
   get_grading_progress_for_every_grader: function (req, res) {
     let sql_query = "SELECT submission.id, grader_id, assignment_id, is_graded, offset, weight, total_graded FROM submission JOIN grader ON submission.grader_id = grader.id WHERE assignment_id=? AND grader_id IS NOT NULL";
     db.query(sql_query, [req.query.assigment_id], (err, results) => {
@@ -288,7 +289,28 @@ module.exports = {
         res.json(progress);
       }
     });
+  },
+
+  get_grader_objects: function (callback) {
+    let sql_query = "SELECT * FROM grader"
+    db.query(sql_query, (err, results) => {
+      if (err) {
+        console.log(err)
+      } else {
+        grader_array = []
+        results.forEach(grader => {
+          let id = grader.id
+          let offset = grader.offset
+          let weight = grader.weight
+          let graderObj = new AssignmentGrader(id, weight, offset, 0)
+          grader_array.push(graderObj)
+        })
+        console.log(grader_array)
+        return callback(grader_array)
+      }
+    })
   }
+
 
 
 
