@@ -178,6 +178,7 @@ exports.grade_batch_submissions = function (req, res) {
   axios
     .post(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), headerData)
     .then(result => {
+      console.log(result);
       res.send({ status: "success", data: result.data })
     })
     .catch(err => {

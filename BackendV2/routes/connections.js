@@ -58,5 +58,4 @@ router.get('/get-grading-progress-for-every-grader', queries.get_grading_progres
 
 /** Downloads a specific user's submission for a specific assignment */
 router.get('/download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
-
 module.exports = router;
