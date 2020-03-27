@@ -10,6 +10,51 @@ import FormControl from 'react-bootstrap/FormControl'
 
 export default function Dashboard(){
     const [assignments, setAssignments] = useState([]);
+    const [changed, setChanged] = useState(false);
+    const [graders, setGraders] = useState([]);
+    const [gradersData, setGradersData] = useState([]);
+    /* weights obj:
+    {
+        grader_id: weight
+        123: 2,
+    }
+    */
+    const [weights, setWeights] = useState([]);
+    const [weightSubmitStatus, setWeightSubmitStatus] = useState([]);
+    const [fetchGradersStatus, setFetchGradersStatus] = useState([]);
+
+    const fetchGraders = useRequest(url => url, {
+        manual: true,
+        onSuccess: (result, params) => {
+            if(result.length==0){
+                setFetchGradersStatus([{type:"primary", message:"There are no graders yet"}]);
+            }
+            else{
+                setGraders(result.sort());
+            }
+        },
+        onError: (error, params) => {
+            setFetchGradersStatus([{type:"warning", message:"Something went wrong while fetching graders, please try refreshing the page."}])
+            console.log(error);
+        },
+        formatResult: []
+    })
+
+    /*need the routes for fetching graders' missed assignments and progress*/
+    const fetchGradersData = useRequest(url => url, {
+        manual: true,
+        onSuccess: (result, params) => {
+            if(result.length==0){
+                setFetchGradersStatus([{type:"primary", message:"There are no graders yet"}]);
+            }
+            setGradersData(result)
+        },
+        onError: (error, params) => {
+            setFetchGradersStatus([{type:"warning", message:"Something went wrong while fetching graders, please try refreshing the page."}])
+            console.log(error);
+        },
+        formatResult: []
+    })
     const fetchAssignments = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
@@ -26,12 +71,46 @@ export default function Dashboard(){
         formatResult: []
     });
 
+    const handleChange = (event) => {
+        setWeights({...weights, [event.target.id] : event.target.value})
+        console.log(weights);
+    }
+
+    const submitWeights = useRequest(url => url, {
+        manual: true,
+        onSuccess: (result, params) => {
+            setWeightSubmitStatus({type:"success", message:"Weights updated successfully"});
+            setChanged(false);
+        },
+        onError: (error, params) => {
+            setWeightSubmitStatus({type:"warning", message:"Something went wrong, please try again"})
+        }
+    })
+
+    /* need routes for submitting weights */     
+    const submit = () =>{
+        /*submitWeights.run({
+            url: "",
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(weights),
+        })*/
+    }
+
     useEffect(()=>{
         fetchAssignments.run('/get-published-assignments')
     },[]);
 
+    useEffect(()=>{
+        fetchGraders.run('/get-graders')
+    }, [])
+
+    if(submitWeights.loading | fetchAssignments.loading | fetchGraders.loading) return <LoadingIcon />
+
     return (
         <div className="container">
+            {weightSubmitStatus.map(status=><Alert variant={status.type}>{status.message}</Alert>)}
+            {fetchGradersStatus.map(status=><Alert variant={status.type}>{status.message}</Alert>)}
             <Table bordered hover  id="dashboardTable">
                 <thead>
                     <tr>
@@ -40,18 +119,24 @@ export default function Dashboard(){
                     <th>Missed</th>
                     <th>
                         <select id="selectAssignments">
-                            <option value="volvo">Progres for Homework 1</option>
-                            <option value="saab">Saab</option>
-                            <option value="mercedes">Mercedes</option>
-                            <option value="audi">Audi</option>
+                            {assignments.map(assignment=><option value={assignment.id}>Progress for {assignment.name}</option>)}
                         </select>
                     </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    {graders.map(grader=>
+                        <tr key={grader.user.id}>
+                            <td>{grader.user.name}</td>
+                            <td className="width-10"><FormControl placeholder="Enter" type="number" id={grader.user.id} onChange={event=>setWeights({...weights, [event.target.id] : event.target.value})}></FormControl></td>
+                            <td className="width-10">4</td>
+                            <td>
+                            <ProgressBar now={30} label={`${30}%`} />
+                        </td>
+                        </tr>)}
+                    {/* <tr>
                         <td>Maidul Islam</td>
-                        <td className="width-10"><FormControl placeholder="Enter" /></td>
+                        <td className="width-10"><FormControl placeholder="Enter" type="number" onChange={event=>setChanged(true)}/></td>
                         <td className="width-10">4</td>
                         <td>
                             <ProgressBar now={30} label={`${30}%`} />
@@ -59,14 +144,15 @@ export default function Dashboard(){
                     </tr>
                     <tr>
                         <td>Maidul Islam</td>
-                        <td className="width-10"><FormControl placeholder="Enter" /></td>
+                        <td className="width-10"><FormControl placeholder="Enter" type="number" onChange={event=>setChanged(true)}/></td>
                         <td className="width-10">4</td>
                         <td>
                             <ProgressBar now={30} label={`${30}%`} />
                         </td>
-                    </tr>
+                    </tr> */}
                 </tbody>
             </Table>
+            <Button onClick={submit} className={changed?"visible":"invisible"}>Save</Button>
         </div>
     )
 }
