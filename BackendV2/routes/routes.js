@@ -63,8 +63,10 @@ router.get('/get-grading-progress-for-every-grader', queries.get_grading_progres
 /** Downloads a specific user's submission for a specific assignment */
 router.get('/download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
 
-/** Downloads a specific user's submission for a specific assignment */
-router.post('/canvas-api', apiCalls.canvas_API_call);
+
+router.post('/canvas-api', apiCalls.GETcanvas_API_call);
+
+router.put('/canvas-api', apiCalls.PUTcanvas_API_call);
 
 
 module.exports = router;

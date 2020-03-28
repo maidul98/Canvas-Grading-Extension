@@ -11,9 +11,8 @@ export default function DetailedAssignmentView(props){
   const [downloads, setDownloads] = useState([])
   const [comments, setComments] = useState('')
   const [user, setUser] = useState([])
+  const [grade, setGrade] = useState(null)
   const [alerts, setAlert] = useState([]);
-
-  console.log(props.match.params)
 
   const submitGrades = useRequest(url => url, {
       manual: true,
@@ -21,7 +20,7 @@ export default function DetailedAssignmentView(props){
         setAlert([...alerts,{type:"success", message:"Your feedback has been submitted successfully"}])
       },
       onError: (error, params) => {
-        setAlert(...alerts,{type:"warning", message:"Something went wrong, your feedback ws not submitted, please try again in 40 seconds"})
+        setAlert([...alerts,{type:"warning", message:"Something went wrong, your feedback ws not submitted, please try again in 40 seconds"}])
       }
   });
 
@@ -31,11 +30,11 @@ export default function DetailedAssignmentView(props){
       let latest_comment = result['submission_comments'][result['submission_comments'].length-1]['comment']
       let attachment = result['attachments']
       let user = result['user']
-      console.log(result)
       setSubmission(result)
       setDownloads(attachment?attachment:[])
       setComments(latest_comment?latest_comment:[])
       setUser(user?user:[])
+      setGrade(result['score'])
     },
     onError: (error, params) => {
       setAlert([...alerts, {type:"warning", message:"Something went wrong, when fetching this page"}])
@@ -54,10 +53,14 @@ export default function DetailedAssignmentView(props){
   function handleSubmit(){
     submitGrades.run(
       {
-          url: '/upload-submission-grades/assignments/'+props.match.params.assignment_id+'/submissions/:user_id',
-          method: 'post',
+          url: `/upload-submission-grades/assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}`,
+          method: 'put',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
+          body: {
+            "comment": comments,
+            "assigned_grade": grade,
+            "is_group_comment": false,
+          },
       }
     )
   }
@@ -82,13 +85,13 @@ export default function DetailedAssignmentView(props){
           <div className="col-10">
             <div className="float-right" id="detiledAssignmentGrade">
               <span>Grade out of 100</span>
-              <input value={submission['score']} type="text"/>
+              <input value={grade || ""} onChange={event => setGrade(event.target.value)} type="text"/>
             </div>
-            <textarea id="detiledAssignmentComment" placeholder="Enter your text feedback here" value={comments} cols="30" rows="10">heheh</textarea>
+            <textarea id="detiledAssignmentComment" placeholder="Enter your text feedback here" value={comments || ""} onChange={event => setComments(event.target.value)} cols="30" rows="10">heheh</textarea>
             {alerts.map((obj) =><Alert variant={obj['type']} id="alert-detail-submit-error" dismissible onClose={(p1, event) => removeAlert(event,alerts, setAlert )}>{obj['message']}</Alert>)}
           </div>
         </div>
-        <Button className="float-right" id="gradeSubmitBtn" variant="primary">Submit feedback</Button>
+        <Button className="float-right" id="gradeSubmitBtn" onClick={handleSubmit} variant="primary">Submit feedback</Button>
         <div className="clearfix"></div>
     </div>
   )

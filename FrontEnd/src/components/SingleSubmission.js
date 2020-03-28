@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useRequest } from '@umijs/hooks';
 
 export default function SingleSubmission({submissionDetails}){ 
-    console.log(submissionDetails)
     return(
         <div>
             <div className="assignment">

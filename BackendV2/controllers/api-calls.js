@@ -129,7 +129,9 @@ exports.get_all_graders = function (_, res) {
     })
     .catch(err => res.send(err));
 };
-
+/**
+ * 
+ */
 exports.grade_single_submission = function (req, res) {
 
   let formData = {
@@ -145,7 +147,7 @@ exports.grade_single_submission = function (req, res) {
     }
   };
   axios
-    .put(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}`, qs.stringify(formData), headerData)
+    .put(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}`,qs.stringify(formData), headerData)
     .then(r => {
       res.send('done');
     })
@@ -201,9 +203,23 @@ exports.grade_batch_submissions = function (req, res) {
  * Takes in a API call for Canvas API and returns the result
  * Input: body['endpoint]
  */
-exports.canvas_API_call = function(req, res){
+exports.GETcanvas_API_call = function(req, res){
   axios
     .get(`https://canvas.cornell.edu/api/v1/courses/15037/${req.body['endpoint']}`, config)
+    .then(result => {
+      const submissionsJSONArray = result.data;
+      return res.json(submissionsJSONArray);
+    })
+    .catch(error => {
+      console.log(error)
+      res.status(406)
+        .send({ status: "fail", data: error });
+    });
+}
+
+exports.PUTcanvas_API_call = function(req, res){
+  axios
+    .put(`https://canvas.cornell.edu/api/v1/courses/15037/${req.body['endpoint']}`, config)
     .then(result => {
       const submissionsJSONArray = result.data;
       return res.json(submissionsJSONArray);
