@@ -13,6 +13,8 @@ export default function DetailedAssignmentView(props){
   const [user, setUser] = useState([])
   const [alerts, setAlert] = useState([]);
 
+  console.log(props.match.params)
+
   const submitGrades = useRequest(url => url, {
       manual: true,
       onSuccess: (result, params) => {
@@ -26,11 +28,14 @@ export default function DetailedAssignmentView(props){
   const fetchSubmission = useRequest(url => url, {
     manual: true,
     onSuccess: (result, params) => {
+      let latest_comment = result['submission_comments'][result['submission_comments'].length-1]['comment']
+      let attachment = result['attachments']
+      let user = result['user']
       console.log(result)
       setSubmission(result)
-      setDownloads(result['attachments'])
-      setComments(result['submission_comments'][result['submission_comments'].length-1]['comment'])
-      setUser(result['user'])
+      setDownloads(attachment?attachment:[])
+      setComments(latest_comment?latest_comment:[])
+      setUser(user?user:[])
     },
     onError: (error, params) => {
       setAlert([...alerts, {type:"warning", message:"Something went wrong, when fetching this page"}])
@@ -41,7 +46,7 @@ export default function DetailedAssignmentView(props){
     fetchSubmission.run({
       url:"/canvas-api", 
       method:"post", 
-      data:{endpoint:`assignments/93965/submissions/22778?include[]=user&include[]=submission_comments`}
+      data:{endpoint:`assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}?include[]=user&include[]=submission_comments`}
     })
   }, [])
 
