@@ -9,6 +9,7 @@ var router = express.Router();
 var apiCalls = require('../controllers/api-calls');
 var queries = require('../controllers/queries');
 
+
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', { title: 'Express' });
@@ -28,6 +29,9 @@ router.get('/get-published-assignments', apiCalls.get_published_assignments);
 
 /** Get assignments for specific submission */
 router.get('/get-submissions/:assignment_id', apiCalls.get_submissions_for_assignment);
+
+/** Get single submission */
+router.get('/single-submission/:assignment_id/submissions/:user_id', apiCalls.get_single_submission);
 
 /** Get all graders for enrolled on Canvas */
 router.get('/get-graders', apiCalls.get_all_graders);
@@ -58,4 +62,9 @@ router.get('/get-grading-progress-for-every-grader', queries.get_grading_progres
 
 /** Downloads a specific user's submission for a specific assignment */
 router.get('/download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
+
+/** Downloads a specific user's submission for a specific assignment */
+router.post('/canvas-api', apiCalls.canvas_API_call);
+
+
 module.exports = router;

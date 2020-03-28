@@ -102,19 +102,6 @@ function assignGraderToSubmission(grader_id, submission_id) {
 };
 
 module.exports = {
-
-  // insertPublishedassignment: function (json_string) {
-  //   let assignment = json_string;
-  //   assignment.forEach(e => {
-  //     let id = e.id;
-  //     let name = e.name;
-  //     let due_date = e.due_at;
-  //     let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
-  //     let points_possible = e.points_possible
-  //     insertSingleAssignment(id, name, due_date, last_updated, points_possible);
-  //   });
-  // },
-
   insertAllSubmission: function (json_string) {
     json_string.forEach(e => {
       let id = e.id;

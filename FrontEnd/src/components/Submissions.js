@@ -5,6 +5,7 @@ import Alert from 'react-bootstrap/Alert';
 import LoadingIcon from './LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import { useRequest } from '@umijs/hooks';
+import {removeAlert} from '../Functions.js'
 
 export default function Submissions(props){
     const [submissions, setSubmissions] = useState([]);
@@ -66,19 +67,11 @@ export default function Submissions(props){
         )
     }
 
-    function fun1(jsj, event){
-        let temp = [...submissionsError]
-        let index = event.target.parentNode.parentNode.getAttribute('data-index')
-        temp.splice(index,1)
-        SetSubmissionError(temp)
-        // console.log(submissionsError)
-    }
-
     if(submitGrades.loading | fetchSubmissions.loading) return <LoadingIcon />
 
     return (
         <div>
-            {submissionsError.map((obj, index) =><Alert  data-index={index} onClose={fun1} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
+            {submissionsError.map((obj, index) =><Alert  data-index={index} onClose={(p1, event) => removeAlert(event,submissionsError, SetSubmissionError )} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
             {submissions.map(res => 
                 <div key={'container-'+res.id}>
                     {
@@ -88,7 +81,7 @@ export default function Submissions(props){
                     }
                 </div>)
             }
-            {gradeSubmitStatus.map((obj) =><Alert onClose={() => fun1} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
+            {gradeSubmitStatus.map((obj) =><Alert onClose={(p1, event) => removeAlert(event,gradeSubmitStatus, SetGradeSubmitStatus )} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
             <Button onClick={submitForms} className={props.bulk_edit?"visible":"invisible"}>Submit feedback for all students</Button>
         </div>
     );

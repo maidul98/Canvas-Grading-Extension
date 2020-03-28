@@ -5,8 +5,10 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var logger = require('morgan');
 var queries = require('./controllers/queries');
-var indexRouter = require('./routes/connections');
+var indexRouter = require('./routes/routes');
 //var usersRouter = require('./routes/users');
+//Middleware
+// var {canvasAPIRequest} = require('./middleware/middleware.js');
 
 var app = express();
 
@@ -23,16 +25,8 @@ app.use(bodyParser.json());
 
 app.use('/', indexRouter);
 
-//app.use('/users', usersRouter);
-//example use of getting grader objects
 queries.get_grader_objects().then(result => console.log(result))
-//a[0].offset = 5
-// queries.update_grader_entries(a, function (err) {
-//     if (err) {
-//         console.log(err)
-//     }
-// })
-// catch 404 and forward to error handler
+
 app.use(function (req, res, next) {
     next(createError(404));
 });
