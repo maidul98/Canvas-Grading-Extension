@@ -53,7 +53,7 @@ export default function DetailedAssignmentView(props){
   function handleSubmit(){
     submitGrades.run(
       {
-          url: `/upload-submission-grades/assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}`,
+          url: `/canvas-api`,
           method: 'put',
           headers: { 'Content-Type': 'application/json' },
           body: {

@@ -74,6 +74,7 @@ export default function Submissions(props){
             {submissionsError.map((obj, index) =><Alert  data-index={index} onClose={(p1, event) => removeAlert(event,submissionsError, SetSubmissionError )} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
             {submissions.map(res => 
                 <div key={'container-'+res.id}>
+                    {console.log(res)}
                     {
                     (props.bulk_edit)
                     ?<QuickEditSubmission key={'form-'+res.id} id={res.id} submissionDetails={res} onChange={handleFormChange}/>

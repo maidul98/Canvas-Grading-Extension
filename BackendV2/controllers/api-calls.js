@@ -218,15 +218,16 @@ exports.GETcanvas_API_call = function(req, res){
 }
 
 exports.PUTcanvas_API_call = function(req, res){
-  axios
-    .put(`https://canvas.cornell.edu/api/v1/courses/15037/${req.body['endpoint']}`, config)
-    .then(result => {
-      const submissionsJSONArray = result.data;
-      return res.json(submissionsJSONArray);
-    })
-    .catch(error => {
-      console.log(error)
-      res.status(406)
-        .send({ status: "fail", data: error });
-    });
+  
+  // axios
+  //   .put(`https://canvas.cornell.edu/api/v1/courses/15037/${req.body['endpoint']}`, config)
+  //   .then(result => {
+  //     const submissionsJSONArray = result.data;
+  //     return res.json(submissionsJSONArray);
+  //   })
+  //   .catch(error => {
+  //     console.log(error)
+  //     res.status(406)
+  //       .send({ status: "fail", data: error });
+  //   });
 }
