@@ -6,7 +6,7 @@
 var mysql = require('mysql');
 var AssignmentGrader = require('../distribution-algorithm/grader-model');
 var async = require('async')
-import { distribute } from '../distribution-algorithm/distribution.js'
+import { runPipeline } from '../distribution-algorithm/pipeline.js'
 /** Configure Heroku Connection */
 /** TODO: Store all these constants in a separate file, gitignore it and figure 
  * out deployment mechanism - where will these pins be stored? That is a later 
@@ -33,7 +33,7 @@ setInterval(function () {
  */
 function createQueryFunction(tableName) {
   return function (_, res, _) {
-    var a1 = "SELECT * FROM `" + tableName + "`";
+    var a1 = "SELECT * FROM " + tableName;
     db.query(a1, (err, result) => {
       if (err) {
         console.log(err);
@@ -88,7 +88,6 @@ function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_up
   });
 };
 
-
 function formMatchingMatrix(grader_array, submissions_array) {
   //need to require('./grader-model'); ???
   const len = submissions_array.length;
@@ -99,6 +98,7 @@ function formMatchingMatrix(grader_array, submissions_array) {
   }
 
   var matrix = new Array(len).fill(0).map(() => new Array(2).fill(0));
+  shuffle(submissions_array);
 
   var counter = 0;
   for (var j = 0; j < grader_array.length; j++) {
@@ -110,15 +110,11 @@ function formMatchingMatrix(grader_array, submissions_array) {
     counter += num_assigned;
   }
 
-  shuffle(submissions_array); //need to import shuffle function 
-
   for (var i = 0; i < len; i++)
     matrix[i][1] = submissions_array[i];
 
   return matrix;
 }
-
-
 
 /**
  * A function that updates the grader for a submission
@@ -394,24 +390,7 @@ module.exports = {
     })
   },
 
-  distribution_pipeline: function () {
-    this.get_grader_objects()
-      .then(grader_array => {
-        this.get_unassigned_submissions()
-          .then(submission_json => {
-            return submission_json.map(v => v.id)
-          })
-          .then(mapped => {
-            output_of_algo = distribute(mapped.length, grader_array);
-            matrix_of_pairs = form_matrix(mapped, output_of_algo);
-
-            //update submissions DB with matrix_of_pairs 
-            //update graders offsest with output_of_algo
-
-
-          })
-      })
-  }
+  distribution_pipeline: runPipeline
   // TO DO:
   // update grade in submission
   // 
