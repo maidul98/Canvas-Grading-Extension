@@ -39,7 +39,7 @@ function shuffle(a) {
  * @param {int} num_of_submissions: Total number of assignments that need to be distributed
  * @param {Array} graders: A 2D-array containing [graders id, weight, offset]
  */
-function distribute(num_of_submissions, graders) {
+export function distribute(num_of_submissions, graders) {
 
   if (num_of_submissions <= 0) {
     console.log("There are currently no assignments to distribute.");

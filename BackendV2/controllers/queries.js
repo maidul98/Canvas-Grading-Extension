@@ -6,6 +6,7 @@
 var mysql = require('mysql');
 var AssignmentGrader = require('../distribution-algorithm/grader-model');
 var async = require('async')
+import { distribute } from '../distribution-algorithm/distribution.js'
 /** Configure Heroku Connection */
 /** TODO: Store all these constants in a separate file, gitignore it and figure 
  * out deployment mechanism - where will these pins be stored? That is a later 
@@ -87,7 +88,9 @@ function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_up
   });
 };
 
+function formMatchingMatrix(grader_array, submissions_array) {
 
+}
 /**
  * A function that updates the grader for a submission
  * @param {int} grader_id - A unique id for a grader
@@ -170,7 +173,7 @@ module.exports = {
   /**
    * This function returns the list of unassigned submissions
    */
-  get_unassigned_submissions: function (_, res, _) {
+  get_unassigned_submissions: function () {
     return new Promise((resolve, reject) => {
       let sql_query = "SELECT * FROM submission WHERE grader_id IS NULL";
       db.query(sql_query, (err, results) => {
@@ -178,7 +181,7 @@ module.exports = {
           console.log(err);
           reject(err)
         } else {
-          res.json(results);
+          //res.json(results);
           return resolve(results)
         }
       });
@@ -317,6 +320,7 @@ module.exports = {
     })
   },
 
+  //TOOD: Refactor the 2 functions into one function. 
   update_grader_entries: function (grader_array, callback) {
     async.forEachOf(grader_array, function (grader, _, inner_callback) {
       let sql_query = "UPDATE grader SET offset=? WHERE id=?"
@@ -359,19 +363,31 @@ module.exports = {
         callback(null)
       }
     })
+  },
+
+  distribution_pipeline: function () {
+    this.get_grader_objects()
+      .then(grader_array => {
+        this.get_unassigned_submissions()
+          .then(submission_json => {
+            return submission_json.map(v => v.id)
+          })
+          .then(mapped => {
+            output_of_algo = distribute(mapped.length, grader_array);
+            matrix_of_pairs = form_matrix(mapped, output_of_algo);
+
+            //update submissions DB with matrix_of_pairs 
+            //update graders offsest with output_of_algo
+
+
+          })
+      })
   }
-
-
-
-
-
-
   // TO DO:
   // update grade in submission
   // 
   // 
   // get data for submssion given submission ID
   // 
-
-
 }
+

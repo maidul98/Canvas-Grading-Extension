@@ -27,13 +27,6 @@ app.use('/', indexRouter);
 
 //app.use('/users', usersRouter);
 //example use of getting grader objects
-
-matrix = [[400, 104]]
-queries.assign_submissions_to_grader(matrix, function (err) {
-    if (err) {
-        console.log(err)
-    }
-})
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));
