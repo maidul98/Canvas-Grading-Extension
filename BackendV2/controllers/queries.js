@@ -314,7 +314,6 @@ module.exports = {
 
   update_grader_entries: function (grader_array, callback) {
     async.forEachOf(grader_array, function (grader, _, inner_callback) {
-      console.log('async call entered')
       let sql_query = "UPDATE grader SET offset=? WHERE id=?"
       db.query(sql_query, [grader.offset, grader.grader_id], (err, results) => {
         if (err) {
@@ -322,7 +321,6 @@ module.exports = {
           inner_callback(err)
           callback(err)
         } else {
-          console.log('updated')
           inner_callback(null)
         }
       });
