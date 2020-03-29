@@ -5,7 +5,7 @@ import Alert from 'react-bootstrap/Alert';
 import LoadingIcon from './LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import { useRequest } from '@umijs/hooks';
-import {removeAlert} from '../Functions.js'
+import {removeAlert} from '../Functions.js';
 
 export default function Submissions(props){
     const [submissions, setSubmissions] = useState([]);

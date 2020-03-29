@@ -350,6 +350,12 @@ h1{
   cursor: pointer;
 }
 
+#login-btn {
+  color: white;
+  font-size: 1.3em;
+  line-height: 50px;
+}
+
 /**
 ========== (Assignments) ===========
 **/
