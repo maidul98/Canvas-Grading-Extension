@@ -5,6 +5,7 @@
  */
 var mysql = require('mysql');
 var AssignmentGrader = require('../distribution-algorithm/grader-model');
+var async = require('async')
 /** Configure Heroku Connection */
 /** TODO: Store all these constants in a separate file, gitignore it and figure 
  * out deployment mechanism - where will these pins be stored? That is a later 
