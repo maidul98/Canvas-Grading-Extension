@@ -29,14 +29,13 @@ app.use('/', indexRouter);
 //example use of getting grader objects
 let a;
 queries.get_grader_objects().then(result => {
-    console.log(result)
-    result[0].offset = 5;
-    queries.update_grader_entries(result, function (err) {
-        if (err) {
-            console.log(err)
-        }
-    })
-})
+    result[result.length - 1].offset = 10;
+    return result
+}).then(updated => queries.update_grader_entries(updated, function (err) {
+    if (err) {
+        console.log(err)
+    }
+}))
 // queries.update_grader_entries(a, function (err) {
 //     if (err) {
 //         console.log(err)

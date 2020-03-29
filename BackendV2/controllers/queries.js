@@ -201,7 +201,7 @@ module.exports = {
    * @param {*} weight 
    */
   update_grader_weight: function (req, res) {
-    let sql_query = "UPDATE grader SET weight=? WHERE id=?";
+    let sql_query = "UPDATE grader SET weight = ? WHERE id = ?";
     db.query(sql_query, [req.body.weight, req.body.grader_id], (err) => {
       if (err) {
         res.status(406).send({
@@ -314,13 +314,15 @@ module.exports = {
 
   update_grader_entries: function (grader_array, callback) {
     async.forEachOf(grader_array, function (grader, _, inner_callback) {
+      console.log('async call entered')
       let sql_query = "UPDATE grader SET offset=? WHERE id=?"
-      db.query(sql_query, [grader.offset, grader.id], (err, results) => {
+      db.query(sql_query, [grader.offset, grader.grader_id], (err, results) => {
         if (err) {
           console.log(err)
           inner_callback(err)
           callback(err)
         } else {
+          console.log('updated')
           inner_callback(null)
         }
       });
