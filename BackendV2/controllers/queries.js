@@ -337,6 +337,28 @@ module.exports = {
         callback(null)
       }
     });
+  },
+
+  assign_submissions_to_grader: function (assignment_matrix, callback) {
+    async.forEachOf(assignment_matrix, function (pairing, _, inner_callback) {
+      let sql_query = "UPDATE submission SET grader_id = ? WHERE id = ?"
+      db.query(sql_query, [pairing[0], pairing[1]], (err, results) => {
+        if (err) {
+          console.log(err)
+          inner_callback(err)
+          callback(err)
+        } else {
+          inner_callback(null)
+        }
+      })
+    }, function (err) {
+      if (err) {
+        console.log(err)
+        callback(err)
+      } else {
+        callback(null)
+      }
+    })
   }
 
 

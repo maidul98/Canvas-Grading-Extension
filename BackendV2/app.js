@@ -27,23 +27,14 @@ app.use('/', indexRouter);
 
 //app.use('/users', usersRouter);
 //example use of getting grader objects
-let a;
-queries.get_grader_objects().then(result => {
-    result[result.length - 1].offset = 10;
-    return result
-}).then(updated => queries.update_grader_entries(updated, function (err) {
+
+matrix = [[400, 104]]
+queries.assign_submissions_to_grader(matrix, function (err) {
     if (err) {
         console.log(err)
     }
-}))
-// queries.update_grader_entries(a, function (err) {
-//     if (err) {
-//         console.log(err)
-//     }
-// })
+})
 // catch 404 and forward to error handler
-queries.get_grader_objects().then(result => console.log(result))
-
 app.use(function (req, res, next) {
     next(createError(404));
 });
