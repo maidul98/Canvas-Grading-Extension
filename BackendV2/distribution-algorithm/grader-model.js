@@ -7,7 +7,7 @@
  */
 
 function AssignmentGrader(grader_id, weight, offset, num_assigned) {
-    this.grader_id = grader_id;
+    this.grader_id = grader_id; //int
     this.weight = weight; //int
     this.offset = offset; //int
     this.num_assigned = num_assigned; //int 
