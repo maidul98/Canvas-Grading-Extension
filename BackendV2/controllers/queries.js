@@ -171,14 +171,19 @@ module.exports = {
    * This function returns the list of unassigned submissions
    */
   get_unassigned_submissions: function (_, res, _) {
-    let sql_query = "SELECT * FROM submission WHERE grader_id IS NULL";
-    db.query(sql_query, (err, results) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.json(results);
-      }
-    });
+    return new Promise((resolve, reject) => {
+      let sql_query = "SELECT * FROM submission WHERE grader_id IS NULL";
+      db.query(sql_query, (err, results) => {
+        if (err) {
+          console.log(err);
+          reject(err)
+        } else {
+          res.json(results);
+          return resolve(results)
+        }
+      });
+    })
+
   },
 
   /**
