@@ -5,8 +5,10 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var logger = require('morgan');
 var queries = require('./controllers/queries');
-var indexRouter = require('./routes/connections');
+var indexRouter = require('./routes/routes');
 //var usersRouter = require('./routes/users');
+//Middleware
+// var {canvasAPIRequest} = require('./middleware/middleware.js');
 
 var app = express();
 
@@ -41,6 +43,8 @@ queries.get_grader_objects().then(result => {
 //     }
 // })
 // catch 404 and forward to error handler
+queries.get_grader_objects().then(result => console.log(result))
+
 app.use(function (req, res, next) {
     next(createError(404));
 });

@@ -5,11 +5,12 @@ import Alert from 'react-bootstrap/Alert';
 import LoadingIcon from './LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import { useRequest } from '@umijs/hooks';
+import {removeAlert} from '../Functions.js';
 
 export default function Submissions(props){
     const [submissions, setSubmissions] = useState([]);
     const gradesAndComments = []    
-    const [submissionsError, SetSubmissionError] = useState([])
+    let [submissionsError, SetSubmissionError] = useState([])
     const [gradeSubmitStatus, SetGradeSubmitStatus] = useState([])
     const [show, setShow] = useState(true);
 
@@ -66,17 +67,14 @@ export default function Submissions(props){
         )
     }
 
-    function dismiss(){
-        return false
-    }
-
     if(submitGrades.loading | fetchSubmissions.loading) return <LoadingIcon />
 
     return (
         <div>
-            {submissionsError.map((obj) =><Alert  onClose={() => setShow(false)} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
+            {submissionsError.map((obj, index) =><Alert  data-index={index} onClose={(p1, event) => removeAlert(event,submissionsError, SetSubmissionError )} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
             {submissions.map(res => 
                 <div key={'container-'+res.id}>
+                    {console.log(res)}
                     {
                     (props.bulk_edit)
                     ?<QuickEditSubmission key={'form-'+res.id} id={res.id} submissionDetails={res} onChange={handleFormChange}/>
@@ -84,7 +82,7 @@ export default function Submissions(props){
                     }
                 </div>)
             }
-            {gradeSubmitStatus.map((obj) =><Alert onClose={() => setShow(false)} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
+            {gradeSubmitStatus.map((obj) =><Alert onClose={(p1, event) => removeAlert(event,gradeSubmitStatus, SetGradeSubmitStatus )} show={show} dismissible variant={obj['type']}>{obj['message']}</Alert>)}
             <Button onClick={submitForms} className={props.bulk_edit?"visible":"invisible"}>Submit feedback for all students</Button>
         </div>
     );
