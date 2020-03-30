@@ -88,6 +88,7 @@ function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_up
   });
 };
 
+//TODO: DELETE when pipeline has been tested
 function formMatchingMatrix(grader_array, submissions_array) {
   //need to require('./grader-model'); ???
   const len = submissions_array.length;
@@ -393,7 +394,7 @@ module.exports = {
   distribution_pipeline: runPipeline
   // TO DO:
   // update grade in submission
-  // 
+  // Pull submissions from Canvas
   // 
   // get data for submssion given submission ID
   // 
