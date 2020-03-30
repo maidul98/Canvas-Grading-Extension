@@ -204,6 +204,7 @@ exports.grade_batch_submissions = function (req, res) {
     });
 };
 
+// Don't touch this for now
 exports.pull_submissions_and_update_for_assignment = function (req, res) {
   axios
     .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}`)
