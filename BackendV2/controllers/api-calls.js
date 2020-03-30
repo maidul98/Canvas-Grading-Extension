@@ -75,7 +75,7 @@ exports.get_submissions_for_assignment = function (req, res) {
   // res.status(400);
   // res.send('None shall pass');
   axios
-    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions`, config)
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions?grouped=true&include[]=group&include[]=submission_comments&include[]=user`, config)
     .then(result => {
       const submissionsJSONArray = result.data;
       res.json(submissionsJSONArray);
@@ -93,7 +93,7 @@ exports.get_assignments_table = function (req, res) {
     .catch(error => console.log(error));
 };
 
-exports.get_single_submission = function(req,res){
+exports.get_single_submission = function (req, res) {
   axios
     .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}?include[]=user&include[]=submission_comments`, config)
     .then(result => {
@@ -103,6 +103,7 @@ exports.get_single_submission = function(req,res){
     .catch(error => console.log(error));
 }
 
+//TODO: Need to change this once we figure out how graders are going to be enrolled.
 exports.get_all_graders = function (_, res) {
   axios
     .get('https://canvas.cornell.edu/api/v1/courses/15037/enrollments',
@@ -147,11 +148,15 @@ exports.grade_single_submission = function (req, res) {
     }
   };
   axios
-    .put(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}`,qs.stringify(formData), headerData)
+    .put(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}`, qs.stringify(formData), headerData)
     .then(r => {
-      res.send('done');
+      res.status(200)
+        .send({ status: 'success', data: r.data });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      res.status(400).send({ status: 'Update failed', message: err });
+      console.log(err);
+    })
 };
 
 /** Sample json in req.body:
@@ -199,11 +204,25 @@ exports.grade_batch_submissions = function (req, res) {
     });
 };
 
+exports.pull_submissions_and_update_for_assignment = function (req, res) {
+  axios
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}`)
+    .then(res => {
+      dbJSON = []
+      counter = 0
+      while (counter < res.length) {
+        if (res[counter].group === undefined) {
+
+        }
+      }
+    })
+}
+
 /**
  * Takes in a API call for Canvas API and returns the result
  * Input: body['endpoint]
  */
-exports.GETcanvas_API_call = function(req, res){
+exports.GETcanvas_API_call = function (req, res) {
   axios
     .get(`https://canvas.cornell.edu/api/v1/courses/15037/${req.body['endpoint']}`, config)
     .then(result => {
@@ -217,8 +236,8 @@ exports.GETcanvas_API_call = function(req, res){
     });
 }
 
-exports.PUTcanvas_API_call = function(req, res){
-  
+exports.PUTcanvas_API_call = function (req, res) {
+
   // axios
   //   .put(`https://canvas.cornell.edu/api/v1/courses/15037/${req.body['endpoint']}`, config)
   //   .then(result => {
