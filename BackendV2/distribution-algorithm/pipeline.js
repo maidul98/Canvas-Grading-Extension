@@ -2,8 +2,7 @@ var AssignmentGrader = require('./grader-model');
 import { shuffle, distribute } from './distribution.js';
 var queries = require('../controllers/queries');
 
-function formMatchingMatrix(grader_array, submissions_array) {
-    //need to require('./grader-model'); ???
+export function formMatchingMatrix(grader_array, submissions_array) {
     const len = submissions_array.length;
 
     if (len === 0) {
