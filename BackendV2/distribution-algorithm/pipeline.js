@@ -3,7 +3,6 @@ import { shuffle, distribute } from './distribution.js'
 var queries = require('../controllers/queries')
 
 function formMatchingMatrix(grader_array, submissions_array) {
-  //need to require('./grader-model'); ???
   const len = submissions_array.length;
 
   if (len === 0) {
@@ -56,3 +55,22 @@ export function runPipeline() {
     .catch(err => console.log(err))
 }
 
+
+
+
+
+//TESTING 
+
+//grader_id, weight, offset, num_assigned
+grader_array =
+  [new AssignmentGrader(1, 0, 0, 4),
+  new AssignmentGrader(2, 0, 0, 6),
+  new AssignmentGrader(3, 0, 0, 2),
+  new AssignmentGrader(4, 0, 0, 1),
+  new AssignmentGrader(5, 0, 0, 0),
+  new AssignmentGrader(6, 0, 0, 5)];
+
+submissions_array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+output = formMatchingMatrix(grader_array, submissions_array);
+console.log(output);
