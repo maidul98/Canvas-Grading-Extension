@@ -75,7 +75,7 @@ exports.get_submissions_for_assignment = function (req, res) {
   // res.status(400);
   // res.send('None shall pass');
   axios
-    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions?grouped=true&include[]=group&include[]=submission_comments&include[]=user`, config)
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions?include[]=group&include[]=submission_comments`, config)
     .then(result => {
       const submissionsJSONArray = result.data;
       res.json(submissionsJSONArray);
@@ -205,18 +205,34 @@ exports.grade_batch_submissions = function (req, res) {
 };
 
 // Don't touch this for now
-exports.pull_submissions_and_update_for_assignment = function (req, res) {
+exports.pull_submissions_and_update_for_assignment = async function (req, res) {
   axios
     .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}`)
     .then(res => {
       dbJSON = []
-      counter = 0
-      while (counter < res.length) {
-        if (res[counter].group === undefined) {
-
+      visitedGroups = Set()
+      res.forEach(element => {
+        json = {
+          grader_id: element.grader_id,
+          assignment_id: element.assignment_id,
+          is_graded: element.graded_at !== null,
+          updated_at: element.submitted_at,
+          grade: customElements.score
         }
-      }
+        json.id = element.id
+        if (element.group.id !== null && !visitedGroups.has(element.group.id)) {
+          visitedGroups.add(element.group.id)
+          dbJson.push(json)
+        } else if (element.group.id === null) {
+          dbJson.push(json)
+        }
+      })
+
+      await queries.insertAllSubmission(dbJSON)
+
+      res.status(200).send({ status: 'success' })
     })
+    .catch(err => res.status(400).send({ status: 'operation failed' }))
 }
 
 /**
