@@ -20,5 +20,5 @@ export function logout(){
 }
 
 
-export default {login, isLoggedIn}
+export default {login, isLoggedIn, logout}
 
