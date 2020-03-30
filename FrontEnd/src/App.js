@@ -9,6 +9,7 @@ import Breadcrumbs from './components/Breadcrumbs';
 import Dashboard from './components/Professor/Dashboard'
 import Welcome from './components/Welcome'
 import {login, isLoggedIn, logOut} from './Auth/LoginActions';
+import PrivateRoute from './Auth/PrivateRoute'
 
 class App extends React.Component {
   state = {
@@ -25,10 +26,9 @@ class App extends React.Component {
       }
           <Switch>
             <Route path = "/" component={Welcome} exact/>
-            <Route exact path="/assignments" component={AssignmentList}/>
-            <Route  path="/assignments/:assignment_id/:student_id" component={DetailedAssignmentView} />
-            <Route path = "/dashboard" component={Dashboard}/>
-            {/* <Route exact path="/detailed-view/:assignment_id/:student_id" render = {props => <DetailedAssignmentView assignment_id={props.match.params.assignment_id} student_id={props.match.params.student_id}/> } /> */}
+            <PrivateRoute  exact path="/assignments" component={AssignmentList}/>
+            <PrivateRoute   path="/assignments/:assignment_id/:student_id" component={DetailedAssignmentView} />
+            <PrivateRoute  path = "/dashboard" component={Dashboard}/>
           </Switch>
       </BrowserRouter>
     </div>

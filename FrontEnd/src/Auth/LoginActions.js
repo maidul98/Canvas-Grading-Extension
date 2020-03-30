@@ -2,23 +2,23 @@ import React from 'react';
 
 
 export function login(){
-    localStorage.setItem('jtw-token', 'fake-token')
-    return true
+    localStorage.setItem('jtw-token', 'fake-token');
+    return true;
 
 }
 
 export function isLoggedIn(){
     if(localStorage.getItem('jtw-token') == null){
-        return false
+        return false;
     }
-    return true
+    return true;
 }
 
 export function logout(){
-    localStorage.removeItem('jtw-token')
-    return true
+    localStorage.removeItem('jtw-token');
+    return true;
 }
 
 
-export default {login, isLoggedIn}
+export default {login, isLoggedIn, logout};
 
