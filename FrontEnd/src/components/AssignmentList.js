@@ -1,11 +1,12 @@
 import React, { Component, useEffect, useState} from 'react';
 import { useRequest } from '@umijs/hooks';
-import Alert from 'react-bootstrap/Alert';
 import LoadingIcon from './LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import Submissions from './Submissions';
+import { useAlert } from 'react-alert'
 
 export default function AssignmentList(props) {
+    const alert = useAlert();
     const [assignments, setAssignments] = useState([]);
     const [bulk_edit, setBulk_edit]     = useState(false);
     const [current_assignment_id, setCurrent_assignment_id] = useState(0);
@@ -19,10 +20,6 @@ export default function AssignmentList(props) {
                     return dateB-dateA;
                 });
                 setAssignments(reOrdered);
-        },
-        onError: (error, params) => {
-            console.log(error)
-            // SetSubmissionError([{type:"warning",message:'Something went wrong when pulling your submissions, please try refreshing the page.'}])
         },
         formatResult: []
     });

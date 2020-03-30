@@ -592,3 +592,18 @@ ol.breadcrumb{
 #dashboardTable .form-control{
   height:25px;
 }
+
+
+/*===================ALERTS===============================*/
+#__react-alert__ div div div{
+  width: 100% !important;
+  text-transform: initial !important;
+  height:70px !important;
+  background-color: rgb(255, 255, 255) !important;
+  color: black !important;
+  box-shadow: rgba(0, 0, 0, 0.31) 0px 2px 7px 1px !important;
+}
+
+#__react-alert__ div div div button svg{
+  background-color: black !important;
+}

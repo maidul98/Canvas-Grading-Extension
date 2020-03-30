@@ -132,7 +132,7 @@ export default function Dashboard(){
                             <ProgressBar now={30} label={`${30}%`} />
                         </td>
                         </tr>)}
-                    {/* <tr>
+                    <tr>
                         <td>Maidul Islam</td>
                         <td className="width-10"><FormControl placeholder="Enter" type="number" onChange={event=>setChanged(true)}/></td>
                         <td className="width-10">4</td>
@@ -141,13 +141,21 @@ export default function Dashboard(){
                         </td>
                     </tr>
                     <tr>
-                        <td>Maidul Islam</td>
+                        <td>Bobby Hik</td>
                         <td className="width-10"><FormControl placeholder="Enter" type="number" onChange={event=>setChanged(true)}/></td>
-                        <td className="width-10">4</td>
+                        <td className="width-10">2</td>
                         <td>
-                            <ProgressBar now={30} label={`${30}%`} />
+                            <ProgressBar now={80} label={`${80}%`} />
                         </td>
-                    </tr> */}
+                    </tr>
+                    <tr>
+                        <td>Tom Pooks</td>
+                        <td className="width-10"><FormControl placeholder="Enter" type="number" onChange={event=>setChanged(true)}/></td>
+                        <td className="width-10">2</td>
+                        <td>
+                            <ProgressBar now={44} label={`${44}%`} />
+                        </td>
+                    </tr>
                 </tbody>
             </Table>
             <Button onClick={submit} className={changed?"visible":"invisible"}>Save</Button>

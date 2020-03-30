@@ -15,8 +15,8 @@ function AssignmentGrader(grader_id, weight, offset, num_assigned) {
 
 /** Overwrites the grader's weight to [weight] */
 AssignmentGrader.prototype.updateWeight = function (weight) {
-    if (Number.isInteger(wieght)) {
-        throw new TypeError('wieght should be an integer');
+    if (Number.isInteger(weight)) {
+        throw new TypeError('weight should be an integer');
     }
     this.weight = weight;
 };
@@ -41,16 +41,16 @@ AssignmentGrader.prototype.updateNumAssigned = function (num_assigned) {
 
 /** Decrements the grader's weight by [weight] */
 AssignmentGrader.prototype.decrementWeight = function (weight) {
-    if (Number.isInteger(wieght)) {
-        throw new TypeError('wieght should be an integer');
+    if (Number.isInteger(weight)) {
+        throw new TypeError('weight should be an integer');
     }
     this.weight -= weight;
 };
 
 /** Increments the grader's weight by [weight] */
 AssignmentGrader.prototype.incrementWeight = function (weight) {
-    if (Number.isInteger(wieght)) {
-        throw new TypeError('wieght should be an integer');
+    if (Number.isInteger(weight)) {
+        throw new TypeError('weight should be an integer');
     }
     this.weight += weight;
 };
