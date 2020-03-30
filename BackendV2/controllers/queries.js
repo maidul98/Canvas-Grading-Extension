@@ -79,9 +79,10 @@ function insertSingleGrader(id, name, offset, role, total_graded, weight, last_u
   })
 };
 
-function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, grade) {
-  let sql_query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, grade) VALUES (?, ?, ?, ?)";
-  db.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, grade], (err, result) => {
+//TODO: Modify query so that it updates if new query with same id comes in
+function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, name, user_id) {
+  let sql_query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, name, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  db.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, name, user_id], (err, result) => {
     if (err) {
       console.log(err);
     }
@@ -132,16 +133,18 @@ function assignGraderToSubmission(grader_id, submission_id) {
 };
 
 module.exports = {
-  insertAllSubmission: function (json_string) {
+  insertAllSubmission: async function (json_string) {
+    console.log(json_string)
     json_string.forEach(e => {
       let id = e.id;
       let grader_id = e.grader_id;
       let assignment_id = e.assignment_id;
       let is_graded = e.is_graded;
       let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
-      let grade = e.grade;
+      let name = e.name;
+      let user_id = e.user_id
 
-      insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, grade);
+      insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, name, user_id);
     });
   },
 

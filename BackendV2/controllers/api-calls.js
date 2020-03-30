@@ -205,34 +205,42 @@ exports.grade_batch_submissions = function (req, res) {
 };
 
 // Don't touch this for now
-exports.pull_submissions_and_update_for_assignment = async function (req, res) {
+exports.pull_submissions_and_update_for_assignment = function (req, res) {
   axios
-    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}`)
-    .then(res => {
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user`, config)
+    .then(response => {
       dbJSON = []
-      visitedGroups = Set()
-      res.forEach(element => {
-        json = {
-          grader_id: element.grader_id,
-          assignment_id: element.assignment_id,
-          is_graded: element.graded_at !== null,
-          updated_at: element.submitted_at,
-          grade: customElements.score
-        }
-        json.id = element.id
-        if (element.group.id !== null && !visitedGroups.has(element.group.id)) {
-          visitedGroups.add(element.group.id)
-          dbJson.push(json)
-        } else if (element.group.id === null) {
-          dbJson.push(json)
+      visitedGroups = new Set()
+      response.data.forEach(element => {
+        if (element.workflow_state === "submitted") {
+          json = {
+            id: element.id,
+            grader_id: element.grader_id,
+            assignment_id: element.assignment_id,
+            is_graded: element.graded_at !== null,
+            updated_at: element.submitted_at,
+            name: element.user.name,
+            user_id: element.user.id
+          }
+          console.log(json)
+          if (element.group.id !== null && !visitedGroups.has(element.group.id)) {
+            visitedGroups.add(element.group.id)
+            dbJSON.push(json)
+          } else if (element.group.id === null) {
+            dbJSON.push(json)
+          }
+
         }
       })
 
-      await queries.insertAllSubmission(dbJSON)
+      queries.insertAllSubmission(dbJSON)
 
       res.status(200).send({ status: 'success' })
     })
-    .catch(err => res.status(400).send({ status: 'operation failed' }))
+    .catch(err => {
+      console.log(err)
+      res.status(400).send({ status: 'operation failed' })
+    })
 }
 
 /**
