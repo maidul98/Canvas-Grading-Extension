@@ -3,10 +3,10 @@ import { useRequest } from '@umijs/hooks';
 import Alert from 'react-bootstrap/Alert';
 import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
-import Table from 'react-bootstrap/Table'
-import ProgressBar from 'react-bootstrap/ProgressBar'
-import InputGroup from 'react-bootstrap/InputGroup'
-import FormControl from 'react-bootstrap/FormControl'
+import Table from 'react-bootstrap/Table';
+import ProgressBar from 'react-bootstrap/ProgressBar';
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
 
 export default function Dashboard(){
     const [assignments, setAssignments] = useState([]);
@@ -28,18 +28,18 @@ export default function Dashboard(){
         manual: true,
         onSuccess: (result, params) => {
             if(result.length==0){
-                setFetchGradersStatus([{type:"primary", message:"There are no graders yet"}]);
+                setFetchGradersStatus([{type:'primary', message:'There are no graders yet'}]);
             }
             else{
                 setGraders(result.sort());
             }
         },
         onError: (error, params) => {
-            setFetchGradersStatus([{type:"warning", message:"Something went wrong while fetching graders, please try refreshing the page."}])
+            setFetchGradersStatus([{type:'warning', message:'Something went wrong while fetching graders, please try refreshing the page.'}]);
             console.log(error);
         },
         formatResult: []
-    })
+    });
 
     /*need the routes for fetching graders' missed assignments and progress*/
     const fetchGradersData = useRequest(url => url, {
@@ -47,28 +47,28 @@ export default function Dashboard(){
         onSuccess: (result, params) => {
             console.log(result);
             if(result.length==0){
-                setFetchGradersStatus([{type:"primary", message:"There are no graders yet"}]);
+                setFetchGradersStatus([{type:'primary', message:'There are no graders yet'}]);
             }
             setGradersData(result);
         },
         onError: (error, params) => {
-            setFetchGradersStatus([{type:"warning", message:"Something went wrong while fetching graders, please try refreshing the page."}])
+            setFetchGradersStatus([{type:'warning', message:'Something went wrong while fetching graders, please try refreshing the page.'}]);
             console.log(error);
         },
         formatResult: []
-    })
+    });
     const fetchAssignments = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
-                let reOrdered = result.sort(function compare(a, b) {
-                    var dateA = new Date(a.due_at);
-                    var dateB = new Date(b.due_at);
-                    return dateB-dateA;
-                });
-                setAssignments(reOrdered);
+            let reOrdered = result.sort(function compare(a, b) {
+                var dateA = new Date(a.due_at);
+                var dateB = new Date(b.due_at);
+                return dateB-dateA;
+            });
+            setAssignments(reOrdered);
         },
         onError: (error, params) => {
-            console.log(error)
+            console.log(error);
         },
         formatResult: []
     });
@@ -76,13 +76,13 @@ export default function Dashboard(){
     const submitWeights = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
-            setWeightSubmitStatus({type:"success", message:"Weights updated successfully"});
+            setWeightSubmitStatus({type:'success', message:'Weights updated successfully'});
             setChanged(false);
         },
         onError: (error, params) => {
-            setWeightSubmitStatus({type:"warning", message:"Something went wrong, please try again"})
+            setWeightSubmitStatus({type:'warning', message:'Something went wrong, please try again'});
         }
-    })
+    });
 
     /* need routes for submitting weights */     
     const submit = () =>{
@@ -92,18 +92,18 @@ export default function Dashboard(){
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(weights),
         })*/
-    }
+    };
 
     useEffect(()=>{
-        fetchAssignments.run('/get-published-assignments')
+        fetchAssignments.run('/get-published-assignments');
     },[]);
 
     useEffect(()=>{
         //fetchGraders.run('/get-graders')
         fetchGradersData.run('/get-grading-progress-for-assignment?assignment_id='+assignment_id);
-    }, [])
+    }, []);
 
-    if(submitWeights.loading | fetchAssignments.loading | fetchGraders.loading) return <LoadingIcon />
+    if(submitWeights.loading | fetchAssignments.loading | fetchGraders.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
@@ -112,14 +112,14 @@ export default function Dashboard(){
             <Table bordered hover  id="dashboardTable">
                 <thead>
                     <tr>
-                    <th>Name</th>
-                    <th>Weights</th>
-                    <th>Missed</th>
-                    <th>
-                        <select id="selectAssignments">
-                            {assignments.map(assignment=><option value={assignment.id} key={assignment.id} onChange={event=>{setAssignmentID(assignment.id)}}>Progress for {assignment.name}</option>)}
-                        </select>
-                    </th>
+                        <th>Name</th>
+                        <th>Weights</th>
+                        <th>Missed</th>
+                        <th>
+                            <select id="selectAssignments">
+                                {assignments.map(assignment=><option value={assignment.id} key={assignment.id} onChange={event=>{setAssignmentID(assignment.id);}}>Progress for {assignment.name}</option>)}
+                            </select>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -129,8 +129,8 @@ export default function Dashboard(){
                             <td className="width-10"><FormControl placeholder="Enter" type="number" id={grader.user.id} onChange={event=>{setWeights({...weights, [event.target.id] : event.target.value}); setChanged(true);}}></FormControl></td>
                             <td className="width-10">4</td>
                             <td>
-                            <ProgressBar now={30} label={`${30}%`} />
-                        </td>
+                                <ProgressBar now={30} label={`${30}%`} />
+                            </td>
                         </tr>)}
                     <tr>
                         <td>Maidul Islam</td>
@@ -158,7 +158,7 @@ export default function Dashboard(){
                     </tr>
                 </tbody>
             </Table>
-            <Button onClick={submit} className={changed?"visible":"invisible"}>Save</Button>
+            <Button onClick={submit} className={changed?'visible':'invisible'}>Save</Button>
         </div>
-    )
+    );
 }

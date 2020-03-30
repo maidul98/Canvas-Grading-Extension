@@ -3,8 +3,8 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import {Link} from 'react-router-dom';
 import {login, isLoggedIn, logout} from '../Auth/LoginActions';
-import Button from 'react-bootstrap/Button'
-import { Redirect } from "react-router-dom";
+import Button from 'react-bootstrap/Button';
+import { Redirect } from 'react-router-dom';
 
 class NavigationMenu extends Component {
     render(){
@@ -22,19 +22,19 @@ class NavigationMenu extends Component {
                             </div>
                         </a>
                         {isLoggedIn()
-                        ?
-                        <div id="user-profile-icon">
-                            <Dropdown>
-                                <Dropdown.Toggle as={CustomToggle}></Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    <Dropdown.Item href="/dashboard">Dashboard</Dropdown.Item>
-                                    <Dropdown.Item href="#/action-2">Setting</Dropdown.Item>
-                                    <Dropdown.Item onClick={()=> logout()} href="/">Logout</Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </div>
-                        :
-                        <a href="/assignments" onClick={()=>login()} id="login-btn">Login</a>
+                            ?
+                            <div id="user-profile-icon">
+                                <Dropdown>
+                                    <Dropdown.Toggle as={CustomToggle}></Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item href="/dashboard">Dashboard</Dropdown.Item>
+                                        <Dropdown.Item href="#/action-2">Setting</Dropdown.Item>
+                                        <Dropdown.Item onClick={()=> logout()} href="/">Logout</Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
+                            :
+                            <a href="/assignments" onClick={()=>login()} id="login-btn">Login</a>
                         // <Button href="/assignments" variant="link" onClick={() => login()}>Login</Button>
                         }
                     </div>

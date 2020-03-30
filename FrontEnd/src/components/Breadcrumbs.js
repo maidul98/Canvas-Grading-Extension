@@ -1,26 +1,26 @@
-import React from "react";
-import { Link} from "react-router-dom";
-import withBreadcrumbs from "react-router-breadcrumbs-hoc";
+import React from 'react';
+import { Link} from 'react-router-dom';
+import withBreadcrumbs from 'react-router-breadcrumbs-hoc';
 
 
 const bread = ({ breadcrumbs }) => (
     <div className="breadcrumb"><div className = "container">
-      {breadcrumbs.map(({ breadcrumb, match }, index) => {
-        console.log(breadcrumb);
-        if (breadcrumb.key != "/") {
-        return (
-           <ol className="bc" key={match.url}>
-            <Link className='bc_a' to={match.url || ""}>{breadcrumb}</Link>
-            {index < breadcrumbs.length - 1 && "/"}
-          </ol>
-        );}
-      })}
+        {breadcrumbs.map(({ breadcrumb, match }, index) => {
+            console.log(breadcrumb);
+            if (breadcrumb.key != '/') {
+                return (
+                    <ol className="bc" key={match.url}>
+                        <Link className='bc_a' to={match.url || ''}>{breadcrumb}</Link>
+                        {index < breadcrumbs.length - 1 && '/'}
+                    </ol>
+                );}
+        })}
     </div></div>
-  );
+);
   
-  export default withBreadcrumbs()(bread);
+export default withBreadcrumbs()(bread);
 
-  // import React from 'react';
+// import React from 'react';
 // import { Route, Link } from 'react-router-dom';
 // import { Breadcrumb, BreadcrumbItem } from 'reactstrap';
 
