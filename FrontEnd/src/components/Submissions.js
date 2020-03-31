@@ -4,17 +4,14 @@ import Button from 'react-bootstrap/Button';
 import { useRequest } from '@umijs/hooks';
 import { Link } from 'react-router-dom';
 import { useAlert } from 'react-alert'
+import Spinner from 'react-bootstrap/Spinner'
 
 export default function Submissions(props){
     const alert = useAlert()
-    const gradesAndComments = [];
+    const gradesAndComments = useRef([]);
     const [grade, setGrade] = useState(null);
     const [comment, setComment] = useState(null);
     const [changed, setChanged] = useState(false);  
-
-    const gradee = useRef(null)
-
-    console.log(gradee)
 
     /**
      * Get all of the submissions that are tasked for this grader from distribution algo 
@@ -65,6 +62,7 @@ export default function Submissions(props){
     const submitGrades = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
+            gradesAndComments.current = []
             alert.success('Your feedback has been submitted successfully')
         },
         onError: (error, params) => {
@@ -77,26 +75,35 @@ export default function Submissions(props){
         assignedSubmissions.run('/get-assigned-submissions-for-assigment?user_id=1&assigment_id='+props.assignment_id);
     }, [props.assignment_id]);
     
-    const handleCommentGrade = (newSubmission, event, type) => {
-        console.log(type)
-        console.log(newSubmission)
-        console.log(event.target.value)
-        // let found = gradesAndComments.some(submissionInArray=> submissionInArray.id == newSubmission.id)
-        // if(found){
-        //     let index = gradesAndComments.findIndex(submissionInArray => submissionInArray.id == newSubmission.id);
-        //     gradesAndComments[index] = newSubmission;
-        // }else{
-        //     gradesAndComments.push(newSubmission)
-        // }
+    const handleCommentGrade = (id, event, type) => {
+        let found = gradesAndComments.current.some(submissionInArray=> submissionInArray.id == id)
+        if(found){
+            let index = gradesAndComments.current.findIndex(submissionInArray => submissionInArray.id == id);
+            gradesAndComments.current[index][type == 'grade'? "assigned_grade": 'comment']=event.target.value
+        }else{
+            gradesAndComments.current.push({
+                'id':id,
+                'assigned_grade': type == "grade"? event.target.value:null,
+                'comment': type == "grade"? event.target.value:null,
+                'is_group_comment': false
+            })
+        }
     };
 
+    /**
+     * Submit the quick edit grades for only the submissions for which the grade has changed
+     */
     const submitForms = () => {
+        const submissionsToBeUpdated = gradesAndComments.current.filter(submission=>{
+            return submission.is_group_comment != null
+        })
+
         submitGrades.run(
             {
                 url: 'upload-submission-grades/assignments/'+props.assignment_id+'/submissions/batch-update-grades',
                 method: 'post',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(gradesAndComments),
+                body: JSON.stringify(submissionsToBeUpdated),
             }
         )
     }
@@ -105,8 +112,9 @@ export default function Submissions(props){
 
     return (
         <div>
-            {assignedSubmissions?.data.map(res => 
-                <div key={res.id}>
+            {Object.values(singleSubmissionFetch?.fetches).map(res => console.log(res))}
+            {Object.values(singleSubmissionFetch?.fetches).map(res => 
+                <div key={res.data.id}>
                     {
                     (props.bulk_edit)
                     ?
@@ -114,27 +122,35 @@ export default function Submissions(props){
                     <div className="quick-edit-submission">
                         <div id="name-grade-container">
                             <div id="student_name">
-                                {res.name}
+                                {res.data?.user?.login_id}
                             </div>
                             <div id="grade_input">
                                 <span className="out-of-text">Grade out of 100</span>
-                                <input type="text" name="assigned_grade" value={singleSubmissionFetch.fetches[res['user_id']]?.data['score']} onChange={(event)=>handleCommentGrade(res['user_id'], event, 'grade')} type="number" min={0} max={100}></input>
+                                <input type="text" name="assigned_grade" defaultValue={res.data.score} onChange={(event)=>handleCommentGrade(res.data.id, event, 'grade')} type="number" min={0} max={100}></input>
                             </div>
                         </div>
-                        <textarea name="comment" type="text" placeholder="Enter feedback here" className="feedback-form"  onChange={(event)=>handleCommentGrade(res['user_id'], event, 'comment')}></textarea>
+                        <textarea name="comment" type="text" placeholder="Enter feedback here" className="feedback-form"  onChange={(event)=>handleCommentGrade(res.data.id, event, 'comment')}></textarea>
                         <p className={changed?'auto-save-show':'auto-save-hidden'}>Auto saved, not submitted</p>
                     </div>
                     :
                     // List view
                     <div className="assignment">
                         <div className="student-name">
-                            <Link to={"/assignments/"+res['assignment_id']+'/'+res['user_id']}>
-                                {res['name']}
+                            {res.loading? <Spinner animation="grow" />: <></>}
+                            <Link to={"/assignments/"+res.data.assignment_id+'/'+res.data.user_id}>
+                                {res.data?.user?.login_id}
                             </Link>
                         </div>
+                        {res.data?.score == null | res.data?.score == undefined
+                        ?
+                        <div className="grade-status">
+                            <div className="grade-icon-red"></div>
+                        </div>
+                        :
                         <div className="grade-status">
                             <div className="grade-icon"></div>
                         </div>
+                        }
                     </div>
                     }
                 </div>)

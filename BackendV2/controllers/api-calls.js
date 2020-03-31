@@ -11,7 +11,7 @@ const fs = require('fs');
 
 const config = {
     //TODO: Factor out bearer tokens into another file that isn't publicly accessible.
-    headers: { Authorization: 'Bearer 9713~TYz9t4zPXdeHonsL9g19ac3kIucoU8BdskLUNZ1rijvusRvhhdbyQFMhXPDhDltZ' },
+    headers: { Authorization: 'Bearer 9713~8gLsbC5WwTWOwqv8U3RPK4KK0wcgFThoufCz7fsCwXKsM00w9jKRcqFsbAo8HvJJ' },
 };
 
 /** Obtains all the student enrollments for the specific class. */
@@ -191,11 +191,11 @@ exports.grade_batch_submissions = function (req, res) {
         }
     };
 
+    console.log(formData)
     //send grades to Canvas
     axios
         .post(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), headerData)
         .then(result => {
-            console.log(result);
             res.send({ status: 'success', data: result.data });
         })
         .catch(err => {
@@ -255,7 +255,7 @@ exports.GETcanvas_API_call = function (req, res) {
             return res.json(submissionsJSONArray);
         })
         .catch(error => {
-            console.log(error);
+            console.log("error");
             res.status(406)
                 .send({ status: 'fail', data: error });
         });

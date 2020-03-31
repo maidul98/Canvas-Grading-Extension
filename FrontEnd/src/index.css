@@ -386,6 +386,13 @@ margin-top: 80px;
   background-color: #049062;
 }
 
+.grade-icon-red{
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background-color:#C30303;
+}
+
 #assignment-header{
   display: flex;
   justify-content: space-between;

@@ -191,7 +191,7 @@ module.exports = {
       sql_query, [req.query.assigment_id, req.query.user_id],
       function (err, results) {
         if (err) {
-          console.log(err);
+          console.log("err");
         } else {
           res.json(results);
         }
