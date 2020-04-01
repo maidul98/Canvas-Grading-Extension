@@ -33,7 +33,7 @@ function formMatchingMatrix(grader_array, submissions_array) {
     }
 
     var matrix = new Array(len).fill(0).map(() => new Array(2).fill(0));
-    distribution.shuffle(submissions_array);
+    shuffle(submissions_array);
 
     var counter = 0;
     for (var j = 0; j < grader_array.length; j++) {
@@ -58,7 +58,10 @@ function formMatchingMatrix(grader_array, submissions_array) {
  * @param {int} num_of_submissions: Total number of assignments that need to be distributed
  * @param {Array} graders: A 2D-array containing [graders id, weight, offset]
  */
-function distribute(num_of_submissions, graders) {
+function distribute(num_of_submissions, graderArray) {
+    // console.log(graders);
+    // console.log("okkkkk" + graders[0].offset);
+    // console.log(" okkkk" + typeof (graders[0].offset));
 
     if (num_of_submissions <= 0) {
         console.log('There are currently no assignments to distribute.');
@@ -66,11 +69,11 @@ function distribute(num_of_submissions, graders) {
     }
 
     //intial set-up; will populate [num_assigned] cells later on 
-    let graderArray = [];
-    graders.forEach(element => {
-        //grader_id, weight, offset, num_assigned
-        graderArray.push(new AssignmentGrader(element[0], element[1], element[2], 0));
-    });
+    // let graderArray = [];
+    // graders.forEach(element => {
+    //     //grader_id, weight, offset, num_assigned
+    //     graderArray.push(new AssignmentGrader(element[0], element[1], element[2], 0));
+    // });
 
 
     //sort graders in order of worst to best offsets 
@@ -85,8 +88,13 @@ function distribute(num_of_submissions, graders) {
     //normalize offsets such that the least offset equals 0; and
     //grader.offset = relative number of assignments that grader [grader] is behind on.
     normalizing_constant = 0 - graderArray[graderArray.length - 1].offset;
-    for (var i = 0; i < graderArray.length; i++)
+    for (var i = 0; i < graderArray.length; i++) {
+        console.log("NC" + normalizing_constant);
+        console.log(" type of NC" + typeof (normalizing_constant));
         graderArray[i].incrementOffset(normalizing_constant);
+    }
+
+
 
 
     //computes sum of all graders' offsets
@@ -208,3 +216,4 @@ function distribute(num_of_submissions, graders) {
 
 module.exports.shuffle = shuffle
 module.exports.distribute = distribute
+module.exports.formMatchingMatrix = formMatchingMatrix

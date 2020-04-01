@@ -6,7 +6,9 @@
  * Offsets: Pulled from DB 
  */
 
+
 function AssignmentGrader(grader_id, weight, offset, num_assigned) {
+    console.assert(Number.isInteger(offset));
     this.grader_id = grader_id; //int
     this.weight = weight; //int
     this.offset = offset; //int
@@ -67,6 +69,7 @@ AssignmentGrader.prototype.decrementOffset = function (offset) {
 /** Increments the grader's offset by [offset] */
 AssignmentGrader.prototype.incrementOffset = function (offset) {
     if (!Number.isInteger(offset)) {
+        console.log("heyooo " + typeof (offset) + " offset: " + offset);
         throw new TypeError('offset should be an integer');
     }
 
