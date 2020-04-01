@@ -25,7 +25,6 @@ function formMatchingMatrix(grader_array, submissions_array) {
 
     for (var i = 0; i < len; i++)
         matrix[i][1] = submissions_array[i];
-
     return matrix;
 }
 
