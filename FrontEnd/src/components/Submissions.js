@@ -98,22 +98,22 @@ export default function Submissions(props){
             return submission.is_group_comment != null
         })
 
-        submitGrades.run(
-            {
-                url: 'upload-submission-grades/assignments/'+props.assignment_id+'/submissions/batch-update-grades',
-                method: 'post',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(submissionsToBeUpdated),
-            }
-        )
+        if(submissionsToBeUpdated.length){
+            submitGrades.run(
+                {
+                    url: 'upload-submission-grades/assignments/'+props.assignment_id+'/submissions/batch-update-grades',
+                    method: 'post',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(submissionsToBeUpdated),
+                }
+            )
+        }
     }
 
     if(submitGrades?.loading | assignedSubmissions?.loading) return <LoadingIcon />
 
     return (
         <div>
-            {/* {Object.values(singleSubmissionFetch?.fetches).map(res => console.log(res))} */}
-            {console.log(singleSubmissionFetch?.fetches)}
             {Object.values(singleSubmissionFetch?.fetches).map(res => 
                 <div key={res.data.id}>
                     {
@@ -156,7 +156,6 @@ export default function Submissions(props){
                     }
                 </div>)
             }
-            
             <Button onClick={submitForms} className={props.bulk_edit?"visible":"invisible"}>Submit feedback</Button>
             <div className="clear-fix"></div>
         </div>
