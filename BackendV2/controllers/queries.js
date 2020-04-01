@@ -395,7 +395,7 @@ module.exports = {
     })
   },
 
-  run_distribution_pipeline: pipeline.runPipeline
+  run_distribution_pipeline: pipeline.runPipeline(req, res)
   // TO DO:
   // update grade in submission
   // Pull submissions from Canvas

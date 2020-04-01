@@ -29,7 +29,7 @@ function formMatchingMatrix(grader_array, submissions_array) {
     return matrix;
 }
 
-function runPipeline() {
+function runPipeline(req, res) {
 
     queries.get_grader_objects()
         .then(grader_array => {
@@ -52,6 +52,7 @@ function runPipeline() {
                 })
                 .catch(err => console.log(err));
         })
+        .then(res.send('success'))
         .catch(err => console.log(err));
 }
 
