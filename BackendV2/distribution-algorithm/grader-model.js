@@ -1,14 +1,5 @@
-/**
- * Need:
- * Number of submissions: Pulled from DB
- * List of graders: Pulled from DB and filtered accordingly 
- * Weights: Intially inputted by professor
- * Offsets: Pulled from DB 
- */
-
 
 function AssignmentGrader(grader_id, weight, offset, num_assigned) {
-    console.assert(Number.isInteger(offset));
     this.grader_id = grader_id; //int
     this.weight = weight; //int
     this.offset = offset; //int

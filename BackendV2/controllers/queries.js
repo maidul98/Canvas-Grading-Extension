@@ -80,6 +80,8 @@ function insertSingleGrader(id, name, offset, role, total_graded, weight, last_u
   })
 };
 
+
+
 //TODO: Modify query so that it updates if new query with same id comes in
 function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, name, user_id) {
   let sql_query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, name, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -89,6 +91,8 @@ function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_up
     }
   });
 };
+
+
 
 //TODO: DELETE when pipeline has been tested
 function formMatchingMatrix(grader_array, submissions_array) {
@@ -118,6 +122,8 @@ function formMatchingMatrix(grader_array, submissions_array) {
 
   return matrix;
 }
+
+
 
 /**
  * A function that updates the grader for a submission
@@ -151,11 +157,11 @@ async function runPipeline(res) {
             assignmentsLeft = true;
             let output_of_algo = distribution.distribute(mapped.length, grader_array);
             let matrix_of_pairs = distribution.formMatchingMatrix(output_of_algo, mapped);
-            //update submissions DB with matrix_of_pairs 
-            //update graders offsest with output_of_algo
+            //update offsets of graders in DB with output_of_algo
             update_grader_entries(output_of_algo, function (err) {
               if (err) console.log(err);
             });
+            //update submissions DB with matrix_of_pairs 
             assign_submissions_to_grader(matrix_of_pairs, function (err) {
               if (err) console.log(err);
             });
@@ -204,7 +210,6 @@ function get_grader_objects() {
 
 
 
-
 /**
    * This function returns the list of all graders
    */
@@ -218,6 +223,7 @@ function get_grader_table(_, res, _) {
     }
   });
 }
+
 
 
 /**
@@ -240,6 +246,7 @@ function get_unassigned_submissions() {
 }
 
 
+
 /**
    * This function takes in a grader_id and updates the weight for that grader
    * @param {*} grader_id
@@ -259,6 +266,8 @@ function update_grader_weight(req, res) {
   }
   );
 }
+
+
 
 /**
    * This function gets the overall progress for a given assignment_id
@@ -284,6 +293,7 @@ function get_grading_progress_for_assignment(req, res) {
     }
   });
 }
+
 
 
 /**
@@ -371,6 +381,8 @@ function update_grader_entries(grader_array, callback) {
   });
 }
 
+
+
 function assign_submissions_to_grader(assignment_matrix, callback) {
   async.forEachOf(assignment_matrix, function (pairing, _, inner_callback) {
     let sql_query = "UPDATE submission SET grader_id = ? WHERE id = ?"
@@ -393,6 +405,8 @@ function assign_submissions_to_grader(assignment_matrix, callback) {
   })
 }
 
+
+
 async function insertAllSubmission(json_string) {
   console.log(json_string)
   json_string.forEach(e => {
@@ -408,6 +422,8 @@ async function insertAllSubmission(json_string) {
   });
 }
 
+
+
 function insertConflict(id, grader_id, reason, approved, reassigned_grader_id, submission_id) {
   let sql_query = "INSERT IGNORE INTO conflict (id, grader_id, reason, approved, reassigned_grader_id, submission_id) VALUES (?, ?, ?, ?, ?, ?)";
   db.query(sql_query, [id, grader_id, reason, approved, reassigned_grader_id, submission_id], (err, _) => {
@@ -416,6 +432,8 @@ function insertConflict(id, grader_id, reason, approved, reassigned_grader_id, s
     }
   })
 }
+
+
 
 function insertAllGraders(json_string) {
   json_string.forEach(e => {
@@ -445,6 +463,7 @@ function insertAllGraders(json_string) {
 async function run_distribution_pipeline(req, res) {
   await runPipeline(res)
 }
+
 
 
 module.exports = {

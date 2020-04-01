@@ -4,7 +4,6 @@ var AssignmentGrader = require('./grader-model');
 
 //if a grader can't grade a few assignments, then we need to create set of "valid graders that can take on extra assignments" and UPDATE OFFSETS 
 //and distribute these "currently ungrade-able assignments" FAIRLY according to grader's NORMALIZED offsets
-//if all offsets are 0, then randomly distribute "currently ungrade-able assignments"
 
 //changes:  the first step should be ....all "valid" graders should only make it to array graderArray ***
 //valid is determined by Graders who didn't opt out, who didn't take "leave of absence"
@@ -25,12 +24,14 @@ function shuffle(a) {
 }
 
 
+
 /**
- * Randomly assigns each grader from [grader_array] [num_assigned] submissions
- * from [submission_array] to grade. 
+ * Randomly assigns each grader from [grader_array] exactly [num_assigned] 
+ * submissions from [submission_array] to grade. 
  * Returns a mapping from grader ID to submission ID. 
- * @param {Array} grader_array: Array of graders containing [num_assigned]
- * @param {Array} submissions_array: Array of submission ID's
+ * @param {Array} grader_array: 2D Array of graders containing the [num_assigned]
+ * value for each grader
+ * @param {Array} submissions_array: 1D Array of submission ID's
  */
 function formMatchingMatrix(grader_array, submissions_array) {
     const len = submissions_array.length;
@@ -55,6 +56,7 @@ function formMatchingMatrix(grader_array, submissions_array) {
 }
 
 
+
 /**
  * Fairly distributes [num_of_submissions] assignments among [graders] 
  * according to the graders' weights and offsets. 
@@ -77,7 +79,6 @@ function distribute(num_of_submissions, graderArray) {
     normalizing_constant = 0 - graderArray[graderArray.length - 1].offset;
     for (var i = 0; i < graderArray.length; i++)
         graderArray[i].incrementOffset(normalizing_constant);
-
 
 
     //computes sum of all graders' offsets
