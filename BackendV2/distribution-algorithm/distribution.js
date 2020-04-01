@@ -24,6 +24,14 @@ function shuffle(a) {
     return a;
 }
 
+
+/**
+ * Randomly assigns each grader from [grader_array] [num_assigned] submissions
+ * from [submission_array] to grade. 
+ * Returns a mapping from grader ID to submission ID. 
+ * @param {Array} grader_array: Array of graders containing [num_assigned]
+ * @param {Array} submissions_array: Array of submission ID's
+ */
 function formMatchingMatrix(grader_array, submissions_array) {
     const len = submissions_array.length;
 
@@ -67,11 +75,9 @@ function distribute(num_of_submissions, graderArray) {
     //normalize offsets such that the least offset equals 0; and
     //grader.offset = relative number of assignments that grader [grader] is behind on.
     normalizing_constant = 0 - graderArray[graderArray.length - 1].offset;
-    for (var i = 0; i < graderArray.length; i++) {
-        console.log("NC" + normalizing_constant);
-        console.log(" type of NC" + typeof (normalizing_constant));
+    for (var i = 0; i < graderArray.length; i++)
         graderArray[i].incrementOffset(normalizing_constant);
-    }
+
 
 
     //computes sum of all graders' offsets
