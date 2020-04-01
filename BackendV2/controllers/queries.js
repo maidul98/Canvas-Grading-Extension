@@ -395,7 +395,10 @@ module.exports = {
     })
   },
 
-  run_distribution_pipeline: pipeline.runPipeline(req, res)
+  run_distribution_pipeline: async function (req, res) {
+    await pipeline.runPipeline()
+    res.send('success')
+  }
   // TO DO:
   // update grade in submission
   // Pull submissions from Canvas

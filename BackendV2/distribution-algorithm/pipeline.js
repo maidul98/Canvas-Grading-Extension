@@ -29,7 +29,7 @@ function formMatchingMatrix(grader_array, submissions_array) {
     return matrix;
 }
 
-function runPipeline(req, res) {
+function runPipeline() {
 
     queries.get_grader_objects()
         .then(grader_array => {
