@@ -112,7 +112,8 @@ export default function Submissions(props){
 
     return (
         <div>
-            {Object.values(singleSubmissionFetch?.fetches).map(res => console.log(res))}
+            {/* {Object.values(singleSubmissionFetch?.fetches).map(res => console.log(res))} */}
+            {console.log(singleSubmissionFetch?.fetches)}
             {Object.values(singleSubmissionFetch?.fetches).map(res => 
                 <div key={res.data.id}>
                     {

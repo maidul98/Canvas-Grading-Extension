@@ -3,10 +3,8 @@ import { useRequest } from '@umijs/hooks';
 import LoadingIcon from './LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import Submissions from './Submissions';
-import { useAlert } from 'react-alert';
 
 export default function AssignmentList(props) {
-    const alert = useAlert();
     const [assignments, setAssignments] = useState([]);
     const [bulk_edit, setBulk_edit]     = useState(false);
     const [current_assignment_id, setCurrent_assignment_id] = useState(0);
@@ -35,12 +33,12 @@ export default function AssignmentList(props) {
             <div className="content-container">
                 <Button variant="dark" className="float-right" size="lg" onClick={()=>setBulk_edit(!bulk_edit)}>{bulk_edit?'Switch to simple edit':'Bulk edit'}</Button>
                 <div id="select-assignment">
-                    <select id="dropdown-assignment-selector" onChange={e => setCurrent_assignment_id(e.target.value)}>
+                    <select id="dropdown-assignment-selector" onChange={ e => setCurrent_assignment_id(e.target.value)}>
                         {assignments.map((res)=> <option key={res.id} value={res.id}>{res.name}</option>)}
                     </select>
                 </div>
                 <div className="assignments-container">
-                    <Submissions assignment_id={current_assignment_id} bulk_edit={bulk_edit}/>
+                    <Submissions key={current_assignment_id} assignment_id={current_assignment_id} bulk_edit={bulk_edit}/>
                 </div>
             </div>
         </div>
