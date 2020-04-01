@@ -27,11 +27,6 @@ function shuffle(a) {
 function formMatchingMatrix(grader_array, submissions_array) {
     const len = submissions_array.length;
 
-    if (len === 0) {
-        console.log('There are currently no assignments to distribute.');
-        return [];
-    }
-
     var matrix = new Array(len).fill(0).map(() => new Array(2).fill(0));
     shuffle(submissions_array);
 
@@ -59,22 +54,6 @@ function formMatchingMatrix(grader_array, submissions_array) {
  * @param {Array} graders: A 2D-array containing [graders id, weight, offset]
  */
 function distribute(num_of_submissions, graderArray) {
-    // console.log(graders);
-    // console.log("okkkkk" + graders[0].offset);
-    // console.log(" okkkk" + typeof (graders[0].offset));
-
-    if (num_of_submissions <= 0) {
-        console.log('There are currently no assignments to distribute.');
-        return [];
-    }
-
-    //intial set-up; will populate [num_assigned] cells later on 
-    // let graderArray = [];
-    // graders.forEach(element => {
-    //     //grader_id, weight, offset, num_assigned
-    //     graderArray.push(new AssignmentGrader(element[0], element[1], element[2], 0));
-    // });
-
 
     //sort graders in order of worst to best offsets 
     //greater offset = worse offset
@@ -93,8 +72,6 @@ function distribute(num_of_submissions, graderArray) {
         console.log(" type of NC" + typeof (normalizing_constant));
         graderArray[i].incrementOffset(normalizing_constant);
     }
-
-
 
 
     //computes sum of all graders' offsets
@@ -213,6 +190,7 @@ function distribute(num_of_submissions, graderArray) {
 
     return graderArray;
 }
+
 
 module.exports.shuffle = shuffle
 module.exports.distribute = distribute
