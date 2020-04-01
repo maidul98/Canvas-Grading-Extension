@@ -1,8 +1,8 @@
 var AssignmentGrader = require('./grader-model');
-import { shuffle, distribute } from './distribution.js';
+var distribution = require('./distribution.js');
 var queries = require('../controllers/queries');
 
-export function formMatchingMatrix(grader_array, submissions_array) {
+function formMatchingMatrix(grader_array, submissions_array) {
     const len = submissions_array.length;
 
     if (len === 0) {
@@ -11,7 +11,7 @@ export function formMatchingMatrix(grader_array, submissions_array) {
     }
 
     var matrix = new Array(len).fill(0).map(() => new Array(2).fill(0));
-    shuffle(submissions_array);
+    distribution.shuffle(submissions_array);
 
     var counter = 0;
     for (var j = 0; j < grader_array.length; j++) {
@@ -29,7 +29,7 @@ export function formMatchingMatrix(grader_array, submissions_array) {
     return matrix;
 }
 
-export function runPipeline() {
+function runPipeline() {
 
     queries.get_grader_objects()
         .then(grader_array => {
@@ -38,7 +38,7 @@ export function runPipeline() {
                     return submission_json.map(v => v.id);
                 })
                 .then(mapped => {
-                    output_of_algo = distribute(mapped.length, grader_array);
+                    output_of_algo = distribution.distribute(mapped.length, grader_array);
                     matrix_of_pairs = formMatchingMatrix(mapped, output_of_algo);
 
                     //update submissions DB with matrix_of_pairs 
@@ -55,9 +55,7 @@ export function runPipeline() {
         .catch(err => console.log(err));
 }
 
-
-
-
+module.exports = runPipeline
 
 //TESTING 
 

@@ -12,12 +12,11 @@ var AssignmentGrader = require('./grader-model');
 
 //**lastly, we must consider the specific case where we are on the LAST assignment!! --> discuss with client about how that should be handled 
 
-
 /**
  * Shuffles the array a, in place
  * @param {Array} a: The array to be shuffled
  */
-export function shuffle(a) {
+function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [a[i], a[j]] = [a[j], a[i]];
@@ -32,7 +31,7 @@ export function shuffle(a) {
  * @param {int} num_of_submissions: Total number of assignments that need to be distributed
  * @param {Array} graders: A 2D-array containing [graders id, weight, offset]
  */
-export function distribute(num_of_submissions, graders) {
+function distribute(num_of_submissions, graders) {
 
     if (num_of_submissions <= 0) {
         console.log('There are currently no assignments to distribute.');
@@ -178,5 +177,7 @@ export function distribute(num_of_submissions, graders) {
         graderArray[i].incrementOffset(normalizing_cons);
 
     return graderArray;
-
 }
+
+module.exports.shuffle = shuffle
+module.exports.distribute = distribute

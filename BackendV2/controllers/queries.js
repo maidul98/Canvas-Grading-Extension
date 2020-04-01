@@ -5,8 +5,9 @@
  */
 var mysql = require('mysql');
 var AssignmentGrader = require('../distribution-algorithm/grader-model');
-// var async = require('async')
-// import { runPipeline } from '../distribution-algorithm/pipeline.js'
+var async = require('async')
+var pipeline = require('../distribution-algorithm/pipeline.js')
+
 /** Configure Heroku Connection */
 /** TODO: Store all these constants in a separate file, gitignore it and figure 
  * out deployment mechanism - where will these pins be stored? That is a later 
@@ -394,7 +395,7 @@ module.exports = {
     })
   },
 
-  // distribution_pipeline: runPipeline
+  run_distribution_pipeline: pipeline.runPipeline
   // TO DO:
   // update grade in submission
   // Pull submissions from Canvas
