@@ -6,7 +6,7 @@
 var mysql = require('mysql');
 var AssignmentGrader = require('../distribution-algorithm/grader-model');
 var async = require('async')
-var pipeline = require('../distribution-algorithm/pipeline.js')
+var distribution = require('../distribution-algorithm/distribution.js');
 
 /** Configure Heroku Connection */
 /** TODO: Store all these constants in a separate file, gitignore it and figure 
@@ -317,39 +317,6 @@ module.exports = {
     });
   },
 
-  /** returns a list of AssignmentGrader objects, which will be input in the 
-   * algorithm. 
-   * 
-   * This method will query a list of all the graders, and create 
-   * AssignmentGrader instances for each of those graders with their respective
-   * id, current weight and offset, and the curr_assigned initialized to 0. 
-   * 
-   * @returns A new Promise object
-   */
-  get_grader_objects: function () {
-    return new Promise(function (resolve, reject) {
-
-      let sql_query = "SELECT * FROM grader"
-      db.query(sql_query, (err, results) => {
-        if (err) {
-          console.log(err)
-          return reject(err)
-        } else {
-          grader_array = []
-          results.forEach(grader => {
-            let id = grader.id
-            let offset = grader.offset
-            let weight = grader.weight
-            let graderObj = new AssignmentGrader(id, weight, offset, 0)
-            grader_array.push(graderObj)
-          })
-          resolve(grader_array)
-        }
-      })
-
-    })
-  },
-
   //TOOD: Refactor the 2 functions into one function. 
   update_grader_entries: function (grader_array, callback) {
     async.forEachOf(grader_array, function (grader, _, inner_callback) {
@@ -396,7 +363,7 @@ module.exports = {
   },
 
   run_distribution_pipeline: async function (req, res) {
-    await pipeline.runPipeline()
+    await runPipeline()
     res.send('success')
   }
   // TO DO:
@@ -407,3 +374,64 @@ module.exports = {
   // 
 }
 
+
+function runPipeline() {
+  get_grader_objects()
+    .then(grader_array => {
+      get_unassigned_submissions()
+        .then(submission_json => {
+          return submission_json.map(v => v.id);
+        })
+        .then(mapped => {
+          output_of_algo = distribution.distribute(mapped.length, grader_array);
+          matrix_of_pairs = distribution.formMatchingMatrix(mapped, output_of_algo);
+
+          //update submissions DB with matrix_of_pairs 
+          //update graders offsest with output_of_algo
+          update_grader_entries(output_of_algo, function (err) {
+            if (err) console.log(err);
+          });
+          assign_submissions_to_grader(matrix_of_pairs, function (err) {
+            if (err) console.log(err);
+          });
+        })
+        .catch(err => console.log(err));
+    })
+    .then(res.send('success'))
+    .catch(err => console.log(err));
+}
+
+
+
+/** returns a list of AssignmentGrader objects, which will be input in the 
+   * algorithm. 
+   * 
+   * This method will query a list of all the graders, and create 
+   * AssignmentGrader instances for each of those graders with their respective
+   * id, current weight and offset, and the curr_assigned initialized to 0. 
+   * 
+   * @returns A new Promise object
+   */
+function get_grader_objects() {
+  return new Promise(function (resolve, reject) {
+
+    let sql_query = "SELECT * FROM grader"
+    db.query(sql_query, (err, results) => {
+      if (err) {
+        console.log(err)
+        return reject(err)
+      } else {
+        grader_array = []
+        results.forEach(grader => {
+          let id = grader.id
+          let offset = grader.offset
+          let weight = grader.weight
+          let graderObj = new AssignmentGrader(id, weight, offset, 0)
+          grader_array.push(graderObj)
+        })
+        resolve(grader_array)
+      }
+    })
+
+  })
+}

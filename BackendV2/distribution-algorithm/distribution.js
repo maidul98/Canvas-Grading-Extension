@@ -24,6 +24,33 @@ function shuffle(a) {
     return a;
 }
 
+function formMatchingMatrix(grader_array, submissions_array) {
+    const len = submissions_array.length;
+
+    if (len === 0) {
+        console.log('There are currently no assignments to distribute.');
+        return [];
+    }
+
+    var matrix = new Array(len).fill(0).map(() => new Array(2).fill(0));
+    distribution.shuffle(submissions_array);
+
+    var counter = 0;
+    for (var j = 0; j < grader_array.length; j++) {
+        num_assigned = grader_array[j].num_assigned;
+        id = grader_array[j].grader_id;
+        for (var i = counter; i < counter + num_assigned; i++) {
+            matrix[i][0] = id;
+        }
+        counter += num_assigned;
+    }
+
+    for (var i = 0; i < len; i++)
+        matrix[i][1] = submissions_array[i];
+
+    return matrix;
+}
+
 
 /**
  * Fairly distributes [num_of_submissions] assignments among [graders] 
