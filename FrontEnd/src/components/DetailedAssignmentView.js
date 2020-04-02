@@ -4,6 +4,7 @@ import { useRequest } from '@umijs/hooks';
 import Alert from 'react-bootstrap/Alert';
 import LoadingIcon from './LoadingIcon';
 import {removeAlert} from '../Functions.js';
+import { useAlert } from 'react-alert'
 
 export default function DetailedAssignmentView(props){
     const [submission, setSubmission] = useState([]);
@@ -13,14 +14,16 @@ export default function DetailedAssignmentView(props){
     const [user, setUser] = useState([]);
     const [grade, setGrade] = useState(null);
     const [alerts, setAlert] = useState([]);
+    const alert = useAlert();
 
     const submitGrades = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
-            setAlert([...alerts,{type:'success', message:'Your feedback has been submitted successfully'}]);
+            alert.success('Your feedback has been submitted successfully')
         },
         onError: (error, params) => {
-            setAlert([...alerts,{type:'warning', message:'Something went wrong, your feedback ws not submitted, please try again in 40 seconds'}]);
+            console.log(error)
+            alert.error('Something went wrong, your feedback ws not submitted, please try again in 40 second')
         }
     });
 
@@ -53,7 +56,7 @@ export default function DetailedAssignmentView(props){
     function handleSubmit(){
         submitGrades.run(
             {
-                url: '/canvas-api',
+                url: `upload-submission-grades/assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}`,
                 method: 'put',
                 headers: { 'Content-Type': 'application/json' },
                 body: {

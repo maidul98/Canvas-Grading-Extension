@@ -7,11 +7,10 @@ import { useAlert } from 'react-alert'
 import Spinner from 'react-bootstrap/Spinner'
 
 export default function Submissions(props){
-    const alert = useAlert()
+    const alert = useAlert();
     const gradesAndComments = useRef([]);
-    const [grade, setGrade] = useState(null);
-    const [comment, setComment] = useState(null);
     const [changed, setChanged] = useState(false);  
+    const gradeInput = useRef()
 
     /**
      * Get all of the submissions that are tasked for this grader from distribution algo 
@@ -76,6 +75,9 @@ export default function Submissions(props){
     }, [props.assignment_id]);
     
     const handleCommentGrade = (id, event, type) => {
+        //if you change grade, then attach any comments for that sub id
+        //if you change comment, then add 
+
         let found = gradesAndComments.current.some(submissionInArray=> submissionInArray.id == id)
         if(found){
             let index = gradesAndComments.current.findIndex(submissionInArray => submissionInArray.id == id);
@@ -83,8 +85,8 @@ export default function Submissions(props){
         }else{
             gradesAndComments.current.push({
                 'id':id,
-                'assigned_grade': type == "grade"? event.target.value:null,
-                'comment': type == "grade"? event.target.value:null,
+                'assigned_grade': document.querySelector(`[data-grade='${id}']`).value,
+                'comment': document.querySelector(`[data-comment='${id}']`).value,
                 'is_group_comment': false
             })
         }
@@ -94,17 +96,13 @@ export default function Submissions(props){
      * Submit the quick edit grades for only the submissions for which the grade has changed
      */
     const submitForms = () => {
-        const submissionsToBeUpdated = gradesAndComments.current.filter(submission=>{
-            return submission.is_group_comment != null
-        })
-
-        if(submissionsToBeUpdated.length){
+        if(Object.keys(gradesAndComments)){
             submitGrades.run(
                 {
                     url: 'upload-submission-grades/assignments/'+props.assignment_id+'/submissions/batch-update-grades',
                     method: 'post',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(submissionsToBeUpdated),
+                    body: JSON.stringify(gradesAndComments.current),
                 }
             )
         }
@@ -114,8 +112,10 @@ export default function Submissions(props){
 
     return (
         <div>
+            {console.log(singleSubmissionFetch?.fetches)}
             {Object.values(singleSubmissionFetch?.fetches).map(res => 
                 <div key={res.data.id}>
+                    {/* {console.log(res.data?.submission_comments)} */}
                     {
                     (props.bulk_edit)
                     ?
@@ -127,10 +127,10 @@ export default function Submissions(props){
                             </div>
                             <div id="grade_input">
                                 <span className="out-of-text">Grade out of 100</span>
-                                <input type="text" name="assigned_grade" defaultValue={res.data.score} onChange={(event)=>handleCommentGrade(res.data.id, event, 'grade')} type="number" min={0} max={100}></input>
+                                <input type="text" data-grade={res.data.user_id} ref={input => gradeInput.current = input} name="assigned_grade" defaultValue={res.data.score} onChange={(event)=>handleCommentGrade(res.data.user_id, event, 'grade')} type="number" min={0} max={100}></input>
                             </div>
                         </div>
-                        <textarea name="comment" type="text" placeholder="Enter feedback here" className="feedback-form"  onChange={(event)=>handleCommentGrade(res.data.id, event, 'comment')}></textarea>
+                        <textarea name="comment" data-comment={res.data.user_id} type="text" defaultValue={res.data?.submission_comments.length ? res.data?.submission_comments[res.data?.submission_comments?.length-1].comment:null} placeholder="Enter feedback here" className="feedback-form"  onChange={(event)=>handleCommentGrade(res.data.user_id, event, 'comment')}></textarea>
                         <p className={changed?'auto-save-show':'auto-save-hidden'}>Auto saved, not submitted</p>
                     </div>
                     :

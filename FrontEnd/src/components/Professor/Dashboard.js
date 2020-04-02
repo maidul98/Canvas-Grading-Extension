@@ -24,15 +24,18 @@ export default function Dashboard(){
     const [weightSubmitStatus, setWeightSubmitStatus] = useState([]);
     const [fetchGradersStatus, setFetchGradersStatus] = useState([]);
 
-    const fetchGraders = useRequest(url => url, {
+    /**
+     * Get each graders info such as net_id, weight and progress given an assigment_id 
+     */
+    const fetchGradersData = useRequest(id => {
+        return {
+            "url":`/get-grader-info/${id}`,
+            "method":'get'
+        }
+    }, {
         manual: true,
         onSuccess: (result, params) => {
-            if(result.length==0){
-                setFetchGradersStatus([{type:'primary', message:'There are no graders yet'}]);
-            }
-            else{
-                setGraders(result.sort());
-            }
+            console.log(result);
         },
         onError: (error, params) => {
             setFetchGradersStatus([{type:'warning', message:'Something went wrong while fetching graders, please try refreshing the page.'}]);
@@ -41,22 +44,9 @@ export default function Dashboard(){
         formatResult: []
     });
 
-    /*need the routes for fetching graders' missed assignments and progress*/
-    const fetchGradersData = useRequest(url => url, {
-        manual: true,
-        onSuccess: (result, params) => {
-            console.log(result);
-            if(result.length==0){
-                setFetchGradersStatus([{type:'primary', message:'There are no graders yet'}]);
-            }
-            setGradersData(result);
-        },
-        onError: (error, params) => {
-            setFetchGradersStatus([{type:'warning', message:'Something went wrong while fetching graders, please try refreshing the page.'}]);
-            console.log(error);
-        },
-        formatResult: []
-    });
+    /**
+     * Get the full list of assignments ordred from new to old
+     */
     const fetchAssignments = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
@@ -73,6 +63,9 @@ export default function Dashboard(){
         formatResult: []
     });
 
+    /**
+     * Update weights for a user to the DB
+     */
     const submitWeights = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
@@ -96,14 +89,15 @@ export default function Dashboard(){
 
     useEffect(()=>{
         fetchAssignments.run('/get-published-assignments');
+
     },[]);
 
+
     useEffect(()=>{
-        //fetchGraders.run('/get-graders')
         fetchGradersData.run('/get-grading-progress-for-assignment?assignment_id='+assignment_id);
     }, []);
 
-    if(submitWeights.loading | fetchAssignments.loading | fetchGraders.loading) return <LoadingIcon />;
+    if(submitWeights.loading | fetchAssignments.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
@@ -114,7 +108,7 @@ export default function Dashboard(){
                     <tr>
                         <th>Name</th>
                         <th>Weights</th>
-                        <th>Missed</th>
+                        <th>Offsets</th>
                         <th>
                             <select id="selectAssignments">
                                 {assignments.map(assignment=><option value={assignment.id} key={assignment.id} onChange={event=>{setAssignmentID(assignment.id);}}>Progress for {assignment.name}</option>)}
@@ -123,39 +117,16 @@ export default function Dashboard(){
                     </tr>
                 </thead>
                 <tbody>
-                    {graders.map(grader=>
-                        <tr key={grader.user.id}>
-                            <td>{grader.user.name}</td>
-                            <td className="width-10"><FormControl placeholder="Enter" type="number" id={grader.user.id} onChange={event=>{setWeights({...weights, [event.target.id] : event.target.value}); setChanged(true);}}></FormControl></td>
-                            <td className="width-10">4</td>
+                    {fetchGradersData?.data?.map(grader=>
+                        <tr key={grader?.id}>
+                            <td>{grader?.name}</td>
+                            <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{setWeights({}); setChanged(true);}}></FormControl></td>
+                            <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{setWeights({}); setChanged(true);}}></FormControl></td>
                             <td>
                                 <ProgressBar now={30} label={`${30}%`} />
                             </td>
-                        </tr>)}
-                    <tr>
-                        <td>Maidul Islam</td>
-                        <td className="width-10"><FormControl placeholder="Enter" type="number" onChange={event=>setChanged(true)}/></td>
-                        <td className="width-10">4</td>
-                        <td>
-                            <ProgressBar now={30} label={`${30}%`} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Bobby Hik</td>
-                        <td className="width-10"><FormControl placeholder="Enter" type="number" onChange={event=>setChanged(true)}/></td>
-                        <td className="width-10">2</td>
-                        <td>
-                            <ProgressBar now={80} label={`${80}%`} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Tom Pooks</td>
-                        <td className="width-10"><FormControl placeholder="Enter" type="number" onChange={event=>setChanged(true)}/></td>
-                        <td className="width-10">2</td>
-                        <td>
-                            <ProgressBar now={44} label={`${44}%`} />
-                        </td>
-                    </tr>
+                        </tr>)
+                    }
                 </tbody>
             </Table>
             <Button onClick={submit} className={changed?'visible':'invisible'}>Save</Button>
