@@ -28,13 +28,13 @@ router.get('/student-enrollments', apiCalls.student_enrollments);
 router.get('/get-published-assignments', apiCalls.get_published_assignments);
 
 /** Get assignments for specific submission */
-router.get('/get-submissions/:assignment_id', apiCalls.get_submissions_for_assignment);
+// router.get('/get-submissions/:assignment_id', apiCalls.get_submissions_for_assignment);
 
 /** Get single submission */
-router.get('/single-submission/:assignment_id/submissions/:user_id', apiCalls.get_single_submission);
+// router.get('/single-submission/:assignment_id/submissions/:user_id', apiCalls.get_single_submission);
 
 /** Get all graders for enrolled on Canvas */
-router.get('/get-graders', apiCalls.get_all_graders);
+// router.get('/get-graders', apiCalls.get_all_graders);
 
 /** Upload grades and comments for a specific user's submission for an assignment */
 router.put('/upload-submission-grades/assignments/:assignment_id/submissions/:user_id', apiCalls.grade_single_submission);
@@ -46,19 +46,19 @@ router.post('/upload-submission-grades/assignments/:assignment_id/submissions/ba
 router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submission_for_assigment);
 
 /** Get all unassigned submissions */
-router.get('/get-unassigned-submissions', queries.get_unassigned_submissions);
+// router.get('/get-unassigned-submissions', queries.get_unassigned_submissions);
 
 /** Get grader table */
-router.get('/get-grader-table', queries.get_grader_table);
+// router.get('/get-grader-table', queries.get_grader_table);
 
 /** Update weight for a specific grader */
 router.post('/update-grader-weight', queries.update_grader_weight);
 
 /** Get grading progress for a specific assignment */
-router.get('/get-grading-progress-for-assignment', queries.get_grading_progress_for_assignment);
+router.get('/get-grader-info/:assignment_id', queries.get_grader_info);
 
 /** Get grading progress for a specific assignment */
-router.get('/get-grading-progress-for-every-grader', queries.get_grading_progress_for_every_grader);
+// router.get('/get-grading-progress-for-every-grader', queries.get_grading_progress_for_every_grader);
 
 /** Downloads a specific user's submission for a specific assignment */
 router.get('/download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
@@ -69,6 +69,7 @@ router.post('/canvas-api', apiCalls.GETcanvas_API_call);
 
 router.put('/canvas-api', apiCalls.PUTcanvas_API_call);
 
+/** Runs the entire assignments-distribution pipeline & updates the database. */
 router.put('/distribute', queries.run_distribution_pipeline)
 
 module.exports = router;
