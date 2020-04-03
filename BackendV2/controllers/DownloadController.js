@@ -15,6 +15,18 @@ const config = {
     },
 };
 
+async function downloadHelper(attachment, filestream, filepath) {
+    https.get(attachment.url, function (response) {
+        response.pipe(filestream);
+        filestream.on('finish', function () {
+            filestream.close();
+            console.log('filestream closed')
+        });
+    }).on('error', function (err) {
+        fs.unlink(`${filepath}/${attachment.filename}`);
+    });;
+}
+
 /**
  * This function downloads submissions given user_ids of students, assignment_id and a download path url
  * and returns the path to the zipped folder of these submissions.
@@ -25,12 +37,11 @@ const config = {
  * @param assignment_id 
  * the id of the assignment we are going to be downloading for
  */
-function createDownloadSubmission(batchDownloadPath, user_ids, assignment_id) {
+async function createDownloadSubmission(batchDownloadPath, user_ids, assignment_id) {
     //make parent folder
     console.log('started method')
     mkdirp(batchDownloadPath)
         .then(parentPath => {
-            console.log('parentpath ' + parentPath)
             user_ids.map(user_id => {
                 //make folder where we are going to save the this users files 
                 mkdirp(`${parentPath}/${user_id}`)
@@ -41,47 +52,28 @@ function createDownloadSubmission(batchDownloadPath, user_ids, assignment_id) {
                             .then(result => {
                                 //for each attachment download the attachment and save 
                                 if (result.data.attachments) {
-                                    result.data.attachments.map(attachment => {
+                                    result.data.attachments.map(async function (attachment) {
                                         //create a writeable file stream
                                         const fileStream = fs.createWriteStream(`${filePathForUser}/${attachment.filename}`);
-
-                                        // make a request to download the file at hand
-                                        https.get(attachment.url, function (response) {
-                                            response.pipe(fileStream);
-                                            fileStream.on('finish', function () {
-                                                fileStream.close();
-                                                console.log('filestream closed')
-                                            });
-                                        }).on('error', function (err) {
-                                            fs.unlink(`${filePathForUser}/${attachment.filename}`);
-                                        });;
-
+                                        await downloadHelper(attachment, fileStream, filePathForUser);
                                     })
                                 }
-
                             })
                             .catch(error => {
                                 return false
-                                throw "there was an error on downloading a file"
                             })
                     })
                     .catch(error => {
                         return false
-                        throw `there was an error when create a user folder within parent folder ${parentPath}/${user_id}`
                     })
             })
-
-
-
         })
         .then(_ => {
-            console.log('about to return')
             return true
-        });
-        .catch (error => {
-        return false
-        throw "error when making parent folder"
-    })
+        })
+        .catch(error => {
+            return false
+        })
 }
 
 
