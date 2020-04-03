@@ -8,6 +8,7 @@ var express = require('express');
 var router = express.Router();
 var apiCalls = require('../controllers/api-calls');
 var queries = require('../controllers/queries');
+var download = require('../controllers/DownloadController');
 
 
 /* GET home page. */
@@ -71,5 +72,8 @@ router.put('/canvas-api', apiCalls.PUTcanvas_API_call);
 
 /** Runs the entire assignments-distribution pipeline & updates the database. */
 router.put('/distribute', queries.run_distribution_pipeline)
+
+//Params: assignment_id, [user_ids]
+router.post('/download-submission', download.downloadSubmissions)
 
 module.exports = router;
