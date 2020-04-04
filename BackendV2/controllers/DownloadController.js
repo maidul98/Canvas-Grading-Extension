@@ -64,7 +64,12 @@ function createDownloadSubmission(batchDownloadPath, user_ids, assignment_id, zi
                                             downloadHelper(attachment, fileStream, filePathForUser)
                                                 .then(async function () {
                                                     console.log('adding file to zip')
-                                                    await zipFolder.file(`${graderFolderName}/${user_id}/${attachment.filename}`, fs.readFileSync(`${filePathForUser}/${attachment.filename}`));
+                                                    //await zipFolder.folder(`${user_id}`).file(`${attachment.filename}`);
+                                                    /*
+                                                    zip.folder("sub").file("file.txt", "content");
+                                                    zip.file("sub/file.txt"); // the file
+                                                    */
+                                                    await zipFolder.file(`${user_id}/${attachment.filename}`, fs.ReadStream(`${filePathForUser}/${attachment.filename}`));
                                                 })
                                                 .catch(err => console.log(err));
                                         })
