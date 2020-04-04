@@ -8,6 +8,8 @@ const path = require('path');
 const fetch = require('node-fetch');
 var zipdir = require('zip-dir');
 
+var rimraf = require("rimraf"); // for removing a folder with contents
+
 const config = {
     //TODO: Factor out bearer tokens into another file that isn't publicly accessible.
     headers: {
@@ -96,7 +98,7 @@ module.exports.downloadSubmissions = async (req, res) => {
         let batchDownloadPath = `temp_bulk_downloads/assignemnt-${folder_name}`;
     
         if (fs.existsSync(batchDownloadPath) && fs.lstatSync(batchDownloadPath).isDirectory()) {
-            await fs.remove(batchDownloadPath)
+            rimraf.sync(batchDownloadPath);
             await createDownloadSubmission(batchDownloadPath, req.body.user_ids, req.body.assignment_id, folder_name)
             res.send('done!')
         } else {
@@ -107,4 +109,3 @@ module.exports.downloadSubmissions = async (req, res) => {
         res.send('Error!')
     }
 }
-
