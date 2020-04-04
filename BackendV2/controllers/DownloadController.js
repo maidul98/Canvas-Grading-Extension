@@ -5,6 +5,9 @@ var mkdirp = require('mkdirp');
 const https = require('https');
 const fs = require('fs-extra');
 const path = require('path');
+const fetch = require('node-fetch');
+
+var zipdir = require('zip-dir');
 
 const config = {
     //TODO: Factor out bearer tokens into another file that isn't publicly accessible.
@@ -14,21 +17,28 @@ const config = {
     },
 };
 
-function downloadHelper(attachment, filestream, filepath) {
-    return new Promise((resolve, reject) => {
-        https.get(attachment.url, function (response) {
-            response.pipe(filestream);
-            filestream.on('finish', function () {
-                filestream.close();
-                console.log('filestream closed')
-                resolve();
-            });
-        }).on('error', function (err) {
-            console.log(err)
-            fs.unlink(`${filepath}/${attachment.filename}`);
-            reject(reject);
-        });;
-    })
+function zipFile(path_to_folder, zip_name) {
+    zipdir(path_to_folder, { saveTo: `${path.join(__dirname, '../temp_bulk_downloads')}/${zip_name}.zip`, each: path => console.log("added!") }, function (err, buffer) {
+        console.log('Zipping')
+    });
+}
+
+/**
+ * Given a URL, it will download a file from the URL into the filestream 
+ * @param {*} url 
+ * @param {*} filestream 
+ * @param {*} filepath
+ * @param {*} bulk_folder_path 
+ * @param {*} zip_name 
+ */
+function downloadHelper(attachment, filestream, filepath, bulk_folder_path, folder_name) {
+    fetch(attachment.url)
+        .then(res => {
+            res.body.pipe(filestream);
+            zipFile(bulk_folder_path, folder_name);
+        }).catch(() => {
+            throw 'Something went wrong when writing the file to disk'
+        });
 }
 
 /**
@@ -41,88 +51,55 @@ function downloadHelper(attachment, filestream, filepath) {
  * @param assignment_id 
  * the id of the assignment we are going to be downloading for
  */
-function createDownloadSubmission(batchDownloadPath, user_ids, assignment_id, zipFolder, graderFolderName) {
-    //make parent folder
-    return new Promise((resolve, reject) => {
-        console.log('started method')
-        mkdirp(batchDownloadPath)
-            .then(parentPath => {
-                user_ids.map(user_id => {
-                    //make folder where we are going to save the this users files 
-                    mkdirp(`${parentPath}/${user_id}`)
-                        .then(filePathForUser => {
-                            //get the list of attachments for a user
-                            axios
-                                .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${assignment_id}/submissions/${user_id}`, config)
-                                .then(result => {
-                                    //for each attachment download the attachment and save 
-                                    if (result.data.attachments) {
-                                        result.data.attachments.map(function (attachment) {
-                                            //create a writeable file stream
-                                            const fileStream = fs.createWriteStream(`${filePathForUser}/${attachment.filename}`);
-                                            console.log('downloading file')
-                                            downloadHelper(attachment, fileStream, filePathForUser)
-                                                .then(async function () {
-                                                    console.log('adding file to zip')
-                                                    //await zipFolder.folder(`${user_id}`).file(`${attachment.filename}`);
-                                                    /*
-                                                    zip.folder("sub").file("file.txt", "content");
-                                                    zip.file("sub/file.txt"); // the file
-                                                    */
-                                                    await zipFolder.file(`${user_id}/${attachment.filename}`, fs.ReadStream(`${filePathForUser}/${attachment.filename}`));
-                                                })
-                                                .catch(err => console.log(err));
-                                        })
-                                    }
-                                })
-                                .catch(error => {
-                                    console.log(error);
-                                    reject(error)
-                                })
-                        })
-                        .catch(error => {
-                            console.log(error);
-                            reject(error)
-                        })
-                })
+function createDownloadSubmission(batchDownloadPath, user_ids, assignment_id, folder_name) {
+    mkdirp(batchDownloadPath)
+        .then(parentPath => {
+            user_ids.map(user_id => {
+                //make folder where we are going to save the this users files 
+                mkdirp(`${parentPath}/${user_id}`)
+                    .then(filePathForUser => {
+                        //get the list of attachments for a user
+                        axios
+                            .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${assignment_id}/submissions/${user_id}`, config)
+                            .then(result => {
+                                //for each attachment download the attachment and save 
+                                if (result.data.attachments) {
+                                    result.data.attachments.map(function (attachment) {
+                                        //create a writeable file stream
+                                        const fileStream = fs.createWriteStream(`${filePathForUser}/${attachment.filename}`);
+                                        downloadHelper(attachment, fileStream, filePathForUser, parentPath, folder_name)
+                                    })
+                                }
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            })
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
             })
-            .then(_ => {
-                resolve(true)
-            })
-            .catch(error => {
-                console.log(error);
-                reject(error)
-            })
-    })
+        })
+        .then(() => {
+
+        })
+        .catch(error => {
+            console.log(error);
+            reject(error)
+        })
 
 }
 
 exports.downloadSubmissions = function (req, res) {
-    let batchDownloadPath = `temp_bulk_downloads/assignemnt-${req.body.assignment_id}-${req.body.grader_id}`;
-    let zip = new JSZip();
-    let graderFolderName = `assignment-${req.body.assignment_id}-${req.body.grader_id}`
-    zip.folder(graderFolderName);
+    let folder_name = `${req.body.assignment_id}-${req.body.grader_id}`
+    let batchDownloadPath = `temp_bulk_downloads/assignemnt-${folder_name}`;
 
     if (fs.existsSync(batchDownloadPath) && fs.lstatSync(batchDownloadPath).isDirectory()) {
         fs.remove(batchDownloadPath).then(function () {
-            // if (createDownloadSubmission(batchDownloadPath, req.body.user_ids, req.body.assignment_id)) {
-            //     res.send('done downloading')
-            // }
-            createDownloadSubmission(batchDownloadPath, req.body.user_ids, req.body.assignment_id, zip, graderFolderName)
-                .then(async function (r) {
-                    var content = await zip.generateAsync({ type: "nodebuffer" });
-                    await fs.writeFile(`${graderFolderName}.zip`, content, function (err) {
-                        if (err) throw err;
-                    });
-                    res.send('done downloading')
-                })
-                .catch(err => console.log(err))
-
+            createDownloadSubmission(batchDownloadPath, req.body.user_ids, req.body.assignment_id, folder_name)
         })
     } else {
-        createDownloadSubmission(batchDownloadPath, req.body.user_ids, req.body.assignment_id, zip, graderFolderName)
-            .then(_ => res.send('done downloading'))
-            .catch(err => console.log(err))
+        createDownloadSubmission(batchDownloadPath, req.body.user_ids, req.body.assignment_id, folder_name)
     }
 }
 
