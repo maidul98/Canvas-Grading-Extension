@@ -1,10 +1,12 @@
 import React from 'react';
-import { Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import withBreadcrumbs from 'react-router-breadcrumbs-hoc';
 
-
+/*
+    Displays trail of locations for users as a secondary navigation tool
+*/
 const bread = ({ breadcrumbs }) => (
-    <div className="breadcrumb"><div className = "container">
+    <div className="breadcrumb"><div className="container">
         {breadcrumbs.map(({ breadcrumb, match }, index) => {
             console.log(breadcrumb);
             if (breadcrumb.key != '/') {
@@ -13,11 +15,12 @@ const bread = ({ breadcrumbs }) => (
                         <Link className='bc_a' to={match.url || ''}>{breadcrumb}</Link>
                         {index < breadcrumbs.length - 1 && '/'}
                     </ol>
-                );}
+                );
+            }
         })}
     </div></div>
 );
-  
+
 export default withBreadcrumbs()(bread);
 
 // import React from 'react';
@@ -44,7 +47,7 @@ export default withBreadcrumbs()(bread);
 //     });
 
 //     return paths;
-  
+
 // };
 
 // const BreadcrumbsItem = ({ match, ...rest }) => {
