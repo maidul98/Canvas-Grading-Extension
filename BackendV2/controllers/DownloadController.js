@@ -1,4 +1,3 @@
-let connection = require('../connection.js');
 const axios = require('axios');
 var mkdirp = require('mkdirp');
 const fs = require('fs-extra');
@@ -81,24 +80,69 @@ async function downloadAllAttachmentsForAllUser(batchDownloadPath, user_ids, ass
 }
 
 /**
+ * This function deletes a folder fully and returns true 
+ * if it has done so successfully or false otherwise.
+ * @param {string} path 
+ */
+function deleteFolder(path){
+    try{
+        rimraf.sync(path)
+        return true
+    }catch(e){
+        console.log(e) 
+    }
+}
+
+/**
+ * This function deletes a file fully and returns true 
+ * if it has done so successfully or false otherwise.
+ * @param {string} path 
+ */
+function deleteFile(path){
+    try{
+        fs.unlink(path, (err) => {
+            if (err) throw err;
+        })
+        return true
+    }catch(e){
+        console.log(e) 
+    }
+}
+
+/**
+ * 
+ */
+function deletePreviousBulkSubmission(){
+    const time_remaining = (date_provided) => new Date(date_provided) - new Date();
+    const timer = setTimeout( () => deleteFile(req.body.file), time_remaining (req.body.date));
+     timeOuts.push(timer);
+}
+
+/**
  * Route
  */
 module.exports.downloadSubmissions = async (req, res) => {
     try{
         let folder_name = `${req.body.assignment_id}-${req.body.grader_id}`
-        let batchDownloadPath = `temp_bulk_downloads/assignemnt-${folder_name}`;
-    
-        if (fs.existsSync(batchDownloadPath) && fs.lstatSync(batchDownloadPath).isDirectory()) {
-            rimraf.sync(batchDownloadPath);
-            await downloadAllAttachmentsForAllUser(batchDownloadPath, req.body.user_ids, req.body.assignment_id)
-            await zip(`${batchDownloadPath}/`, `${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`);
-            res.download(`${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`)
-        } else {
-            await downloadAllAttachmentsForAllUser(batchDownloadPath, req.body.user_ids, req.body.assignment_id)
-            await zip(`${batchDownloadPath}/`, `${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`);
+        let bulkSubmissionsPath = `temp_bulk_downloads/assignemnt-${folder_name}`;
+        let zip_file_path = `${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`
+
+        if (fs.existsSync(zip_file_path)) { 
+            if(deleteFile(zip_file_path) & deleteFolder(bulkSubmissionsPath)){
+                console.log('delete both')
+                await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id)
+                await zip(`${bulkSubmissionsPath}/`, zip_file_path);
+                res.download(`${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`)
+            }else{
+                console.log('not delete')
+            }
+        }else{
+            await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id)
+            await zip(`${bulkSubmissionsPath}/`, zip_file_path);
             res.download(`${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`)
         }
+
     }catch(error){
-        res.send('Error!')
+        res.send(error)
     }
 }
