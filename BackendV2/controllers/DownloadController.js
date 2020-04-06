@@ -81,7 +81,7 @@ async function downloadAllAttachmentsForAllUser(batchDownloadPath, user_ids, ass
 }
 
 /**
- * 
+ * Route
  */
 module.exports.downloadSubmissions = async (req, res) => {
     try{
