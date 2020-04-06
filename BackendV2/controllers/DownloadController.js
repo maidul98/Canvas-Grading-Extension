@@ -110,12 +110,11 @@ function deleteFile(path) {
 }
 
 /**
- * 
+ * Computes the delay in milliseconds
+ * @param {*} minutes The number of minutes the delay is required to last
  */
-function deletePreviousBulkSubmission() {
-    const time_remaining = (date_provided) => new Date(date_provided) - new Date();
-    const timer = setTimeout(() => deleteFile(req.body.file), time_remaining(req.body.date));
-    timeOuts.push(timer);
+function computeTimeout(minutes) {
+    return minutes * 60000
 }
 
 /**
@@ -126,7 +125,7 @@ module.exports.downloadSubmissions = async (req, res) => {
         let folder_name = `${req.body.assignment_id}-${req.body.grader_id}`
         let bulkSubmissionsPath = `temp_bulk_downloads/assignemnt-${folder_name}`;
         let zip_file_path = `${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`
-        const timeout = 5000 // 5 seconds for now
+        const timeout = computeTimeout(0.5) // 30 seconds for now
         if (fs.existsSync(zip_file_path)) {
             if (deleteFile(zip_file_path) & deleteFolder(bulkSubmissionsPath)) {
                 console.log('delete both')
