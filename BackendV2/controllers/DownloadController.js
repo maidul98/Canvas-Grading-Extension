@@ -125,26 +125,29 @@ module.exports.downloadSubmissions = async (req, res) => {
         let folder_name = `${req.body.assignment_id}-${req.body.grader_id}`
         let bulkSubmissionsPath = `temp_bulk_downloads/assignemnt-${folder_name}`;
         let zip_file_path = `${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`
-        const timeout = computeTimeout(0.5) // 30 seconds for now
+        const timeout = computeTimeout(2) // 2 minutes for now
         if (fs.existsSync(zip_file_path)) {
-            if (deleteFile(zip_file_path) & deleteFolder(bulkSubmissionsPath)) {
-                console.log('delete both')
-                await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id)
-                await zip(`${bulkSubmissionsPath}/`, zip_file_path);
-                res.download(`${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`)
-                console.log('do something')
-                setTimeout(function () {
-                    deleteFile(zip_file_path)
-                    deleteFolder(bulkSubmissionsPath)
-                }, timeout)
-            } else {
-                console.log('not delete')
-            }
+            // if (deleteFile(zip_file_path) & deleteFolder(bulkSubmissionsPath)) {
+            //     console.log('delete both')
+            //     await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id)
+            //     await zip(`${bulkSubmissionsPath}/`, zip_file_path);
+            //     res.download(`${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`)
+            //     console.log('do something')
+            //     setTimeout(function () {
+            //         deleteFile(zip_file_path)
+            //         deleteFolder(bulkSubmissionsPath)
+            //     }, timeout)
+            // } else {
+            //     console.log('not delete')
+            // }
+            console.log('if block')
+            res.download(zip_file_path);
+
         } else {
             await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id)
             await zip(`${bulkSubmissionsPath}/`, zip_file_path);
-            res.download(`${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`)
-            console.log('else branch delete')
+            res.download(zip_file_path)
+            console.log('else block')
             setTimeout(function () {
                 deleteFile(zip_file_path)
                 deleteFolder(bulkSubmissionsPath)
