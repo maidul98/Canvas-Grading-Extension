@@ -87,7 +87,8 @@ module.exports.downloadSubmissions = async (req, res) => {
         if (fs.existsSync(batchDownloadPath) && fs.lstatSync(batchDownloadPath).isDirectory()) {
             rimraf.sync(batchDownloadPath);
             await createDownloadSubmission(batchDownloadPath, req.body.user_ids, req.body.assignment_id)
-            res.send('done!')
+            await zip(`${batchDownloadPath}/`, `${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`);
+            res.download(`${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`)
         } else {
             await createDownloadSubmission(batchDownloadPath, req.body.user_ids, req.body.assignment_id)
             await zip(`${batchDownloadPath}/`, `${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`);
