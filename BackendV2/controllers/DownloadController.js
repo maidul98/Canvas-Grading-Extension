@@ -17,9 +17,10 @@ const config = {
 };
 
 /**
- * 
- * @param {*} attachment 
- * @param {*} user_folder_path 
+ * This function downloads a single attachment and savesit to its users folder. 
+ * Throws error otherwise
+ * @param {obj} attachment 
+ * @param {string} user_folder_path 
  */
 function downloadAttachment(attachment, user_folder_path){
     return new Promise(function(resolve, reject) {
@@ -38,10 +39,12 @@ function downloadAttachment(attachment, user_folder_path){
 }
 
 /**
- * 
- * @param {*} user_id 
- * @param {*} assignment_id 
- * @param {*} parentPath 
+ * This fetches all attachments of a single user and 
+ * calls downloadAttachment() for each attachment to be 
+ * downloaded into the users folder.
+ * @param {int} user_id 
+ * @param {int} assignment_id 
+ * @param {string} parentPath 
  */
 async function getAllUserAttachments(user_id, assignment_id, parentPath){
     try{
@@ -59,12 +62,13 @@ async function getAllUserAttachments(user_id, assignment_id, parentPath){
 }
 
 /**
- * 
- * @param {*} batchDownloadPath 
- * @param {*} user_ids 
- * @param {*} assignment_id 
+ * This function downloads all attachments for every user 
+ * gievn a assignment_id into folders named by user_id
+ * @param {string} batchDownloadPath 
+ * @param {array} user_ids 
+ * @param {int} assignment_id 
  */
-async function createDownloadSubmission(batchDownloadPath, user_ids, assignment_id) {
+async function downloadAllAttachmentsForAllUser(batchDownloadPath, user_ids, assignment_id) {
     try{
         let parentPath = await mkdirp(batchDownloadPath)
         return await Promise.all(user_ids.map(user_id => 
@@ -86,11 +90,11 @@ module.exports.downloadSubmissions = async (req, res) => {
     
         if (fs.existsSync(batchDownloadPath) && fs.lstatSync(batchDownloadPath).isDirectory()) {
             rimraf.sync(batchDownloadPath);
-            await createDownloadSubmission(batchDownloadPath, req.body.user_ids, req.body.assignment_id)
+            await downloadAllAttachmentsForAllUser(batchDownloadPath, req.body.user_ids, req.body.assignment_id)
             await zip(`${batchDownloadPath}/`, `${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`);
             res.download(`${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`)
         } else {
-            await createDownloadSubmission(batchDownloadPath, req.body.user_ids, req.body.assignment_id)
+            await downloadAllAttachmentsForAllUser(batchDownloadPath, req.body.user_ids, req.body.assignment_id)
             await zip(`${batchDownloadPath}/`, `${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`);
             res.download(`${path.join(__dirname, '../temp_bulk_downloads/achieves')}/${folder_name}.zip`)
         }
