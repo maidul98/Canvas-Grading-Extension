@@ -11,6 +11,7 @@
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "^4.17.1",
+    "folder-zip-sync": "^1.0.5",
     "form-data": "^3.0.0",
     "fs-extra": "^9.0.0",
     "heroku": "^7.38.2",
