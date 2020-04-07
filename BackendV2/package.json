@@ -6,11 +6,13 @@
     "start": "nodemon ./bin/www"
   },
   "dependencies": {
+    "archiver": "^3.1.1",
     "async": "^3.2.0",
     "axios": "^0.19.2",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "^4.17.1",
+    "folder-zip-sync": "^1.0.5",
     "form-data": "^3.0.0",
     "fs-extra": "^9.0.0",
     "heroku": "^7.38.2",
@@ -29,6 +31,7 @@
     "qs": "^6.9.1",
     "rimraf": "^3.0.2",
     "sequelize": "^5.21.5",
+    "zip-a-folder": "0.0.12",
     "zip-dir": "^1.0.2"
   },
   "devDependencies": {
