@@ -272,7 +272,7 @@ function update_grader_weight(req, res) {
  * Returns the assigned submissions for every grader for an assignment:
  * {grader1_id: [submission1_id, submission2_id], grader2_id: [submission3_id, submission4_id]}
  */
-function get_number_of_submissions_for_each_grader(req, res){
+function get_assigned_submissions_for_graders(req, res){
   let sql_query = "SELECT grader_id, id AS submission_id FROM submission WHERE assignment_id=? order by grader_id";
   db.query(
     sql_query, [req.query.assignment_id],
@@ -311,11 +311,9 @@ function get_number_of_submissions_for_each_grader(req, res){
   );
 }
 
-
 /**
 * This function gets the grading progress for each grader given assignment_id
 * @param {*} assigment_id
-* @param {*} grader_id
 */
 function get_grading_progress_for_every_grader(req, res) {
   let sql_query = "SELECT submission.id, grader_id, assignment_id, is_graded, offset, weight, total_graded FROM submission JOIN grader ON submission.grader_id = grader.id WHERE assignment_id=? AND grader_id IS NOT NULL";
@@ -538,7 +536,7 @@ module.exports = {
 
   update_grader_weight: update_grader_weight,
 
-  get_number_of_submissions_for_each_grader: get_number_of_submissions_for_each_grader,
+  get_assigned_submissions_for_graders: get_assigned_submissions_for_graders,
 
   get_assigned_submission_for_assigment: get_assigned_submission_for_assigment,
 

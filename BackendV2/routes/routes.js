@@ -46,7 +46,7 @@ router.post('/upload-submission-grades/assignments/:assignment_id/submissions/ba
 /** Get all assigned submissions for a specific submission */
 router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submission_for_assigment);
 
-router.get('/get_number_of_submissions_for_each_grader', queries.get_number_of_submissions_for_each_grader)
+router.get('/get-assigned-submissions-for-graders', queries.get_assigned_submissions_for_graders);
 
 /** Get all unassigned submissions */
 // router.get('/get-unassigned-submissions', queries.get_unassigned_submissions);
