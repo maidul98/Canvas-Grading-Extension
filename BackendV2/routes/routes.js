@@ -46,6 +46,8 @@ router.post('/upload-submission-grades/assignments/:assignment_id/submissions/ba
 /** Get all assigned submissions for a specific submission */
 router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submission_for_assigment);
 
+router.get('/get_number_of_submissions_for_each_grader', queries.get_number_of_submissions_for_each_grader)
+
 /** Get all unassigned submissions */
 // router.get('/get-unassigned-submissions', queries.get_unassigned_submissions);
 
@@ -56,7 +58,7 @@ router.get('/get-assigned-submissions-for-assigment', queries.get_assigned_submi
 router.post('/update-grader-weight', queries.update_grader_weight);
 
 /** Get grading progress for a specific assignment */
-router.get('/get-grader-info/:assignment_id', queries.get_grader_info);
+router.get('/get-grader-info', queries.get_grader_info);
 
 /** Get grading progress for a specific assignment */
 // router.get('/get-grading-progress-for-every-grader', queries.get_grading_progress_for_every_grader);

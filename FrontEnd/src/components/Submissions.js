@@ -74,6 +74,7 @@ export default function Submissions(props){
         assignedSubmissions.run('/get-assigned-submissions-for-assigment?user_id=1&assigment_id='+props.assignment_id);
     }, [props.assignment_id]);
     
+    
     const handleCommentGrade = (id, event, type) => {
         //if you change grade, then attach any comments for that sub id
         //if you change comment, then add 

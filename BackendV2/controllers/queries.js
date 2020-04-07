@@ -267,7 +267,30 @@ function update_grader_weight(req, res) {
   );
 }
 
-
+/**
+ * @param {*} assignment_id
+ * Returns the assigned submissions for every grader for an assignment:
+ * {grader1_id: [submission1_id, submission2_id], grader2_id: [submission3_id, submission4_id]}
+ */
+function get_number_of_submissions_for_each_grader(req, res){
+  let sql_query = "SELECT grader_id, id AS submission_id FROM submission WHERE assignment_id=? order by grader_id";
+  db.query(
+    sql_query, [req.query.assignment_id],
+    function (err, results){
+      if(err){
+        console.log(err);
+      } else {
+        data = results.reduce((assigned_submissions, row)=>{
+          assigned_submissions[row.grader_id]?
+          assigned_submissions[row.grader_id].push(row.submission_id)
+          :assigned_submissions[row.grader_id]=[row.submission_id];
+          return assigned_submissions;
+        }, {})
+        res.json(data);
+      }
+    }
+  )
+}
 
 /**
   * This function takes in grader_id and assigment_id and returns the list of submissions that are assigned for that grader
@@ -514,6 +537,8 @@ module.exports = {
   get_grader_table: get_grader_table,
 
   update_grader_weight: update_grader_weight,
+
+  get_number_of_submissions_for_each_grader: get_number_of_submissions_for_each_grader,
 
   get_assigned_submission_for_assigment: get_assigned_submission_for_assigment,
 
