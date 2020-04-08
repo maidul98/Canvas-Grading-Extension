@@ -15,8 +15,14 @@ export default function Dashboard(){
     const [gradersProgress, setGradersProgress] = useState({});
     const [changed, setChanged] = useState(false);
     const [assignment_id, setAssignmentID] = useState(null);
-    const [weights, setWeights] = useState([]);
-    const [weightSubmitStatus, setWeightSubmitStatus] = useState([]);
+    /* gradersData:
+    {
+        "grader1_id": {"weight": 5, "offset": 1}
+        "grader2_id": {"weight": 2, "offset": 0}
+    }
+    */
+    const [gradersData, setGradersData] = useState({});
+    const [dataSubmitStatus, setDataSubmitStatus] = useState([]);
     const [fetchGradersStatus, setFetchGradersStatus] = useState([]);
 
     /**
@@ -97,32 +103,45 @@ export default function Dashboard(){
             setGradersProgress(updatedGradersProgress);
         },
         onError: (error, params) => {
-            console.log(error);
+            setFetchGradersStatus([{type:'warning', message:'Something went wrong while fetching graders, please try refreshing the page.'}]);
         }
     })
 
+    const updateGradersData = (grader_id, field, val) => {
+        if(val!=""){
+            setGradersData({...gradersData, [grader_id]: {...gradersData[grader_id], [field]:parseInt(val)}})
+        }
+    };
+
     /**
-     * Update weights for a user to the DB
+     * Update the db with weights and offsets for users
      */
-    const submitWeights = useRequest(url => url, {
+    const submitData = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
-            setWeightSubmitStatus({type:'success', message:'Weights updated successfully'});
+            setDataSubmitStatus([{type:'success', message:'Weights and offsets updated successfully'}]);
             setChanged(false);
+            setGradersData({});
         },
         onError: (error, params) => {
-            setWeightSubmitStatus({type:'warning', message:'Something went wrong, please try again'});
+            setDataSubmitStatus([{type:'warning', message:'Something went wrong while submitting changes, please try resubmitting.'}]);
+
         }
     });
 
     /* need routes for submitting weights */     
     const submit = () =>{
-        /*submitWeights.run({
-            url: "",
+        let finalData = Object.keys(gradersData).reduce((data, grader_id)=>{
+            data.push({"id": grader_id, ...gradersData[grader_id]});
+            return data;
+        }, [])
+        console.log(finalData);
+        submitData.run({
+            url: "/update-graders-data",
             method: 'post',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(weights),
-        })*/
+            body: JSON.stringify(finalData),
+        })
     };
 
     useEffect(()=>{
@@ -140,12 +159,15 @@ export default function Dashboard(){
         }
     }, [assignment_id])
 
-    if(submitWeights.loading | fetchAssignments.loading) return <LoadingIcon />;
+    useEffect(()=>{
+        console.log(gradersData);
+    }, [gradersData])
+    if(submitData.loading | fetchAssignments.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
-            {weightSubmitStatus.map(status=><Alert variant={status.type}>{status.message}</Alert>)}
-            {fetchGradersStatus.map(status=><Alert variant={status.type}>{status.message}</Alert>)}
+            {dataSubmitStatus.map(status=><Alert variant={status.type} key="dataSubmitStatus">{status.message}</Alert>)}
+            {fetchGradersStatus.map(status=><Alert variant={status.type} key="fetchGradersStatus">{status.message}</Alert>)}
             <Table bordered hover  id="dashboardTable">
                 <thead>
                     <tr>
@@ -163,8 +185,8 @@ export default function Dashboard(){
                     {fetchGradersData?.data?.map(grader=>
                         <tr key={grader?.id}>
                             <td>{grader?.name}</td>
-                            <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{setWeights({}); setChanged(true);}}></FormControl></td>
-                            <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{setWeights({}); setChanged(true);}}></FormControl></td>
+                            <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" min="0" pattern="[0-9]*" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "weight", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
+                            <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "offset", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
                             <td>
                                 {!fetchSubmissions.loading && !fetchAssignedSubmissions.loading?gradersProgress[grader?.id][assignment_id]?
                                 <ProgressBar now={gradersProgress[grader?.id][assignment_id]} label={`${gradersProgress[grader?.id][assignment_id]}%`} />

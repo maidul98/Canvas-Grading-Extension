@@ -235,8 +235,6 @@ exports.pull_submissions_and_update_for_assignment = function (req, res) {
  * Input: body['endpoint]
  */
 exports.GETcanvas_API_call = function (req, res) {
-  console.log(req);
-  console.log(req.body);
   axios
     .get(`https://canvas.cornell.edu/api/v1/courses/15037/${req.body['endpoint']}`, config)
     .then(result => {

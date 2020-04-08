@@ -245,6 +245,45 @@ function get_unassigned_submissions() {
 
 }
 
+function update_multiple_graders_data_route(req, res) {
+  console.log("hi");
+  const callback = (err) => {
+    if(err){
+      res.status(406).send({
+        status: "fail",
+        message: "Something went wrong"
+      });
+    } else {
+      res.send("success");
+    }
+  }
+  console.log(req.body);
+  update_multiple_graders_data(req.body, callback);
+}
+
+/**
+ * @param {*} graders_arr: [{"id": 123, "weight": 5, "offset": -1}, {"id": 234, "offset": 0}, {"id: 345", "weight": 3}]
+ * @param {*} callback
+ */
+function update_multiple_graders_data(graders_arr, callback) {
+  let queries = "";
+  graders_arr.forEach(grader=>{
+    let {id, ...data} = grader;
+    queries += mysql.format("UPDATE grader SET ? WHERE id = ?; ", [data, id]);
+  });
+  console.log(queries);
+  db.query(queries, callback);
+}
+
+/**
+ * @param {*} grader_id
+ * @param {*} grader_obj: the columns and their values to be updated. e.g. {"weight": 5, "offset": -1}
+ * @param {*} callback 
+ */
+function update_single_grader_data(grader_id, grader_obj, callback) {
+  let sql_query = "UPDATE grader SET ? WHERE id = ?";
+  db.query(sql_query, [grader_obj, grader_id], callback)
+}
 
 
 /**
@@ -543,6 +582,12 @@ module.exports = {
   get_grading_progress_for_every_grader: get_grading_progress_for_every_grader,
 
   update_grader_entries: update_grader_entries,
+
+  update_single_grader_data: update_single_grader_data,
+
+  update_multiple_graders_data: update_multiple_graders_data,
+
+  update_multiple_graders_data_route: update_multiple_graders_data_route,
 
   assign_submissions_to_grader: assign_submissions_to_grader,
 
