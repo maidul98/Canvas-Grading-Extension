@@ -166,7 +166,6 @@ export default function Dashboard(){
 
     useEffect(()=>{
         fetchAssignments.run('/get-published-assignments');
-
     },[]);
 
     useEffect(()=>{
@@ -179,10 +178,11 @@ export default function Dashboard(){
         }
     }, [assignment_id])
 
-    if(submitData.loading | fetchAssignments.loading) return <LoadingIcon />;
+    if(fetchAssignments.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
+            {submitData.loading | fetchAssignedSubmissions.loading | fetchSubmissions.loading?<LoadingIcon/>:null}
             <Table bordered hover  id="dashboardTable">
                 <thead>
                     <tr>
@@ -204,16 +204,12 @@ export default function Dashboard(){
                             <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" min="0" pattern="[0-9]*" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "weight", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
                             <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "offset", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
                             <td className="width-10">
-                                {!fetchSubmissions.loading && !fetchAssignedSubmissions.loading?graders[grader?.id][assignment_id]?
-                                graders[grader?.id][assignment_id]["total_assigned"]:0
-                                :"Loading..."}
+                                {graders[grader?.id][assignment_id]?graders[grader?.id][assignment_id]["total_assigned"]:0}
                             </td>
                             <td>
-                                {!fetchSubmissions.loading && !fetchAssignedSubmissions.loading?graders[grader?.id][assignment_id]?
+                                {graders[grader?.id][assignment_id]?
                                 <ProgressBar now={graders[grader?.id][assignment_id]["progress"]} label={`${graders[grader?.id][assignment_id]["progress"]}%`} />
-                                :<p>No assigned submissions yet</p>
-                                :<p>Loading...</p>
-                                }
+                                :<p>No assigned submissions yet</p>}
                             </td>
                         </tr>)
                     }
