@@ -12,16 +12,22 @@ import Submissions from '../Submissions';
 export default function Dashboard(){
     const [assignments, setAssignments] = useState([]);
     const [gradedSubmissions, setGradedSubmissions] = useState({});
-    const [gradersProgress, setGradersProgress] = useState({});
+    /* graders store the grading progress and total number of assigned submissions for each grader for every assignment
+    {
+        "grader1_id": {"assignment1_id": {"progress": 0, "total_assigned": 10}, "assignment2_id": {"progress": 50, "total_assigned": 10}}
+    }
+    */
+    const [graders, setGraders] = useState({});
     const [changed, setChanged] = useState(false);
     const [assignment_id, setAssignmentID] = useState(null);
-    /* gradersData:
+    /* gradersData (to store user inputs):
     {
-        "grader1_id": {"weight": 5, "offset": 1}
+        "grader1_id": {"weight": 5}
         "grader2_id": {"weight": 2, "offset": 0}
     }
     */
     const [gradersData, setGradersData] = useState({});
+    const [lastSubmittedData, setLastSubmittedData] = useState({})
     const [dataSubmitStatus, setDataSubmitStatus] = useState([]);
     const [fetchGradersStatus, setFetchGradersStatus] = useState([]);
 
@@ -36,11 +42,11 @@ export default function Dashboard(){
     }, {
         manual: true,
         onSuccess: (result, params) => {
-            let updatedGradersProgress = result.reduce((obj, grader)=>{
+            let updatedGraders = result.reduce((obj, grader)=>{
                 obj[grader.id] = {};
                 return obj;
             }, {})
-            setGradersProgress(updatedGradersProgress);
+            setGraders(updatedGraders);
         },
         onError: (error, params) => {
             setFetchGradersStatus([{type:'warning', message:'Something went wrong while fetching graders, please try refreshing the page.'}]);
@@ -93,14 +99,14 @@ export default function Dashboard(){
         manual: true,
         onSuccess: (results, params) => {
             const assignmentID = params[1];
-            let updatedGradersProgress = {...gradersProgress}
-            Object.keys(gradersProgress).forEach(grader=>{
+            let updatedGraders = {...graders}
+            Object.keys(graders).forEach(grader=>{
                 if(results[grader]){
                     let graded = results[grader].filter(submission=>gradedSubmissions[assignmentID].has(submission));
-                    updatedGradersProgress[grader][assignmentID] = Math.round(graded.length/results[grader].length*100)
+                    updatedGraders[grader][assignmentID] = {"progress": Math.round(graded.length/results[grader].length*100), "total_assigned": results[grader].length}
                 }
             })
-            setGradersProgress(updatedGradersProgress);
+            setGraders(updatedGraders);
         },
         onError: (error, params) => {
             setFetchGradersStatus([{type:'warning', message:'Something went wrong while fetching graders, please try refreshing the page.'}]);
@@ -174,6 +180,7 @@ export default function Dashboard(){
                         <th>Name</th>
                         <th>Weights</th>
                         <th>Offsets</th>
+                        <th>Total Assigned</th>
                         <th>
                             <select id="selectAssignments" onChange={event=>setAssignmentID(event.target.value)}>
                                 {assignments.map(assignment=><option value={assignment.id} key={assignment.id}>Progress for {assignment.name}</option>)}
@@ -187,9 +194,14 @@ export default function Dashboard(){
                             <td>{grader?.name}</td>
                             <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" min="0" pattern="[0-9]*" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "weight", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
                             <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "offset", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
+                            <td className="width-10">
+                                {!fetchSubmissions.loading && !fetchAssignedSubmissions.loading?graders[grader?.id][assignment_id]?
+                                graders[grader?.id][assignment_id]["total_assigned"]:0
+                                :"Loading..."}
+                            </td>
                             <td>
-                                {!fetchSubmissions.loading && !fetchAssignedSubmissions.loading?gradersProgress[grader?.id][assignment_id]?
-                                <ProgressBar now={gradersProgress[grader?.id][assignment_id]} label={`${gradersProgress[grader?.id][assignment_id]}%`} />
+                                {!fetchSubmissions.loading && !fetchAssignedSubmissions.loading?graders[grader?.id][assignment_id]?
+                                <ProgressBar now={graders[grader?.id][assignment_id]["progress"]} label={`${graders[grader?.id][assignment_id]["progress"]}%`} />
                                 :<p>No assigned submissions yet</p>
                                 :<p>Loading...</p>
                                 }
