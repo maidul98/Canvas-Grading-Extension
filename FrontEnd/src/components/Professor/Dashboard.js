@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { useRequest } from '@umijs/hooks';
 import Alert from 'react-bootstrap/Alert';
+import { useAlert } from 'react-alert'
 import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
@@ -10,11 +11,13 @@ import FormControl from 'react-bootstrap/FormControl';
 import Submissions from '../Submissions';
 
 export default function Dashboard(){
+    const alert = useAlert();
     const [assignments, setAssignments] = useState([]);
     const [gradedSubmissions, setGradedSubmissions] = useState({});
     /* graders store the grading progress and total number of assigned submissions for each grader for every assignment
     {
-        "grader1_id": {"assignment1_id": {"progress": 0, "total_assigned": 10}, "assignment2_id": {"progress": 50, "total_assigned": 10}}
+        "grader1_id": {"assignment1_id": {"progress": 0, "total_assigned": 10}, 
+                        "assignment2_id": {"progress": 50, "total_assigned": 10}}
     }
     */
     const [graders, setGraders] = useState({});
@@ -27,10 +30,6 @@ export default function Dashboard(){
     }
     */
     const [gradersData, setGradersData] = useState({});
-    const [lastSubmittedData, setLastSubmittedData] = useState({})
-    const [dataSubmitStatus, setDataSubmitStatus] = useState([]);
-    const [fetchGradersStatus, setFetchGradersStatus] = useState([]);
-
     /**
      * Get each graders info such as net_id, weight and progress given an assigment_id 
      */
@@ -49,8 +48,7 @@ export default function Dashboard(){
             setGraders(updatedGraders);
         },
         onError: (error, params) => {
-            setFetchGradersStatus([{type:'warning', message:'Something went wrong while fetching graders, please try refreshing the page.'}]);
-            console.log(error);
+            alert.error('Something went wrong while fetching graders, please try refreshing the page.');
         },
         formatResult: []
     });
@@ -70,7 +68,7 @@ export default function Dashboard(){
             setAssignmentID(reOrdered[0].id)
         },
         onError: (error, params) => {
-            console.log(error);
+            alert.error("Something went wrong while fetching assignments, please try refreshing the page");
         },
         formatResult: []
     });
@@ -91,7 +89,7 @@ export default function Dashboard(){
             fetchAssignedSubmissions.run(`/get-assigned-submissions-for-graders?assignment_id=${assignmentID}`, params[0]);
         },
         onError: (error, params) => {
-           console.log(error);
+           alert.error("Something went wrong while fetching graders' progress, please try refreshing the page.")
         }
     })
 
@@ -109,13 +107,15 @@ export default function Dashboard(){
             setGraders(updatedGraders);
         },
         onError: (error, params) => {
-            setFetchGradersStatus([{type:'warning', message:'Something went wrong while fetching graders, please try refreshing the page.'}]);
+            alert.error("Something went wrong while fetching graders' progress, please try refreshing the page.");
         }
     })
 
     const updateGradersData = (grader_id, field, val) => {
         if(val!=""){
-            setGradersData({...gradersData, [grader_id]: {...gradersData[grader_id], [field]:parseInt(val)}})
+            setGradersData({...gradersData, [grader_id]: {...gradersData[grader_id], [field]: parseInt(val)}})
+        } else {
+            setGradersData({...gradersData, [grader_id]: {...gradersData[grader_id], [field]:""}})
         }
     };
 
@@ -125,29 +125,43 @@ export default function Dashboard(){
     const submitData = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
-            setDataSubmitStatus([{type:'success', message:'Weights and offsets updated successfully'}]);
+            alert.success('Weights and offsets updated successfully');
             setChanged(false);
             setGradersData({});
         },
         onError: (error, params) => {
-            setDataSubmitStatus([{type:'warning', message:'Something went wrong while submitting changes, please try resubmitting.'}]);
+            alert.error('Something went wrong while submitting changes, please try resubmitting.');
 
         }
     });
 
     /* need routes for submitting weights */     
     const submit = () =>{
-        let finalData = Object.keys(gradersData).reduce((data, grader_id)=>{
-            data.push({"id": grader_id, ...gradersData[grader_id]});
+        let finalData = Object.keys(gradersData)
+        .reduce((data, grader_id)=>{
+            if(gradersData[grader_id].weight && gradersData[grader_id].weight==""){
+                delete gradersData[grader_id].weight;
+            }
+            if(gradersData[grader_id].offset && gradersData[grader_id].offset==""){
+                delete gradersData[grader_id].offset;
+            }
+            if(gradersData[grader_id].weight || gradersData[grader_id].offset){
+                data.push({"id": grader_id, ...gradersData[grader_id]});
+            }
             return data;
         }, [])
         console.log(finalData);
-        submitData.run({
-            url: "/update-graders-data",
-            method: 'post',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(finalData),
-        })
+        if(finalData.length > 0){
+            submitData.run({
+                url: "/update-graders-data",
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(finalData),
+            })
+        } else {
+            setGradersData({});
+            alert.show("No changes detected");
+        }
     };
 
     useEffect(()=>{
@@ -165,15 +179,10 @@ export default function Dashboard(){
         }
     }, [assignment_id])
 
-    useEffect(()=>{
-        console.log(gradersData);
-    }, [gradersData])
     if(submitData.loading | fetchAssignments.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
-            {dataSubmitStatus.map(status=><Alert variant={status.type} key="dataSubmitStatus">{status.message}</Alert>)}
-            {fetchGradersStatus.map(status=><Alert variant={status.type} key="fetchGradersStatus">{status.message}</Alert>)}
             <Table bordered hover  id="dashboardTable">
                 <thead>
                     <tr>

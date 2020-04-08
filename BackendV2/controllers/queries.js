@@ -246,7 +246,6 @@ function get_unassigned_submissions() {
 }
 
 function update_multiple_graders_data_route(req, res) {
-  console.log("hi");
   const callback = (err) => {
     if(err){
       res.status(406).send({
@@ -257,7 +256,6 @@ function update_multiple_graders_data_route(req, res) {
       res.send("success");
     }
   }
-  console.log(req.body);
   update_multiple_graders_data(req.body, callback);
 }
 
@@ -271,7 +269,6 @@ function update_multiple_graders_data(graders_arr, callback) {
     let {id, ...data} = grader;
     queries += mysql.format("UPDATE grader SET ? WHERE id = ?; ", [data, id]);
   });
-  console.log(queries);
   db.query(queries, callback);
 }
 
@@ -312,7 +309,7 @@ function update_grader_weight(req, res) {
  * {grader1_id: [submission1_id, submission2_id], grader2_id: [submission3_id, submission4_id]}
  */
 function get_assigned_submissions_for_graders(req, res){
-  let sql_query = "SELECT grader_id, id AS submission_id FROM submission WHERE assignment_id=? order by grader_id";
+  let sql_query = "SELECT grader_id, id AS submission_id FROM submission WHERE assignment_id=? AND grader_id IS NOT NULL order by grader_id";
   db.query(
     sql_query, [req.query.assignment_id],
     function (err, results){
