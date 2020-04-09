@@ -21,14 +21,16 @@ export default function Submissions(props){
         onSuccess: (result, params) => {
             if(result.length == 0){
                 alert.show('You have no assigned submissions for this assignment yet')
+                props.showControls(false)
             }else{
                 //remove any older alerts
                 alert.removeAll()
-
                 //concurrently pull all submission for quick edit
                 result.map((submission) =>{
                     singleSubmissionFetch.run(submission['user_id'], submission['name'])
                 })
+
+                props.showControls(true)
 
             }
         },

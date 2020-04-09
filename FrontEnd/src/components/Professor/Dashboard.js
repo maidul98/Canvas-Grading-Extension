@@ -166,11 +166,8 @@ export default function Dashboard(){
 
     useEffect(()=>{
         fetchAssignments.run('/get-published-assignments');
-    },[]);
-
-    useEffect(()=>{
         fetchGradersData.run();
-    }, []);
+    },[]);
 
     useEffect(()=>{
         if(assignment_id && !gradedSubmissions[assignment_id]){
