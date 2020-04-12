@@ -25,6 +25,8 @@ function shuffle(a) {
 
 
 
+
+
 /**
  * Randomly assigns each grader from [grader_array] exactly [num_assigned] 
  * submissions from [submission_array] to grade. 
@@ -56,14 +58,49 @@ function formMatchingMatrix(grader_array, submissions_array) {
 }
 
 
+//AssignmentGrader(grader_id, weight, offset, num_assigned, cap)
+/**
+ * Main function that distributes the assignments, also taking into account of 
+ * each graders' caps
+ * @param {*} num_of_submissions: total number of assignments left to distribute currently 
+ * @param {*} graderArray 
+ */
+function main_distribute(num_of_submissions, graderArray) {
+
+    var unavailable_graders = new Set(); //set of currently unavailable graders 
+
+    while (num_of_submissions != 0) {
+
+        graderArray = distribute(num_of_submissions, graderArray, unavailable_graders) //initial distribution 
+
+        //checking if each grader's num_assigned value does not exceed their cap 
+        for (let i = 0; i < graderArray.length; i++) {
+            num_of_submissions = 0;
+            surplus = graderArray[i].num_assigned - graderArray[i].cap;
+
+            if (surplus > 0) {
+                graderArray[i].decrementNumAssigned(surplus);
+                graderArray[i].incrementOffset(surplus);
+                unavailable_graders.add(graderArray[i].grader_id);
+                num_of_submissions += surplus;
+            }
+        }
+    }
+
+    return graderArray;
+}
+
+
+
 
 /**
  * Fairly distributes [num_of_submissions] assignments among [graders] 
  * according to the graders' weights and offsets. 
  * @param {int} num_of_submissions: Total number of assignments that need to be distributed
  * @param {Array} graders: A 2D-array containing [graders id, weight, offset]
+ * @param {Set} unavailable_graders: A set of unavailable graders
  */
-function distribute(num_of_submissions, graderArray) {
+function distribute(num_of_submissions, graderArray, unavailable_graders) {
 
     //sort graders in order of worst to best offsets 
     //greater offset = worse offset
@@ -79,6 +116,13 @@ function distribute(num_of_submissions, graderArray) {
     normalizing_constant = 0 - graderArray[graderArray.length - 1].offset;
     for (var i = 0; i < graderArray.length; i++)
         graderArray[i].incrementOffset(normalizing_constant);
+
+
+    //array of only unavailable graders 
+    unavailable_graderArray = graderArray.filter(grader => (grader.grader_id in unavailable_graders));
+
+    //filters graderArray such that only available graders remain
+    graderArray = graderArray.filter(grader => !(grader.grader_id in unavailable_graders));
 
 
     //computes sum of all graders' offsets
@@ -183,6 +227,10 @@ function distribute(num_of_submissions, graderArray) {
     } //end of else statement
 
 
+    //merges available & unavailable graders into one set 
+    graderArray = graderArray.concat(unavailable_graderArray);
+
+
     //sort graders in order of worst to best offsets 
     graderArray.sort(function (a, b) {
         if (b.offset === a.offset) return 0;
@@ -200,5 +248,58 @@ function distribute(num_of_submissions, graderArray) {
 
 
 module.exports.shuffle = shuffle
-module.exports.distribute = distribute
 module.exports.formMatchingMatrix = formMatchingMatrix
+module.exports.main_distribute = main_distribute
+
+
+
+
+
+
+// //grader_id, weight, offset, cap 
+
+
+let g1 = [1, 1, 0, 2];
+let g2 = [2, 1, 0, 1];
+let g3 = [3, 1, 0, 0];
+let g5 = [3227, 1, -2, 100];
+let g6 = [1228, 1, 3, 100];
+let g7 = [1229, 1, 0, 100];
+let g4 = [3226, 1, 1, 100];
+let g8 = [1223, 1, 2, 100];
+let g9 = [1224, 1, 0, 100];
+let g10 = [3225, 2, 0, 100];
+let g11 = [9, 2, 0, 2];
+let g12 = [1227, 2, 0, 100];
+let g13 = [1228, 2, 0, 100];
+let g14 = [3229, 2, 0, 100];
+let g15 = [3223, 2, 0, 100];
+let g16 = [7, 3, 0, 4];
+let g17 = [1228, 3, 0, 100];
+let g18 = [1229, 3, 0, 100];
+let g19 = [1223, 3, 0, 100];
+let g20 = [3224, 3, -1, 100];
+let ag1 = [1223, 1, 1, 100];
+let ag2 = [8, 1, 2, 0];
+let ag3 = [1225, 1, -2, 100];
+let ag4 = [3226, 1, 0, 100];
+let ag5 = [3227, 1, 0, 100];
+let ag6 = [1228, 1, 3, 100];
+let ag7 = [1229, 1, 0, 100];
+let ag8 = [1223, 1, 0, 100];
+let ag9 = [1224, 1, 0, 100];
+
+let graders = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12, g13, g14, g15, g16, g17, g18, g19, g20,
+    ag1, ag2, ag3, ag4, ag5, ag6, ag7, ag8, ag9];
+
+//NEED TO DELETE AFTER TESTING
+//intial set-up; will populate [num_assigned] cells later on 
+let graderArray = [];
+graders.forEach(element => {
+    //grader_id, weight, offset, num_assigned, cap 
+    graderArray.push(new AssignmentGrader(element[0], element[1], element[2], 0, element[3]));
+});
+//
+
+ans = main_distribute(567, graderArray);
+console.log(ans);

@@ -155,7 +155,7 @@ async function runPipeline(res) {
           }
           else {
             assignmentsLeft = true;
-            let output_of_algo = distribution.distribute(mapped.length, grader_array);
+            let output_of_algo = distribution.main_distribute(mapped.length, grader_array);
             let matrix_of_pairs = distribution.formMatchingMatrix(output_of_algo, mapped);
             //update offsets of graders in DB with output_of_algo
             update_grader_entries(output_of_algo, function (err) {
@@ -272,18 +272,18 @@ function update_grader_weight(req, res) {
  * Returns the assigned submissions for every grader for an assignment:
  * {grader1_id: [submission1_id, submission2_id], grader2_id: [submission3_id, submission4_id]}
  */
-function get_assigned_submissions_for_graders(req, res){
+function get_assigned_submissions_for_graders(req, res) {
   let sql_query = "SELECT grader_id, id AS submission_id FROM submission WHERE assignment_id=? order by grader_id";
   db.query(
     sql_query, [req.query.assignment_id],
-    function (err, results){
-      if(err){
+    function (err, results) {
+      if (err) {
         console.log(err);
       } else {
-        data = results.reduce((assigned_submissions, row)=>{
-          assigned_submissions[row.grader_id]?
-          assigned_submissions[row.grader_id].push(row.submission_id)
-          :assigned_submissions[row.grader_id]=[row.submission_id];
+        data = results.reduce((assigned_submissions, row) => {
+          assigned_submissions[row.grader_id] ?
+            assigned_submissions[row.grader_id].push(row.submission_id)
+            : assigned_submissions[row.grader_id] = [row.submission_id];
           return assigned_submissions;
         }, {})
         res.json(data);
@@ -297,7 +297,7 @@ function get_assigned_submissions_for_graders(req, res){
   * @param {*} user_id 
   * @param {*} assigment_id 
   */
- function get_assigned_submission_for_assigment(req, res) {
+function get_assigned_submission_for_assigment(req, res) {
   let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
   db.query(
     sql_query, [req.query.assigment_id, req.query.user_id],
@@ -356,15 +356,15 @@ function get_grading_progress_for_every_grader(req, res) {
  * @param {*} res 
  */
 function get_grader_info(req, res) {
-    let sql_query = "SELECT * FROM grader";
-    db.query(sql_query, [req.query.assigment_id], (err, results) => {
+  let sql_query = "SELECT * FROM grader";
+  db.query(sql_query, [req.query.assigment_id], (err, results) => {
 
-      if (err) {
-        console.log("err");
-      } else {
-        res.json(results);
-      }
+    if (err) {
+      console.log("err");
+    } else {
+      res.json(results);
     }
+  }
   );
 }
 
