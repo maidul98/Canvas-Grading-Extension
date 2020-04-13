@@ -50,16 +50,16 @@ function formMatchingMatrix(grader_array, submissions_array) {
     shuffle(submissions_array);
 
     var counter = 0;
-    for (var j = 0; j < grader_array.length; j++) {
-        num_assigned = grader_array[j].num_assigned;
+    for (let j = 0; j < grader_array.length; j++) {
+        assign = grader_array[j].dist_num_assigned;
         id = grader_array[j].grader_id;
-        for (var i = counter; i < counter + num_assigned; i++) {
+        for (var i = counter; i < counter + assign; i++) {
             matrix[i][0] = id;
         }
-        counter += num_assigned;
+        counter += assign;
     }
 
-    for (var i = 0; i < len; i++)
+    for (let i = 0; i < len; i++)
         matrix[i][1] = submissions_array[i];
 
     return matrix;
