@@ -1,16 +1,5 @@
 var AssignmentGrader = require('./grader-model');
 
-//IMPORTANT NOTES: 
-
-//if a grader can't grade a few assignments, then we need to create set of "valid graders that can take on extra assignments" and UPDATE OFFSETS 
-//and distribute these "currently ungrade-able assignments" FAIRLY according to grader's NORMALIZED offsets
-
-//changes:  the first step should be ....all "valid" graders should only make it to array graderArray ***
-//valid is determined by Graders who didn't opt out, who didn't take "leave of absence"
-//if a grader took a "leave of absence", then we must update their offset (increase their offset accordingly - by an amount that a grader with the same weight got assigned - solely acc to their weight & NOT their offset )
-
-//**lastly, we must consider the specific case where we are on the LAST assignment!! --> discuss with client about how that should be handled 
-
 /**
  * Shuffles the array a, in place
  * @param {Array} a: The array to be shuffled
@@ -24,6 +13,25 @@ function shuffle(a) {
 }
 
 
+
+/**
+ * Normalizes offsets such that the least offset equals 0; and
+ * grader.offset = relative number of assignments that grader [grader] is behind on.
+ * @param {Array} graderArray: 1D array of AssignmentGrader objects, which 
+ * represent all of the graders. 
+ */
+function normalize_offset(graderArray) {
+
+    let min = 1000000;
+
+    for (let i = 0; i < graderArray.length; i++)
+        min = Math.min(graderArray[i].offset, min);
+
+    for (let i = 0; i < graderArray.length; i++)
+        graderArray[i].decrementOffset(min);
+
+    return graderArray;
+}
 
 
 
@@ -58,14 +66,13 @@ function formMatchingMatrix(grader_array, submissions_array) {
 }
 
 
-//AssignmentGrader(grader_id, weight, offset, num_assigned, cap)
 
 /**
  * Main function that distributes the submissions for one particular assignment, 
  * also taking into account of each graders' caps. 
- * @param {*} num_of_submissions: total number of submissions left to distribute currently 
+ * @param {*} num_of_submissions: total number of submissions required to be distributed
  * @param {*} graderArray: 1D array containing AssignmentGrader objects, with appropriate 
- * prev_assigned values, and num_assigned = 0 for each grader. 
+ * num_assigned values. 
  */
 function main_distribute(num_of_submissions, graderArray) {
 
@@ -109,25 +116,10 @@ function main_distribute(num_of_submissions, graderArray) {
         }
     }
 
+    return normalize_offset(graderArray);
 
-    //sort graders in order of worst to best offsets 
-    //greater offset = worse offset
-    //smaller offset = better offset 
-    graderArray.sort(function (a, b) {
-        if (b.offset === a.offset) return 0;
-        return b.offset > a.offset ? 1 : -1;
-    });
-
-
-    //normalize offsets such that the least offset equals 0; and
-    //grader.offset = relative number of assignments that grader [grader] is behind on.
-    normalizing_constant = 0 - graderArray[graderArray.length - 1].offset;
-    for (var i = 0; i < graderArray.length; i++)
-        graderArray[i].incrementOffset(normalizing_constant);
-
-
-    return graderArray;
 }
+
 
 
 
@@ -258,20 +250,9 @@ function distribute(num_of_submissions, graderArray) {
 
     } //end of else statement
 
-    //sort graders in order of worst to best offsets 
-    graderArray.sort(function (a, b) {
-        if (b.offset === a.offset) return 0;
-        return b.offset > a.offset ? 1 : -1;
-    });
-
-    //normalize offsets so the professor can easily update offsets if s/he wishes
-    //to before the next set of assignments are distributed 
-    normalizing_cons = 0 - graderArray[graderArray.length - 1].offset;
-    for (var i = 0; i < graderArray.length; i++)
-        graderArray[i].incrementOffset(normalizing_cons);
-
-    return graderArray;
+    return normalize_offset(graderArray);
 }
+
 
 
 module.exports.shuffle = shuffle
@@ -281,67 +262,23 @@ module.exports.main_distribute = main_distribute
 
 
 
-
-
-// //grader_id, weight, offset, cap 
-
-
-let g1 = [1, 1, 0, 2];
-let g2 = [2, 1, 0, 1];
-let g3 = [3, 1, 0, 0];
-let g5 = [3227, 1, -2, 100];
-let g6 = [1228, 1, 3, 100];
-let g7 = [1229, 1, 0, 100];
-let g4 = [3226, 1, 1, 100];
-let g8 = [1223, 1, 2, 100];
-let g9 = [1224, 1, 0, 100];
-let g10 = [3225, 2, 0, 100];
-let g11 = [9, 2, 0, 2];
-let g12 = [1227, 2, 0, 100];
-let g13 = [1228, 2, 0, 100];
-let g14 = [3229, 2, 0, 100];
-let g15 = [3223, 2, 0, 100];
-let g16 = [7, 3, 0, 4];
-let g17 = [1228, 3, 0, 100];
-let g18 = [1229, 3, 0, 100];
-let g19 = [1223, 3, 0, 100];
-let g20 = [3224, 3, -1, 100];
-let ag1 = [1223, 1, 1, 100];
-let ag2 = [8, 1, 2, 0];
-let ag3 = [1225, 1, -2, 100];
-let ag4 = [3226, 1, 0, 100];
-let ag5 = [3227, 1, 0, 100];
-let ag6 = [1228, 1, 3, 100];
-let ag7 = [1229, 1, 0, 100];
-let ag8 = [1223, 1, 0, 100];
-let ag9 = [1224, 1, 0, 100];
-
-let graders = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12, g13, g14, g15, g16, g17, g18, g19, g20,
-    ag1, ag2, ag3, ag4, ag5, ag6, ag7, ag8, ag9];
-
-
-//NEED TO DELETE AFTER TESTING
-//intial set-up; will populate [num_assigned] cells later on 
-let graderArray = [];
-graders.forEach(element => {
-    //grader_id, weight, offset, num_assigned, cap 
-    graderArray.push(new AssignmentGrader(element[0], element[1], element[2], 0, element[3]));
-});
-//
-
-
-//////////////////////////////////////
-
-
-
+//TESTING
 //grader_id, weight, offset, num_assigned, cap
 
-arr = [
-    new AssignmentGrader(1, 1, 45, 0, 10),
-    new AssignmentGrader(2, 1, 65, 0, 100),
-    new AssignmentGrader(3, 1, 11, 0, 100),
-    new AssignmentGrader(4, 1, 51, 0, 100)
-];
+arr1 = [
+    new AssignmentGrader(1, 2, 0, 0, 10),
+    new AssignmentGrader(2, 2, 0, 0, 100),
+    new AssignmentGrader(3, 2, 0, 0, 100),
+    new AssignmentGrader(4, 2, 0, 0, 100)];
 
-ans = main_distribute(100, arr);
-console.log(ans);
+console.log(main_distribute(100, arr1));
+console.log(" ");
+
+arr2 = [
+    new AssignmentGrader(1, 2, 20, 10, 10),
+    new AssignmentGrader(2, 2, 0, 30, 100),
+    new AssignmentGrader(3, 2, 0, 30, 100),
+    new AssignmentGrader(4, 2, 0, 30, 100)];
+
+console.log(main_distribute(100, arr2));
+console.log(" "); 
