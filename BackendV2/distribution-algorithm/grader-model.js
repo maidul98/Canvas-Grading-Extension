@@ -1,11 +1,23 @@
 
 function AssignmentGrader(grader_id, weight, offset, num_assigned, dist_num_assigned, cap) {
-    this.grader_id = grader_id; //int
-    this.weight = weight; //int >= 0
-    this.offset = offset; //int
-    this.num_assigned = num_assigned; //int >= 0 representing how many submissions have been already assigned for the specified assignment in all 
-    this.dist_num_assigned = dist_num_assigned; //int >= 0 representing how many submissions have been assigned to the grader in this round of distribution 
-    this.cap = cap; //int >= 0  
+    //int
+    this.grader_id = grader_id;
+
+    //int >= 0
+    this.weight = weight;
+
+    //int
+    this.offset = offset;
+
+    //int >= 0 representing how many submissions have been already assigned for the specified assignment in all 
+    this.num_assigned = num_assigned;
+
+    //int >= 0 representing how many submissions have been assigned to the grader in this round of distribution 
+    //not stored in database 
+    this.dist_num_assigned = dist_num_assigned;
+
+    //int >= 0  
+    this.cap = cap;
 }
 
 

@@ -116,6 +116,9 @@ function main_distribute(num_of_submissions, graderArray) {
         }
     }
 
+    for (let i = 0; i < graderArray.length; i++)
+        graderArray[i].update_dist_num_assigned(graderArray[i].num_assigned - graderArray[i].dist_num_assigned);
+
     return normalize_offset(graderArray);
 
 }
