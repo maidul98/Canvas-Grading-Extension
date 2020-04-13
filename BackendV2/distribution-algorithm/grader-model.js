@@ -1,10 +1,10 @@
 
 function AssignmentGrader(grader_id, weight, offset, num_assigned, cap) {
     this.grader_id = grader_id; //int
-    this.weight = weight; //int
+    this.weight = weight; //int >= 0
     this.offset = offset; //int
-    this.num_assigned = num_assigned; //int 
-    this.cap = cap;
+    this.num_assigned = num_assigned; //int representing how many submissions have been already assigned for the specified assignment
+    this.cap = cap; //int >= 0  
 }
 
 
@@ -25,14 +25,6 @@ AssignmentGrader.prototype.updateOffset = function (offset) {
     this.offset = offset;
 };
 
-/** Overwrites the number of assignments that the grader has been assigned to [num_assigned] */
-AssignmentGrader.prototype.updateNumAssigned = function (num_assigned) {
-    if (!Number.isInteger(num_assigned)) {
-        throw new TypeError('num_assigned should be an integer');
-    }
-
-    this.num_assigned = num_assigned;
-};
 
 /** Decrements the grader's weight by [weight] */
 AssignmentGrader.prototype.decrementWeight = function (weight) {

@@ -1,3 +1,5 @@
+@import url('https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+
 /*
 ==============CSS Reset================
 From:https://dev.to/hankchizljaw/a-modern-css-reset-6p3
@@ -359,6 +361,11 @@ h1{
 /**
 ========== (Assignments) ===========
 **/
+#downloadBtnSpinner{
+  margin-bottom: 4px;
+  margin-left: 10px;
+}
+
 .content-container{
 margin-top: 80px;
 }
@@ -443,6 +450,10 @@ ul#download-files {
 
 #alert-detail-submit-error {
   margin-top: 10px;
+}
+
+#download-buttn{
+  margin-right: 10px;
 }
 
 /* #F7F7F7 */

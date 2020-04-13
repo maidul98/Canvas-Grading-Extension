@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { useRequest } from '@umijs/hooks';
 import Alert from 'react-bootstrap/Alert';
+import { useAlert } from 'react-alert'
 import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
@@ -10,15 +11,25 @@ import FormControl from 'react-bootstrap/FormControl';
 import Submissions from '../Submissions';
 
 export default function Dashboard(){
+    const alert = useAlert();
     const [assignments, setAssignments] = useState([]);
     const [gradedSubmissions, setGradedSubmissions] = useState({});
-    const [gradersProgress, setGradersProgress] = useState({});
+    /* graders store the grading progress and total number of assigned submissions for each grader for every assignment
+    {
+        "grader1_id": {"assignment1_id": {"progress": 0, "total_assigned": 10}, 
+                        "assignment2_id": {"progress": 50, "total_assigned": 10}}
+    }
+    */
+    const [graders, setGraders] = useState({});
     const [changed, setChanged] = useState(false);
     const [assignment_id, setAssignmentID] = useState(null);
-    const [weights, setWeights] = useState([]);
-    const [weightSubmitStatus, setWeightSubmitStatus] = useState([]);
-    const [fetchGradersStatus, setFetchGradersStatus] = useState([]);
-
+    /* gradersData (to store user inputs):
+    {
+        "grader1_id": {"weight": 5}
+        "grader2_id": {"weight": 2, "offset": 0}
+    }
+    */
+    const [gradersData, setGradersData] = useState({});
     /**
      * Get each graders info such as net_id, weight and progress given an assigment_id 
      */
@@ -30,15 +41,14 @@ export default function Dashboard(){
     }, {
         manual: true,
         onSuccess: (result, params) => {
-            let updatedGradersProgress = result.reduce((obj, grader)=>{
+            let updatedGraders = result.reduce((obj, grader)=>{
                 obj[grader.id] = {};
                 return obj;
             }, {})
-            setGradersProgress(updatedGradersProgress);
+            setGraders(updatedGraders);
         },
         onError: (error, params) => {
-            setFetchGradersStatus([{type:'warning', message:'Something went wrong while fetching graders, please try refreshing the page.'}]);
-            console.log(error);
+            alert.error('Something went wrong while fetching graders, please try refreshing the page.');
         },
         formatResult: []
     });
@@ -58,7 +68,7 @@ export default function Dashboard(){
             setAssignmentID(reOrdered[0].id)
         },
         onError: (error, params) => {
-            console.log(error);
+            alert.error("Something went wrong while fetching assignments, please try refreshing the page");
         },
         formatResult: []
     });
@@ -79,7 +89,7 @@ export default function Dashboard(){
             fetchAssignedSubmissions.run(`/get-assigned-submissions-for-graders?assignment_id=${assignmentID}`, params[0]);
         },
         onError: (error, params) => {
-           console.log(error);
+           alert.error("Something went wrong while fetching graders' progress, please try refreshing the page.")
         }
     })
 
@@ -87,52 +97,77 @@ export default function Dashboard(){
         manual: true,
         onSuccess: (results, params) => {
             const assignmentID = params[1];
-            let updatedGradersProgress = {...gradersProgress}
-            Object.keys(gradersProgress).forEach(grader=>{
+            let updatedGraders = {...graders}
+            Object.keys(graders).forEach(grader=>{
                 if(results[grader]){
                     let graded = results[grader].filter(submission=>gradedSubmissions[assignmentID].has(submission));
-                    updatedGradersProgress[grader][assignmentID] = Math.round(graded.length/results[grader].length*100)
+                    updatedGraders[grader][assignmentID] = {"progress": Math.round(graded.length/results[grader].length*100), "total_assigned": results[grader].length}
                 }
             })
-            setGradersProgress(updatedGradersProgress);
+            setGraders(updatedGraders);
         },
         onError: (error, params) => {
-            console.log(error);
+            alert.error("Something went wrong while fetching graders' progress, please try refreshing the page.");
         }
     })
 
+    const updateGradersData = (grader_id, field, val) => {
+        if(val!=""){
+            setGradersData({...gradersData, [grader_id]: {...gradersData[grader_id], [field]: parseInt(val)}})
+        } else {
+            setGradersData({...gradersData, [grader_id]: {...gradersData[grader_id], [field]:""}})
+        }
+    };
+
     /**
-     * Update weights for a user to the DB
+     * Update the db with weights and offsets for users
      */
-    const submitWeights = useRequest(url => url, {
+    const submitData = useRequest(url => url, {
         manual: true,
         onSuccess: (result, params) => {
-            setWeightSubmitStatus({type:'success', message:'Weights updated successfully'});
+            alert.success('Weights and offsets updated successfully');
             setChanged(false);
+            setGradersData({});
         },
         onError: (error, params) => {
-            setWeightSubmitStatus({type:'warning', message:'Something went wrong, please try again'});
+            alert.error('Something went wrong while submitting changes, please try resubmitting.');
+
         }
     });
 
     /* need routes for submitting weights */     
     const submit = () =>{
-        /*submitWeights.run({
-            url: "",
-            method: 'post',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(weights),
-        })*/
+        let finalData = Object.keys(gradersData)
+        .reduce((data, grader_id)=>{
+            if(gradersData[grader_id].weight && gradersData[grader_id].weight==""){
+                delete gradersData[grader_id].weight;
+            }
+            if(gradersData[grader_id].offset && gradersData[grader_id].offset==""){
+                delete gradersData[grader_id].offset;
+            }
+            if(gradersData[grader_id].weight || gradersData[grader_id].offset){
+                data.push({"id": grader_id, ...gradersData[grader_id]});
+            }
+            return data;
+        }, [])
+        console.log(finalData);
+        if(finalData.length > 0){
+            submitData.run({
+                url: "/update-graders-data",
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(finalData),
+            })
+        } else {
+            setGradersData({});
+            alert.show("No changes detected");
+        }
     };
 
     useEffect(()=>{
         fetchAssignments.run('/get-published-assignments');
-
-    },[]);
-
-    useEffect(()=>{
         fetchGradersData.run();
-    }, []);
+    },[]);
 
     useEffect(()=>{
         if(assignment_id && !gradedSubmissions[assignment_id]){
@@ -140,18 +175,18 @@ export default function Dashboard(){
         }
     }, [assignment_id])
 
-    if(submitWeights.loading | fetchAssignments.loading) return <LoadingIcon />;
+    if(fetchAssignments.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
-            {weightSubmitStatus.map(status=><Alert variant={status.type}>{status.message}</Alert>)}
-            {fetchGradersStatus.map(status=><Alert variant={status.type}>{status.message}</Alert>)}
+            {submitData.loading | fetchAssignedSubmissions.loading | fetchSubmissions.loading?<LoadingIcon/>:null}
             <Table bordered hover  id="dashboardTable">
                 <thead>
                     <tr>
                         <th>Name</th>
                         <th>Weights</th>
                         <th>Offsets</th>
+                        <th>Total Assigned</th>
                         <th>
                             <select id="selectAssignments" onChange={event=>setAssignmentID(event.target.value)}>
                                 {assignments.map(assignment=><option value={assignment.id} key={assignment.id}>Progress for {assignment.name}</option>)}
@@ -163,14 +198,15 @@ export default function Dashboard(){
                     {fetchGradersData?.data?.map(grader=>
                         <tr key={grader?.id}>
                             <td>{grader?.name}</td>
-                            <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{setWeights({}); setChanged(true);}}></FormControl></td>
-                            <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{setWeights({}); setChanged(true);}}></FormControl></td>
+                            <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" min="0" pattern="[0-9]*" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "weight", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
+                            <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "offset", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
+                            <td className="width-10">
+                                {graders[grader?.id][assignment_id]?graders[grader?.id][assignment_id]["total_assigned"]:0}
+                            </td>
                             <td>
-                                {!fetchSubmissions.loading && !fetchAssignedSubmissions.loading?gradersProgress[grader?.id][assignment_id]?
-                                <ProgressBar now={gradersProgress[grader?.id][assignment_id]} label={`${gradersProgress[grader?.id][assignment_id]}%`} />
-                                :<p>No assigned submissions yet</p>
-                                :<p>Loading...</p>
-                                }
+                                {graders[grader?.id][assignment_id]?
+                                <ProgressBar now={graders[grader?.id][assignment_id]["progress"]} label={`${graders[grader?.id][assignment_id]["progress"]}%`} />
+                                :<p>No assigned submissions yet</p>}
                             </td>
                         </tr>)
                     }

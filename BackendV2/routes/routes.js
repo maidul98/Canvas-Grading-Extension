@@ -57,6 +57,9 @@ router.get('/get-assigned-submissions-for-graders', queries.get_assigned_submiss
 /** Update weight for a specific grader */
 router.post('/update-grader-weight', queries.update_grader_weight);
 
+/** Update data for multiple graders */
+router.post('/update-graders-data', queries.update_multiple_graders_data_route);
+
 /** Get grading progress for a specific assignment */
 router.get('/get-grader-info', queries.get_grader_info);
 
