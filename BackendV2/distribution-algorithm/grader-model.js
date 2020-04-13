@@ -1,9 +1,10 @@
 
-function AssignmentGrader(grader_id, weight, offset, num_assigned, cap) {
+function AssignmentGrader(grader_id, weight, offset, num_assigned, dist_num_assigned, cap) {
     this.grader_id = grader_id; //int
     this.weight = weight; //int >= 0
     this.offset = offset; //int
-    this.num_assigned = num_assigned; //int representing how many submissions have been already assigned for the specified assignment
+    this.num_assigned = num_assigned; //int >= 0 representing how many submissions have been already assigned for the specified assignment in all 
+    this.dist_num_assigned = dist_num_assigned; //int >= 0 representing how many submissions have been assigned to the grader in this round of distribution 
     this.cap = cap; //int >= 0  
 }
 
@@ -16,13 +17,19 @@ AssignmentGrader.prototype.updateWeight = function (weight) {
     this.weight = weight;
 };
 
-/** Overwrites the grader's offset to [weight] */
+/** Overwrites the grader's offset to [offset] */
 AssignmentGrader.prototype.updateOffset = function (offset) {
     if (!Number.isInteger(offset)) {
         throw new TypeError('offset should be an integer');
     }
 
     this.offset = offset;
+};
+
+
+/** Overwrites the grader's dist_num_assigned to [dist_num_assigned] */
+AssignmentGrader.prototype.update_dist_num_assigned = function (dist_num_assigned) {
+    this.dist_num_assigned = dist_num_assigned;
 };
 
 
