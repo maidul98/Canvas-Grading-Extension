@@ -165,6 +165,8 @@ async function runPipeline(res) {
             assign_submissions_to_grader(matrix_of_pairs, function (err) {
               if (err) console.log(err);
             });
+            //update (overwrite) num_assigned of graders in DB with output_of_algo
+
           }
         })
         .catch(err => console.log(err));
