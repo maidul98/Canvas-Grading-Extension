@@ -15,13 +15,14 @@ function shuffle(a) {
 
 
 /**
+ * Precondition: The minimum offset among all graders must be less than or 
+ * equal to 1000000. 
  * Normalizes offsets such that the least offset equals 0; and
  * grader.offset = relative number of assignments that grader [grader] is behind on.
  * @param {Array} graderArray: 1D array of AssignmentGrader objects, which 
  * represent all of the graders. 
  */
 function normalize_offset(graderArray) {
-
     let min = 1000000;
 
     for (let i = 0; i < graderArray.length; i++)
@@ -36,10 +37,10 @@ function normalize_offset(graderArray) {
 
 
 /**
- * Randomly assigns each grader from [grader_array] exactly [num_assigned] 
+ * Randomly assigns each grader from [grader_array] exactly [dist_num_assigned] 
  * submissions from [submission_array] to grade. 
  * Returns a mapping from grader ID to submission ID. 
- * @param {Array} grader_array: 2D Array of graders containing the [num_assigned]
+ * @param {Array} grader_array: 2D Array of graders containing the [dist_num_assigned]
  * value for each grader
  * @param {Array} submissions_array: 1D Array of submission ID's
  */
@@ -78,6 +79,7 @@ function main_distribute(num_of_submissions, graderArray) {
 
     //initial distribution 
     //only offset & num_assigned should be altered 
+
     graderArray = distribute(num_of_submissions, graderArray);
 
     left_to_distribute = 0;
@@ -98,7 +100,6 @@ function main_distribute(num_of_submissions, graderArray) {
 
     //[left_to_distribute] represents the total number of submissions that now 
     //need to be distributed among available graders
-
 
     while (left_to_distribute !== 0) {
 
@@ -235,7 +236,7 @@ function distribute(num_of_submissions, graderArray) {
 
         //Random distribution: 
         //An array is populated with numbers [0] to [graderArray.length-1] (represents graders).
-        //The array is shuffled a random number of times.
+        //The array is shuffled once.
         //The first [leftAssign] elements of the resulting array are chosen. 
 
         let randomArr = [];
@@ -243,8 +244,7 @@ function distribute(num_of_submissions, graderArray) {
         for (var p = 0; p < graderArray.length; p++)
             randomArr[p] = p;
 
-        for (var c = 0; c < Math.floor((Math.random() * 4) + 3); c++)
-            shuffle(randomArr);
+        shuffle(randomArr);
 
         for (var q = 0; q < leftAssign; q++) {
             graderArray[randomArr[q]].incrementNumAssigned(1);
@@ -266,22 +266,51 @@ module.exports.main_distribute = main_distribute
 
 
 //TESTING
-//grader_id, weight, offset, num_assigned, cap
+//grader_id, weight, offset, num_assigned, dist_num_assigned, cap
 
-arr1 = [
-    new AssignmentGrader(1, 2, 0, 0, 10),
-    new AssignmentGrader(2, 2, 0, 0, 100),
-    new AssignmentGrader(3, 2, 0, 0, 100),
-    new AssignmentGrader(4, 2, 0, 0, 100)];
+arr = [
+    new AssignmentGrader(1, 2, 0, 0, 0, 10),
+    new AssignmentGrader(2, 2, 0, 0, 0, 100),
+    new AssignmentGrader(3, 2, 0, 0, 0, 100),
+    new AssignmentGrader(4, 2, 0, 0, 0, 100)];
 
-console.log(main_distribute(100, arr1));
-console.log(" ");
+console.log(arr);
+console.log("\n\n");
 
-arr2 = [
-    new AssignmentGrader(1, 2, 20, 10, 10),
-    new AssignmentGrader(2, 2, 0, 30, 100),
-    new AssignmentGrader(3, 2, 0, 30, 100),
-    new AssignmentGrader(4, 2, 0, 30, 100)];
+arr = main_distribute(50, arr);
 
-console.log(main_distribute(100, arr2));
-console.log(" "); 
+console.log(arr);
+console.log("\n\n");
+for (let i = 0; i < 4; i++)
+    arr[i].update_dist_num_assigned(arr[i].num_assigned);
+
+
+arr = main_distribute(50, arr);
+
+console.log(arr);
+console.log("\n\n");
+for (let i = 0; i < 4; i++)
+    arr[i].update_dist_num_assigned(arr[i].num_assigned);
+
+
+
+arr = main_distribute(50, arr);
+
+console.log(arr);
+console.log("\n\n");
+for (let i = 0; i < 4; i++)
+    arr[i].update_dist_num_assigned(arr[i].num_assigned);
+
+
+for (let i = 0; i < 4; i++)
+    if (arr[i].cap < 90)
+        arr[i].cap += 90;
+
+
+
+arr = main_distribute(70, arr);
+console.log(arr);
+console.log("\n\n");
+
+
+//total distributed = 220 
