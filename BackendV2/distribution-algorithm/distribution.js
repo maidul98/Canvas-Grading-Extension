@@ -89,7 +89,7 @@ function main_distribute(num_of_submissions, graderArray) {
 
         surplus = graderArray[i].num_assigned - graderArray[i].cap;
 
-        if (surplus >= 0) {
+        if (surplus > 0) {
             graderArray[i].decrementNumAssigned(surplus);
             graderArray[i].incrementOffset(surplus);
             left_to_distribute += surplus;
@@ -104,11 +104,8 @@ function main_distribute(num_of_submissions, graderArray) {
     while (left_to_distribute !== 0) {
 
         for (let i = 0; i < graderArray.length; i++) {
-
             if (left_to_distribute === 0) break;
-
             let grader = graderArray[i];
-
             if (grader.num_assigned < grader.cap) {
                 grader.incrementNumAssigned(1);
                 grader.decrementOffset(1);

@@ -38,7 +38,12 @@ AssignmentGrader.prototype.updateOffset = function (offset) {
     this.offset = offset;
 };
 
+
+/** Overwrites the grader's cap to [cap] */
 AssignmentGrader.prototype.update_cap = function (cap) {
+    if (!Number.isInteger(cap)) {
+        throw new TypeError('cap should be an integer');
+    }
     this.cap = cap;
 }
 

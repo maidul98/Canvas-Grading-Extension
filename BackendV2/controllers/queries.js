@@ -148,7 +148,9 @@ async function runPipeline(res, assignment_id) {
               if (err) console.log(err);
             });
             //update (overwrite) num_assigned of graders in DB with output_of_algo
-
+            update_total_assigned(output_of_algo, assignment_id, function (err) {
+              if (err) console.log(err);
+            });
           }
         })
         .catch(err => console.log(err));
@@ -200,9 +202,10 @@ function get_grader_objects(assignment_id) {
             // has an entry for every assignment in assignments_cap table.
             if (grader_array.length != results.length) throw Error('you done messed up')
             for (let i = 0; i < grader_array.length; i++) {
-              grader_array[i].update_num_assigned(results[i].total_assigned_for_assignment);
-              grader_array[i].update_dist_num_assigned(results[i].total_assigned_for_assignment)
-              grader_array[i].update_cap(results[i].cap)
+              let assigned = results[i].total_assigned_for_assignment;
+              grader_array[i].update_num_assigned(assigned);
+              grader_array[i].update_dist_num_assigned(assigned);
+              grader_array[i].update_cap(results[i].cap);
             }
             resolve(grader_array)
           }
@@ -231,7 +234,7 @@ function get_grader_table(_, res, _) {
 
 
 /**
- * This function returns the list of unassigned submissions
+ * This function returns the list of unassigned submissions for a given assignment. 
  */
 function get_unassigned_submissions(assignment_id) {
   return new Promise((resolve, reject) => {
@@ -450,7 +453,36 @@ function get_grading_progress_for_every_grader(req, res) {
 
 
 
-//TOOD: Refactor the 2 functions into one function. 
+//TOOD: Refactor the 3 functions into one function. 
+
+
+//IS THIS CORRECT -> TRYNA UPDATE NUM_ASSIGNED IN ASSIGNED_CAP TABLE 
+function update_total_assigned(grader_array, assignment_id, callback) {
+  async.forEachOf(grader_array, function (grader, _, inner_callback) {
+    let sql_query = "UPDATE assignment_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
+    db.query(sql_query, [grader.num_assigned, grader.grader_id, assignment_id], (err, results) => {
+      if (err) {
+        console.log(err)
+        inner_callback(err)
+        callback(err)
+      } else {
+        inner_callback(null)
+      }
+    });
+  }, function (err) {
+    if (err) {
+      console.log(err);
+      callback(err)
+    } else {
+      callback(null)
+    }
+  });
+}
+//THIS FUNCTION ALSO NEEDS TO BE ACTUALLY CALLED WITHIN ALGO RUN PIPELIN!!! 
+//*****QUESTIONABLE CODE ABOVE -DIVYA LMAO  
+//DO I NEEDD TO ADD ANOTHER FUNC(ERROR) BELOW ALL THE CODE?? */
+
+
 function update_grader_entries(grader_array, callback) {
   async.forEachOf(grader_array, function (grader, _, inner_callback) {
     let sql_query = "UPDATE grader SET offset=? WHERE id=?"
@@ -569,8 +601,8 @@ function get_assignment_cap(assignment_id) {
 
 
 
-async function run_distribution_pipeline(req, res) {
-  await runPipeline(res)
+async function run_distribution_pipeline(req, res, assignment_id) {
+  await runPipeline(res, assignment_id)
 }
 
 
