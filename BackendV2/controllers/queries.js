@@ -28,24 +28,6 @@ setInterval(function () {
 }, 15000);
 
 /**
- * A higher-order function that returns a function for querying a full table.
- * @param {string} tableName The name of the table to be queried. Make sure the 
- * table exists to avoid TableNotFoundErrors on Heroku/
- */
-function createQueryFunction(tableName) {
-  return function (_, res, _) {
-    var a1 = "SELECT * FROM " + tableName;
-    db.query(a1, (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.json(result);
-      }
-    });
-  };
-}
-
-/**
  * Function that inserts a single assignment with relevant arguments into the database.
  * @param {string} id - ?
  * @param {string} name - ?
@@ -545,6 +527,13 @@ function insertAllGraders(json_string) {
     let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
 
     insertSingleGrader(id, grader_name, offset, role, total_graded, weight, last_updated);
+  })
+}
+
+function insert_assignment_cap(id, assigment_id, student_id, cap) {
+  let sql_query = "INSERT INTO assignments_cap (id, assignment_id, student_id, cap) VALUES (? ? ? ?)"
+  db.query(sql_query, [id, assignment_id, student_id, cap], (err, _) => {
+    if (err) console.log(err);
   })
 }
 
