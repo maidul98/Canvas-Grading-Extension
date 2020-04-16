@@ -123,11 +123,11 @@ function assignGraderToSubmission(grader_id, submission_id) {
 
 
 
-async function runPipeline(res) {
+async function runPipeline(res, assignment_id) {
   let assignmentsLeft;
-  get_grader_objects()
+  get_grader_objects(assignment_id)
     .then(grader_array => {
-      get_unassigned_submissions()
+      get_unassigned_submissions(assignment_id)
         .then(submission_json => {
           return submission_json.map(v => v.id);
         })
@@ -168,27 +168,46 @@ async function runPipeline(res) {
    * 
    * @returns A new Promise object
    */
-function get_grader_objects(assigment_id) {
+function get_grader_objects(assignment_id) {
   return new Promise(function (resolve, reject) {
-    let cap_data = get_assignment_cap(assignment_id)
-    let sql_query = "SELECT * FROM grader"
-    db.query(sql_query, (err, results) => {
-      if (err) {
-        console.log(err)
-        return reject(err)
-      } else {
-        grader_array = []
-        results.forEach(grader => {
-          let id = grader.id
-          let offset = grader.offset
-          let weight = grader.weight
-          let total_assigned = grader.total_assigned
-          let graderObj = new AssignmentGrader(id, weight, offset, total_assigned, total_assigned)
-          grader_array.push(graderObj)
+    get_assignment_cap(assignment_id)
+      .then((response) => {
+        response.sort(function (a, b) {
+          if (a.grader_id === b.grader_id) return 0
+          return b.grader_id > a.grader_id ? 1 : -1
         })
-        resolve(grader_array)
-      }
-    })
+        let sql_query = "SELECT * FROM grader"
+        db.query(sql_query, (err, results) => {
+          if (err) {
+            console.log(err)
+            return reject(err)
+          } else {
+            grader_array = []
+            results.forEach(grader => {
+              let id = grader.id
+              let offset = grader.offset
+              let weight = grader.weight
+              let graderObj = new AssignmentGrader(id, weight, offset, -1, -1, -1)
+              grader_array.push(graderObj)
+            })
+            grader_array.sort(function (a, b) {
+              if (a.id === b.id) return 0
+              return b.id > a.id ? 1 : -1
+            })
+
+            // IMPORTANT: Assumes grader_array and the response from the assignments_cap
+            // are equal in length. This needs to be satisfied by making sure every grader 
+            // has an entry for every assignment in assignments_cap table.
+            if (grader_array.length != results.length) throw Error('you done messed up')
+            for (let i = 0; i < grader_array.length; i++) {
+              grader_array[i].update_num_assigned(results[i].total_assigned_for_assignment);
+              grader_array[i].update_dist_num_assigned(results[i].total_assigned_for_assignment)
+              grader_array[i].update_cap(results[i].cap)
+            }
+            resolve(grader_array)
+          }
+        })
+      })
 
   })
 }
@@ -214,9 +233,9 @@ function get_grader_table(_, res, _) {
 /**
  * This function returns the list of unassigned submissions
  */
-function get_unassigned_submissions() {
+function get_unassigned_submissions(assignment_id) {
   return new Promise((resolve, reject) => {
-    let sql_query = "SELECT * FROM submission WHERE grader_id IS NULL";
+    let sql_query = `SELECT * FROM submission WHERE grader_id IS NULL AND assignment_id = ${assignment_id}`;
     db.query(sql_query, (err, results) => {
       if (err) {
         console.log(err);
@@ -537,12 +556,12 @@ function insert_assignment_cap(id, assigment_id, student_id, cap) {
 function get_assignment_cap(assignment_id) {
   return new Promise((resolve, reject) => {
     let sql_query = `SELECT * from assignments_cap WHERE assignment_id=${assignment_id}`;
-    db.query(sql_query, (err, _) => {
+    db.query(sql_query, (err, results) => {
       if (err) {
         console.log(err)
         reject(err)
       } else {
-        resolve()
+        resolve(results)
       }
     })
   })

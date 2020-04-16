@@ -38,12 +38,19 @@ AssignmentGrader.prototype.updateOffset = function (offset) {
     this.offset = offset;
 };
 
+AssignmentGrader.prototype.update_cap = function (cap) {
+    this.cap = cap;
+}
 
 /** Overwrites the grader's dist_num_assigned to [dist_num_assigned] */
 AssignmentGrader.prototype.update_dist_num_assigned = function (dist_num_assigned) {
     this.dist_num_assigned = dist_num_assigned;
 };
 
+/** Overwrites the grader's num_assigned to [num_assigned] */
+AssignmentGrader.prototype.update_num_assigned = function (num_assigned) {
+    this.num_assigned = num_assigned;
+};
 
 /** Decrements the grader's weight by [weight] */
 AssignmentGrader.prototype.decrementWeight = function (weight) {
