@@ -267,7 +267,7 @@ module.exports.main_distribute = main_distribute
 
 //TESTING
 //grader_id, weight, offset, num_assigned, dist_num_assigned, cap
-
+/*
 arr = [
     new AssignmentGrader(1, 2, 0, 0, 0, 10),
     new AssignmentGrader(2, 2, 0, 0, 0, 100),
@@ -313,4 +313,5 @@ console.log(arr);
 console.log("\n\n");
 
 
-//total distributed = 220 
+//total distributed = 220
+*/

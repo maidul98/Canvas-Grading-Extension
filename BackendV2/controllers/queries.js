@@ -537,12 +537,12 @@ function insert_assignment_cap(id, assigment_id, student_id, cap) {
 function get_assignment_cap(assignment_id) {
   return new Promise((resolve, reject) => {
     let sql_query = `SELECT * from assignments_cap WHERE assignment_id=${assignment_id}`;
-    db.query(sql_query, (err, _) => {
+    db.query(sql_query, (err, response) => {
       if (err) {
         console.log(err)
         reject(err)
       } else {
-        resolve()
+        resolve(response)
       }
     })
   })
@@ -557,6 +557,10 @@ async function run_distribution_pipeline(req, res) {
 
 
 module.exports = {
+
+  insert_assignment_cap: insert_assignment_cap,
+
+  get_assignment_cap: get_assignment_cap,
 
   insertAllGraders: insertAllGraders,
 
