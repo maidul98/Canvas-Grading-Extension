@@ -44,7 +44,7 @@ export default function Submissions(props){
      */
     const singleSubmissionFetch = useRequest( (user_id, net_id) => {
         return {
-            url:"/canvas-api", 
+            url:`${process.env.REACT_APP_BASE_URL}/canvas-api`, 
             method:"post", 
             data:{endpoint:`assignments/${props.assignment_id}/submissions/${user_id}?include[]=user&include[]=submission_comments`}
         }
@@ -73,7 +73,7 @@ export default function Submissions(props){
 
     
     useEffect(()=>{
-        assignedSubmissions.run('/get-assigned-submissions-for-assigment?user_id=1&assigment_id='+props.assignment_id);
+        assignedSubmissions.run(`${process.env.REACT_APP_BASE_URL}/get-assigned-submissions-for-assigment?user_id=1&assigment_id=`+props.assignment_id);
     }, [props.assignment_id]);
     
     
@@ -102,7 +102,7 @@ export default function Submissions(props){
         if(Object.keys(gradesAndComments)){
             submitGrades.run(
                 {
-                    url: 'upload-submission-grades/assignments/'+props.assignment_id+'/submissions/batch-update-grades',
+                    url: `${process.env.REACT_APP_BASE_URL}/upload-submission-grades/assignments/`+props.assignment_id+'/submissions/batch-update-grades',
                     method: 'post',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(gradesAndComments.current),

@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^7.2.1",
     "@umijs/hooks": "^1.8.0",
     "bootstrap": "^4.4.1",
+    "dotenv": "^8.2.0",
     "downloadjs": "^1.4.7",
     "file-saver": "^2.0.2",
     "js-file-download": "^0.4.11",

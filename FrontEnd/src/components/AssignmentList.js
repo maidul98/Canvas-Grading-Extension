@@ -32,7 +32,7 @@ export default function AssignmentList(props) {
      * 
      */
     const downloadBulkSubmissions = useRequest(()=>{
-        return fetch('/download-submission', {
+        return fetch(`${process.env.REACT_APP_BASE_URL}/download-submission`, {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
             responseType: 'arraybuffer', // add this line 
             headers: {
@@ -49,7 +49,7 @@ export default function AssignmentList(props) {
     });
 
     useEffect(()=>{
-        fetchAssignments.run('/get-published-assignments');
+        fetchAssignments.run(`${process.env.REACT_APP_BASE_URL}/get-published-assignments`);
     },[]);
 
     if(fetchAssignments.loading) return <LoadingIcon />;

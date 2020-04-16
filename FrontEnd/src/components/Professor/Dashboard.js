@@ -35,7 +35,7 @@ export default function Dashboard(){
      */
     const fetchGradersData = useRequest(() => {
         return {
-            "url":`/get-grader-info`,
+            "url":`${process.env.REACT_APP_BASE_URL}/get-grader-info`,
             "method":'get'
         }
     }, {
@@ -75,7 +75,7 @@ export default function Dashboard(){
 
     const fetchSubmissions = useRequest( (assignmentID) => {
         return {
-            url:'/canvas-api', 
+            url:`${process.env.REACT_APP_BASE_URL}/canvas-api`, 
             method:'post', 
             data:{endpoint:`assignments/${assignmentID}/submissions`}
         }
@@ -153,7 +153,7 @@ export default function Dashboard(){
         console.log(finalData);
         if(finalData.length > 0){
             submitData.run({
-                url: "/update-graders-data",
+                url: `${process.env.REACT_APP_BASE_URL}/update-graders-data`,
                 method: 'post',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(finalData),
@@ -165,7 +165,7 @@ export default function Dashboard(){
     };
 
     useEffect(()=>{
-        fetchAssignments.run('/get-published-assignments');
+        fetchAssignments.run(`${process.env.REACT_APP_BASE_URL}/get-published-assignments`);
         fetchGradersData.run();
     },[]);
 
