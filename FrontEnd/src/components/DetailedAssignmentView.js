@@ -46,7 +46,7 @@ export default function DetailedAssignmentView(props){
 
     useEffect(()=>{
         fetchSubmission.run({
-            url:'/canvas-api', 
+            url:`${process.env.REACT_APP_BASE_URL}/canvas-api`, 
             method:'post', 
             data:{endpoint:`assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}?include[]=user&include[]=submission_comments`}
         });
@@ -56,7 +56,7 @@ export default function DetailedAssignmentView(props){
     function handleSubmit(){
         submitGrades.run(
             {
-                url: `upload-submission-grades/assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}`,
+                url: `${process.env.REACT_APP_BASE_URL}/upload-submission-grades/assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}`,
                 method: 'put',
                 headers: { 'Content-Type': 'application/json' },
                 body: {

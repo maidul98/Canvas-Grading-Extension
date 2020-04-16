@@ -155,7 +155,7 @@ async function runPipeline(res) {
           }
           else {
             assignmentsLeft = true;
-            let output_of_algo = distribution.distribute(mapped.length, grader_array);
+            let output_of_algo = distribution.main_distribute(mapped.length, grader_array);
             let matrix_of_pairs = distribution.formMatchingMatrix(output_of_algo, mapped);
             //update offsets of graders in DB with output_of_algo
             update_grader_entries(output_of_algo, function (err) {
@@ -165,6 +165,8 @@ async function runPipeline(res) {
             assign_submissions_to_grader(matrix_of_pairs, function (err) {
               if (err) console.log(err);
             });
+            //update (overwrite) num_assigned of graders in DB with output_of_algo
+
           }
         })
         .catch(err => console.log(err));
@@ -245,6 +247,42 @@ function get_unassigned_submissions() {
 
 }
 
+function update_multiple_graders_data_route(req, res) {
+  const callback = (err) => {
+    if (err) {
+      res.status(406).send({
+        status: "fail",
+        message: "Something went wrong"
+      });
+    } else {
+      res.send("success");
+    }
+  }
+  update_multiple_graders_data(req.body, callback);
+}
+
+/**
+ * @param {*} graders_arr: [{"id": 123, "weight": 5, "offset": -1}, {"id": 234, "offset": 0}, {"id: 345", "weight": 3}]
+ * @param {*} callback
+ */
+function update_multiple_graders_data(graders_arr, callback) {
+  let queries = "";
+  graders_arr.forEach(grader => {
+    let { id, ...data } = grader;
+    queries += mysql.format("UPDATE grader SET ? WHERE id = ?; ", [data, id]);
+  });
+  db.query(queries, callback);
+}
+
+/**
+ * @param {*} grader_id
+ * @param {*} grader_obj: the columns and their values to be updated. e.g. {"weight": 5, "offset": -1}
+ * @param {*} callback 
+ */
+function update_single_grader_data(grader_id, grader_obj, callback) {
+  let sql_query = "UPDATE grader SET ? WHERE id = ?";
+  db.query(sql_query, [grader_obj, grader_id], callback)
+}
 
 
 /**
@@ -267,14 +305,37 @@ function update_grader_weight(req, res) {
   );
 }
 
-
+/**
+ * @param {*} assignment_id
+ * Returns the assigned submissions for every grader for an assignment:
+ * {grader1_id: [submission1_id, submission2_id], grader2_id: [submission3_id, submission4_id]}
+ */
+function get_assigned_submissions_for_graders(req, res) {
+  let sql_query = "SELECT grader_id, id AS submission_id FROM submission WHERE assignment_id=? AND grader_id IS NOT NULL order by grader_id";
+  db.query(
+    sql_query, [req.query.assignment_id],
+    function (err, results) {
+      if (err) {
+        console.log(err);
+      } else {
+        data = results.reduce((assigned_submissions, row) => {
+          assigned_submissions[row.grader_id] ?
+            assigned_submissions[row.grader_id].push(row.submission_id)
+            : assigned_submissions[row.grader_id] = [row.submission_id];
+          return assigned_submissions;
+        }, {})
+        res.json(data);
+      }
+    }
+  )
+}
 
 /**
   * This function takes in grader_id and assigment_id and returns the list of submissions that are assigned for that grader
   * @param {*} user_id 
   * @param {*} assigment_id 
   */
- function get_assigned_submission_for_assigment(req, res) {
+function get_assigned_submission_for_assigment(req, res) {
   let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
   db.query(
     sql_query, [req.query.assigment_id, req.query.user_id],
@@ -288,11 +349,9 @@ function update_grader_weight(req, res) {
   );
 }
 
-
 /**
 * This function gets the grading progress for each grader given assignment_id
 * @param {*} assigment_id
-* @param {*} grader_id
 */
 function get_grading_progress_for_every_grader(req, res) {
   let sql_query = "SELECT submission.id, grader_id, assignment_id, is_graded, offset, weight, total_graded FROM submission JOIN grader ON submission.grader_id = grader.id WHERE assignment_id=? AND grader_id IS NOT NULL";
@@ -335,15 +394,15 @@ function get_grading_progress_for_every_grader(req, res) {
  * @param {*} res 
  */
 function get_grader_info(req, res) {
-    let sql_query = "SELECT * FROM grader";
-    db.query(sql_query, [req.query.assigment_id], (err, results) => {
+  let sql_query = "SELECT * FROM grader";
+  db.query(sql_query, [req.query.assigment_id], (err, results) => {
 
-      if (err) {
-        console.log("err");
-      } else {
-        res.json(results);
-      }
+    if (err) {
+      console.log("err");
+    } else {
+      res.json(results);
     }
+  }
   );
 }
 
@@ -515,11 +574,19 @@ module.exports = {
 
   update_grader_weight: update_grader_weight,
 
+  get_assigned_submissions_for_graders: get_assigned_submissions_for_graders,
+
   get_assigned_submission_for_assigment: get_assigned_submission_for_assigment,
 
   get_grading_progress_for_every_grader: get_grading_progress_for_every_grader,
 
   update_grader_entries: update_grader_entries,
+
+  update_single_grader_data: update_single_grader_data,
+
+  update_multiple_graders_data: update_multiple_graders_data,
+
+  update_multiple_graders_data_route: update_multiple_graders_data_route,
 
   assign_submissions_to_grader: assign_submissions_to_grader,
 

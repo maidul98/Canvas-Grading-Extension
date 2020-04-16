@@ -93,7 +93,6 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color:rgb(235, 235, 235)
 }
 
 /* .container{
@@ -359,6 +358,11 @@ h1{
 /**
 ========== (Assignments) ===========
 **/
+#downloadBtnSpinner{
+  margin-bottom: 4px;
+  margin-left: 10px;
+}
+
 .content-container{
 margin-top: 80px;
 }
@@ -443,6 +447,10 @@ ul#download-files {
 
 #alert-detail-submit-error {
   margin-top: 10px;
+}
+
+#download-buttn{
+  margin-right: 10px;
 }
 
 /* #F7F7F7 */

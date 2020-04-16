@@ -21,14 +21,16 @@ export default function Submissions(props){
         onSuccess: (result, params) => {
             if(result.length == 0){
                 alert.show('You have no assigned submissions for this assignment yet')
+                props.showControls(false)
             }else{
                 //remove any older alerts
                 alert.removeAll()
-
                 //concurrently pull all submission for quick edit
                 result.map((submission) =>{
                     singleSubmissionFetch.run(submission['user_id'], submission['name'])
                 })
+
+                props.showControls(true)
 
             }
         },
@@ -42,7 +44,7 @@ export default function Submissions(props){
      */
     const singleSubmissionFetch = useRequest( (user_id, net_id) => {
         return {
-            url:"/canvas-api", 
+            url:`${process.env.REACT_APP_BASE_URL}/canvas-api`, 
             method:"post", 
             data:{endpoint:`assignments/${props.assignment_id}/submissions/${user_id}?include[]=user&include[]=submission_comments`}
         }
@@ -71,8 +73,9 @@ export default function Submissions(props){
 
     
     useEffect(()=>{
-        assignedSubmissions.run('/get-assigned-submissions-for-assigment?user_id=1&assigment_id='+props.assignment_id);
+        assignedSubmissions.run(`${process.env.REACT_APP_BASE_URL}/get-assigned-submissions-for-assigment?user_id=1&assigment_id=`+props.assignment_id);
     }, [props.assignment_id]);
+    
     
     const handleCommentGrade = (id, event, type) => {
         //if you change grade, then attach any comments for that sub id
@@ -99,7 +102,7 @@ export default function Submissions(props){
         if(Object.keys(gradesAndComments)){
             submitGrades.run(
                 {
-                    url: 'upload-submission-grades/assignments/'+props.assignment_id+'/submissions/batch-update-grades',
+                    url: `${process.env.REACT_APP_BASE_URL}/upload-submission-grades/assignments/`+props.assignment_id+'/submissions/batch-update-grades',
                     method: 'post',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(gradesAndComments.current),
@@ -108,10 +111,9 @@ export default function Submissions(props){
         }
     }
 
-    if(submitGrades?.loading | assignedSubmissions?.loading) return <LoadingIcon />
-
     return (
         <div>
+            {submitGrades?.loading | assignedSubmissions?.loading ? <LoadingIcon />:null}
             {console.log(singleSubmissionFetch?.fetches)}
             {Object.values(singleSubmissionFetch?.fetches).map(res => 
                 <div key={res.data.id}>
@@ -130,7 +132,7 @@ export default function Submissions(props){
                                 <input type="text" data-grade={res.data.user_id} ref={input => gradeInput.current = input} name="assigned_grade" defaultValue={res.data.score} onChange={(event)=>handleCommentGrade(res.data.user_id, event, 'grade')} type="number" min={0} max={100}></input>
                             </div>
                         </div>
-                        <textarea name="comment" data-comment={res.data.user_id} type="text" defaultValue={res.data?.submission_comments.length ? res.data?.submission_comments[res.data?.submission_comments?.length-1].comment:null} placeholder="Enter feedback here" className="feedback-form"  onChange={(event)=>handleCommentGrade(res.data.user_id, event, 'comment')}></textarea>
+                        <textarea name="comment" data-comment={res.data.user_id} type="text" defaultValue={res.data?.submission_comments?.length ? res.data?.submission_comments[res.data?.submission_comments?.length-1].comment:null} placeholder="Enter feedback here" className="feedback-form"  onChange={(event)=>handleCommentGrade(res.data.user_id, event, 'comment')}></textarea>
                         <p className={changed?'auto-save-show':'auto-save-hidden'}>Auto saved, not submitted</p>
                     </div>
                     :

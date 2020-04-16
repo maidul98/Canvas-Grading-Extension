@@ -79,6 +79,7 @@ async function downloadAllAttachmentsForAllUser(batchDownloadPath, user_ids, ass
 
 }
 
+
 /**
  * This function deletes a folder fully and returns true 
  * if it has done so successfully or false otherwise.
@@ -87,7 +88,6 @@ async function downloadAllAttachmentsForAllUser(batchDownloadPath, user_ids, ass
 function deleteFolder(path) {
     try {
         rimraf.sync(path)
-        return true
     } catch (e) {
         console.log(e)
     }
@@ -100,18 +100,15 @@ function deleteFolder(path) {
  */
 function deleteFile(path) {
     try {
-        fs.unlink(path, (err) => {
-            if (err) throw err;
-        })
-        return true
+        fs.unlink(path)
     } catch (e) {
-        console.log(e)
+        
     }
 }
 
 /**
  * Computes the delay in milliseconds
- * @param {*} minutes The number of minutes the delay is required to last
+ * @param {int} minutes The number of minutes the delay is required to last
  */
 function computeTimeout(minutes) {
     return minutes * 60000
@@ -125,33 +122,30 @@ module.exports.downloadSubmissions = async (req, res) => {
         let folder_name = `${req.body.assignment_id}-${req.body.grader_id}`
         let bulkSubmissionsPath = `temp_bulk_downloads/assignemnt-${folder_name}`;
         let zip_file_path = `${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`
-        const timeout = computeTimeout(2) // 2 minutes for now
+        const timeout = computeTimeout(1) // 2 minutes for now
         if (fs.existsSync(zip_file_path)) {
-            // if (deleteFile(zip_file_path) & deleteFolder(bulkSubmissionsPath)) {
-            //     console.log('delete both')
-            //     await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id)
-            //     await zip(`${bulkSubmissionsPath}/`, zip_file_path);
-            //     res.download(`${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`)
-            //     console.log('do something')
-            //     setTimeout(function () {
-            //         deleteFile(zip_file_path)
-            //         deleteFolder(bulkSubmissionsPath)
-            //     }, timeout)
-            // } else {
-            //     console.log('not delete')
-            // }
-            console.log('if block')
-            res.download(zip_file_path);
-
+            deleteFile(zip_file_path)
+            deleteFolder(bulkSubmissionsPath)
+            await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id)
+            await zip(`${bulkSubmissionsPath}/`, zip_file_path);
+            res.setHeader("content-type", "application/zip");
+            fs.createReadStream(zip_file_path).pipe(res).on('finish', function () {
+                setTimeout(function () {
+                    deleteFile(zip_file_path)
+                    deleteFolder(bulkSubmissionsPath)
+                }, timeout)
+            });
+            
         } else {
             await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id)
             await zip(`${bulkSubmissionsPath}/`, zip_file_path);
-            res.download(zip_file_path)
-            console.log('else block')
-            setTimeout(function () {
-                deleteFile(zip_file_path)
-                deleteFolder(bulkSubmissionsPath)
-            }, timeout)
+            res.setHeader("content-type", "application/zip");
+            fs.createReadStream(zip_file_path).pipe(res).on('finish', function () {
+                setTimeout(function () {
+                    deleteFile(zip_file_path)
+                    deleteFolder(bulkSubmissionsPath)
+                }, timeout)
+            });
         }
 
     } catch (error) {
