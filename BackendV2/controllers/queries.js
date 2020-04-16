@@ -168,9 +168,9 @@ async function runPipeline(res) {
    * 
    * @returns A new Promise object
    */
-function get_grader_objects() {
+function get_grader_objects(assigment_id) {
   return new Promise(function (resolve, reject) {
-
+    let cap_data = get_assignment_cap(assignment_id)
     let sql_query = "SELECT * FROM grader"
     db.query(sql_query, (err, results) => {
       if (err) {
@@ -182,7 +182,8 @@ function get_grader_objects() {
           let id = grader.id
           let offset = grader.offset
           let weight = grader.weight
-          let graderObj = new AssignmentGrader(id, weight, offset, 0)
+          let total_assigned = grader.total_assigned
+          let graderObj = new AssignmentGrader(id, weight, offset, total_assigned, total_assigned)
           grader_array.push(graderObj)
         })
         resolve(grader_array)
@@ -453,8 +454,6 @@ function update_grader_entries(grader_array, callback) {
   });
 }
 
-
-
 function assign_submissions_to_grader(assignment_matrix, callback) {
   async.forEachOf(assignment_matrix, function (pairing, _, inner_callback) {
     let sql_query = "UPDATE submission SET grader_id = ? WHERE id = ?"
@@ -476,8 +475,6 @@ function assign_submissions_to_grader(assignment_matrix, callback) {
     }
   })
 }
-
-
 
 async function insertAllSubmission(json_string) {
   console.log(json_string)
@@ -534,6 +531,20 @@ function insert_assignment_cap(id, assigment_id, student_id, cap) {
   let sql_query = "INSERT INTO assignments_cap (id, assignment_id, student_id, cap) VALUES (? ? ? ?)"
   db.query(sql_query, [id, assignment_id, student_id, cap], (err, _) => {
     if (err) console.log(err);
+  })
+}
+
+function get_assignment_cap(assignment_id) {
+  return new Promise((resolve, reject) => {
+    let sql_query = `SELECT * from assignments_cap WHERE assignment_id=${assignment_id}`;
+    db.query(sql_query, (err, _) => {
+      if (err) {
+        console.log(err)
+        reject(err)
+      } else {
+        resolve()
+      }
+    })
   })
 }
 
