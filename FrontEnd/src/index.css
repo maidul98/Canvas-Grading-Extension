@@ -435,6 +435,7 @@ ul#download-files {
 
 #gradeSubmitBtn{
   margin-top: 20px;
+  float:right;
 }
 
 #assignmentDetails h4{
@@ -536,6 +537,7 @@ ol.breadcrumb{
   background-color: #F7F7F7;
   padding: 20px;
   margin-bottom: 10px;
+  padding-bottom: 10px;
 }
 
 #student_name{
@@ -573,17 +575,7 @@ ol.breadcrumb{
 .out-of-text{
   margin-right: 10px;
 }
-/* .feedback-form{
-  width: 100%;
-  height: 100px;
-}
 
-.grade-box-bulk{
-  display: flex;
-  position: relative;
-  top: -80px;
-  padding: 15px;
-} */
 .auto-save-show {
   color: #3CB371;
   display: block;
@@ -593,6 +585,22 @@ ol.breadcrumb{
 
 .auto-save-hidden{
   display: none;
+}
+
+.submission_actions{
+  margin-top:10px;
+}
+
+.submission_actions ul{
+  list-style: none;
+  padding-left: 0;
+}
+
+.submission_actions ul li{
+  padding-left: 0;
+  margin-left:0;
+  display: inline;
+  margin-right: 15px;
 }
 
 /*===================PROFESSOR: DASHBOARD===============*/
@@ -621,4 +629,13 @@ ol.breadcrumb{
 
 #__react-alert__ div div div button svg{
   background-color: black !important;
+}
+
+/*===================COMMENTS===============================*/
+.comment{
+  margin-bottom: 20px;
+}
+
+.showCommentsIcon{
+  width: 100px;
 }

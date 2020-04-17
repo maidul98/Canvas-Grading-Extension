@@ -1,15 +1,14 @@
-import React, {useEffect, useState, useRef} from 'react';
-import LoadingIcon from './LoadingIcon';
+import React, {useEffect, useRef} from 'react';
+import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import { useRequest } from '@umijs/hooks';
-import { Link } from 'react-router-dom';
 import { useAlert } from 'react-alert'
-import Spinner from 'react-bootstrap/Spinner'
+import ExtendedSubmissionView from './bulk_edit/ExtendedSubmissionView'
+import BasicSubmissionView from './bulk_edit/BasicSubmissionView'
 
 export default function Submissions(props){
     const alert = useAlert();
     const gradesAndComments = useRef([]);
-    const [changed, setChanged] = useState(false);  
     const gradeInput = useRef()
 
     /**
@@ -78,9 +77,6 @@ export default function Submissions(props){
     
     
     const handleCommentGrade = (id, event, type) => {
-        //if you change grade, then attach any comments for that sub id
-        //if you change comment, then add 
-
         let found = gradesAndComments.current.some(submissionInArray=> submissionInArray.id == id)
         if(found){
             let index = gradesAndComments.current.findIndex(submissionInArray => submissionInArray.id == id);
@@ -114,51 +110,22 @@ export default function Submissions(props){
     return (
         <div>
             {submitGrades?.loading | assignedSubmissions?.loading ? <LoadingIcon />:null}
-            {console.log(singleSubmissionFetch?.fetches)}
             {Object.values(singleSubmissionFetch?.fetches).map(res => 
                 <div key={res.data.id}>
-                    {/* {console.log(res.data?.submission_comments)} */}
                     {
                     (props.bulk_edit)
                     ?
-                    // Quick edit
-                    <div className="quick-edit-submission">
-                        <div id="name-grade-container">
-                            <div id="student_name">
-                                {res.data?.user?.login_id}
-                            </div>
-                            <div id="grade_input">
-                                <span className="out-of-text">Grade out of 100</span>
-                                <input type="text" data-grade={res.data.user_id} ref={input => gradeInput.current = input} name="assigned_grade" defaultValue={res.data.score} onChange={(event)=>handleCommentGrade(res.data.user_id, event, 'grade')} type="number" min={0} max={100}></input>
-                            </div>
-                        </div>
-                        <textarea name="comment" data-comment={res.data.user_id} type="text" defaultValue={res.data?.submission_comments?.length ? res.data?.submission_comments[res.data?.submission_comments?.length-1].comment:null} placeholder="Enter feedback here" className="feedback-form"  onChange={(event)=>handleCommentGrade(res.data.user_id, event, 'comment')}></textarea>
-                        <p className={changed?'auto-save-show':'auto-save-hidden'}>Auto saved, not submitted</p>
-                    </div>
+                    <ExtendedSubmissionView
+                        data={res.data} 
+                        gradeInput={gradeInput} 
+                        handleCommentGrade={handleCommentGrade}
+                    />
                     :
-                    // List view
-                    <div className="assignment">
-                        <div className="student-name">
-                            {res.loading? <Spinner animation="grow" />: <></>}
-                            <Link to={"/assignments/"+res.data.assignment_id+'/'+res.data.user_id}>
-                                {res.data?.user?.login_id}
-                            </Link>
-                        </div>
-                        {res.data?.score == null | res.data?.score == undefined
-                        ?
-                        <div className="grade-status">
-                            <div className="grade-icon-red"></div>
-                        </div>
-                        :
-                        <div className="grade-status">
-                            <div className="grade-icon"></div>
-                        </div>
-                        }
-                    </div>
+                    <BasicSubmissionView data={res} />
                     }
                 </div>)
             }
-            <Button onClick={submitForms} className={props.bulk_edit?"visible":"invisible"}>Submit feedback</Button>
+            <Button onClick={submitForms} className={`float-right ${props.bulk_edit?`visible`:`invisible`}`}>Submit feedback</Button>
             <div className="clear-fix"></div>
         </div>
     );

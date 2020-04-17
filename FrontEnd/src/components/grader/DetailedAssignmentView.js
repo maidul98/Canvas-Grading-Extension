@@ -1,19 +1,14 @@
 import React, {useState, useEffect} from 'react';
 import Button from 'react-bootstrap/Button';
 import { useRequest } from '@umijs/hooks';
-import Alert from 'react-bootstrap/Alert';
-import LoadingIcon from './LoadingIcon';
-import {removeAlert} from '../Functions.js';
+import LoadingIcon from '../LoadingIcon';
 import { useAlert } from 'react-alert'
 
 export default function DetailedAssignmentView(props){
-    const [submission, setSubmission] = useState([]);
-    const [gradeSubmitStatus, SetGradeSubmitStatus] = useState([]);
     const [downloads, setDownloads] = useState([]);
     const [comments, setComments] = useState('');
     const [user, setUser] = useState([]);
     const [grade, setGrade] = useState(null);
-    const [alerts, setAlert] = useState([]);
     const alert = useAlert();
 
     const submitGrades = useRequest(url => url, {
@@ -22,7 +17,6 @@ export default function DetailedAssignmentView(props){
             alert.success('Your feedback has been submitted successfully')
         },
         onError: (error, params) => {
-            console.log(error)
             alert.error('Something went wrong, your feedback ws not submitted, please try again in 40 second')
         }
     });
@@ -33,14 +27,13 @@ export default function DetailedAssignmentView(props){
             let latest_comment = result['submission_comments'][result['submission_comments'].length-1]['comment'];
             let attachment = result['attachments'];
             let user = result['user'];
-            setSubmission(result);
             setDownloads(attachment?attachment:[]);
             setComments(latest_comment?latest_comment:[]);
             setUser(user?user:[]);
             setGrade(result['score']);
         },
         onError: (error, params) => {
-            setAlert([...alerts, {type:'warning', message:'Something went wrong, when fetching this page'}]);
+            alert.error('Something went wrong, when fetching this page')
         }
     });
 
@@ -50,7 +43,7 @@ export default function DetailedAssignmentView(props){
             method:'post', 
             data:{endpoint:`assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}?include[]=user&include[]=submission_comments`}
         });
-    }, []);
+    });
 
 
     function handleSubmit(){
@@ -91,9 +84,9 @@ export default function DetailedAssignmentView(props){
                         <input value={grade || ''} onChange={event => setGrade(event.target.value)} type="text"/>
                     </div>
                     <textarea id="detiledAssignmentComment" placeholder="Enter your text feedback here" value={comments || ''} onChange={event => setComments(event.target.value)} cols="30" rows="10">heheh</textarea>
-                    {alerts.map((obj) =><Alert variant={obj['type']} id="alert-detail-submit-error" dismissible onClose={(p1, event) => removeAlert(event,alerts, setAlert )}>{obj['message']}</Alert>)}
                 </div>
             </div>
+            <div className="clearfix"></div>
             <Button className="float-right" id="gradeSubmitBtn" onClick={handleSubmit} variant="primary">Submit feedback</Button>
             <div className="clearfix"></div>
         </div>

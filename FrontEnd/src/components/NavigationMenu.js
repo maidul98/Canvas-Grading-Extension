@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { Link } from 'react-router-dom';
 import { login, isLoggedIn, logout } from '../Auth/LoginActions';
-import Button from 'react-bootstrap/Button';
-import { Redirect } from 'react-router-dom';
 
 /*
     Creates a navigation bar for users. Allows them access to their dashboard,
@@ -39,17 +35,12 @@ class NavigationMenu extends Component {
                             </div>
                             :
                             <a href="/assignments" onClick={() => login()} id="login-btn">Login</a>
-                            // <Button href="/assignments" variant="link" onClick={() => login()}>Login</Button>
                         }
                     </div>
                 </div>
             </header>
         );
     }
-}
-
-function userProfileOnClick() {
-    document.getElementById('user_menu_nav').classList.toggle('show');
 }
 
 export default NavigationMenu;
