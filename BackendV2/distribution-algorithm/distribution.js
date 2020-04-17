@@ -77,6 +77,55 @@ function formMatchingMatrix(grader_array, submissions_array) {
  */
 function main_distribute(num_of_submissions, graderArray) {
 
+    //WE GOTTA CHNAGE THE PIPELINE....THE ALGO MUST BE CALLED 
+    //EVEN IF MAPPED.LENGTH = 0, SINCE EVEN IF WE'RE NOT PULLING SUBMISSIONS,
+    //WE MAY WANNA HANDLE CONFLICTS ************************
+
+    //START OF CONFLICT HANDLING
+
+    let surplus_num_submissions = 0;
+    let extra_submissions = [];
+
+    //checks to see which graders have num_assigned > cap --> conflicts
+    for (let i = 0; i < graderArray.length; i++) {
+
+        surplus = graderArray[i].num_assigned - graderArray[i].cap;
+
+        if (surplus > 0) {
+            graderArray[i].update_dist_num_assigned(graderArray[i].cap);
+            graderArray[i].update_num_assigned(graderArray[i].cap);
+            graderArray[i].incrementOffset(surplus);
+            surplus_num_submissions += surplus;
+
+            //functionality to remove [surplus] randomly-selected ungraded 
+            //submissions from this grader's workload; should return the submission 
+            //id's of the [surplus] assigbnments which have been removed and now 
+            //have a null grader 
+            extra_submissions =
+                extra_submissions.concat(handle_conflict(graderArray[i].grader_id, surplus));
+        }
+    }
+
+    num_of_submissions += surplus_num_submissions;
+
+
+    //add those submission IDS to mapped in the 
+    //algo pipeline
+    //at the end of algo pipeline, update progress bar 
+    //also update progress bar, whenever grader is done grading any submissions 
+
+
+    //NEW OUTPUT OF MAIN_DISTIRBUTE SHOULD BE submissions_Array (arra of int (submission_ids), 
+    //grader_Array (array of assignment_grader objects), boolean...whether or not num_of_submissions =0
+    //becuz num_of_submissions can be positive int > 0 EVEN IF mapped.length = 0; 
+    //return an object with the aforementioned fields ^^^
+
+    //END OF CONFLICT HANDLING 
+
+
+
+
+
     //initial distribution 
     //only offset & num_assigned should be altered 
 
@@ -118,7 +167,6 @@ function main_distribute(num_of_submissions, graderArray) {
         graderArray[i].update_dist_num_assigned(graderArray[i].num_assigned - graderArray[i].dist_num_assigned);
 
     return normalize_offset(graderArray);
-
 }
 
 
