@@ -81,4 +81,9 @@ router.put('/distribute', queries.run_distribution_pipeline)
 //Params: assignment_id, [user_ids]
 router.post('/download-submission', download.downloadSubmissions)
 
+//NEED TO UPDATEEEEEE!!!
+router.get('/get-assignment-cap', (req, res) => {
+    queries.get_assignment_cap(1234).then(response => res.send(response));
+});
+
 module.exports = router;

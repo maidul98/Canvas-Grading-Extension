@@ -28,24 +28,6 @@ setInterval(function () {
 }, 15000);
 
 /**
- * A higher-order function that returns a function for querying a full table.
- * @param {string} tableName The name of the table to be queried. Make sure the 
- * table exists to avoid TableNotFoundErrors on Heroku/
- */
-function createQueryFunction(tableName) {
-  return function (_, res, _) {
-    var a1 = "SELECT * FROM " + tableName;
-    db.query(a1, (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.json(result);
-      }
-    });
-  };
-}
-
-/**
  * Function that inserts a single assignment with relevant arguments into the database.
  * @param {string} id - ?
  * @param {string} name - ?
@@ -141,11 +123,11 @@ function assignGraderToSubmission(grader_id, submission_id) {
 
 
 
-async function runPipeline(res) {
+async function runPipeline(res, assignment_id) {
   let assignmentsLeft;
-  get_grader_objects()
+  get_grader_objects(assignment_id)
     .then(grader_array => {
-      get_unassigned_submissions()
+      get_unassigned_submissions(assignment_id)
         .then(submission_json => {
           return submission_json.map(v => v.id);
         })
@@ -166,7 +148,9 @@ async function runPipeline(res) {
               if (err) console.log(err);
             });
             //update (overwrite) num_assigned of graders in DB with output_of_algo
-
+            update_total_assigned(output_of_algo, assignment_id, function (err) {
+              if (err) console.log(err);
+            });
           }
         })
         .catch(err => console.log(err));
@@ -186,26 +170,47 @@ async function runPipeline(res) {
    * 
    * @returns A new Promise object
    */
-function get_grader_objects() {
+function get_grader_objects(assignment_id) {
   return new Promise(function (resolve, reject) {
-
-    let sql_query = "SELECT * FROM grader"
-    db.query(sql_query, (err, results) => {
-      if (err) {
-        console.log(err)
-        return reject(err)
-      } else {
-        grader_array = []
-        results.forEach(grader => {
-          let id = grader.id
-          let offset = grader.offset
-          let weight = grader.weight
-          let graderObj = new AssignmentGrader(id, weight, offset, 0)
-          grader_array.push(graderObj)
+    get_assignment_cap(assignment_id)
+      .then((response) => {
+        response.sort(function (a, b) {
+          if (a.grader_id === b.grader_id) return 0
+          return b.grader_id > a.grader_id ? 1 : -1
         })
-        resolve(grader_array)
-      }
-    })
+        let sql_query = "SELECT * FROM grader"
+        db.query(sql_query, (err, results) => {
+          if (err) {
+            console.log(err)
+            return reject(err)
+          } else {
+            grader_array = []
+            results.forEach(grader => {
+              let id = grader.id
+              let offset = grader.offset
+              let weight = grader.weight
+              let graderObj = new AssignmentGrader(id, weight, offset, -1, -1, -1)
+              grader_array.push(graderObj)
+            })
+            grader_array.sort(function (a, b) {
+              if (a.id === b.id) return 0
+              return b.id > a.id ? 1 : -1
+            })
+
+            // IMPORTANT: Assumes grader_array and the response from the assignments_cap
+            // are equal in length. This needs to be satisfied by making sure every grader 
+            // has an entry for every assignment in assignments_cap table.
+            if (grader_array.length != results.length) throw Error('you done messed up')
+            for (let i = 0; i < grader_array.length; i++) {
+              let assigned = results[i].total_assigned_for_assignment;
+              grader_array[i].update_num_assigned(assigned);
+              grader_array[i].update_dist_num_assigned(assigned);
+              grader_array[i].update_cap(results[i].cap);
+            }
+            resolve(grader_array)
+          }
+        })
+      })
 
   })
 }
@@ -229,11 +234,11 @@ function get_grader_table(_, res, _) {
 
 
 /**
- * This function returns the list of unassigned submissions
+ * This function returns the list of unassigned submissions for a given assignment. 
  */
-function get_unassigned_submissions() {
+function get_unassigned_submissions(assignment_id) {
   return new Promise((resolve, reject) => {
-    let sql_query = "SELECT * FROM submission WHERE grader_id IS NULL";
+    let sql_query = `SELECT * FROM submission WHERE grader_id IS NULL AND assignment_id = ${assignment_id}`;
     db.query(sql_query, (err, results) => {
       if (err) {
         console.log(err);
@@ -448,7 +453,36 @@ function get_grading_progress_for_every_grader(req, res) {
 
 
 
-//TOOD: Refactor the 2 functions into one function. 
+//TOOD: Refactor the 3 functions into one function. 
+
+
+//IS THIS CORRECT -> TRYNA UPDATE NUM_ASSIGNED IN ASSIGNED_CAP TABLE 
+function update_total_assigned(grader_array, assignment_id, callback) {
+  async.forEachOf(grader_array, function (grader, _, inner_callback) {
+    let sql_query = "UPDATE assignment_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
+    db.query(sql_query, [grader.num_assigned, grader.grader_id, assignment_id], (err, results) => {
+      if (err) {
+        console.log(err)
+        inner_callback(err)
+        callback(err)
+      } else {
+        inner_callback(null)
+      }
+    });
+  }, function (err) {
+    if (err) {
+      console.log(err);
+      callback(err)
+    } else {
+      callback(null)
+    }
+  });
+}
+//THIS FUNCTION ALSO NEEDS TO BE ACTUALLY CALLED WITHIN ALGO RUN PIPELIN!!! 
+//*****QUESTIONABLE CODE ABOVE -DIVYA LMAO  
+//DO I NEEDD TO ADD ANOTHER FUNC(ERROR) BELOW ALL THE CODE?? */
+
+
 function update_grader_entries(grader_array, callback) {
   async.forEachOf(grader_array, function (grader, _, inner_callback) {
     let sql_query = "UPDATE grader SET offset=? WHERE id=?"
@@ -471,8 +505,6 @@ function update_grader_entries(grader_array, callback) {
   });
 }
 
-
-
 function assign_submissions_to_grader(assignment_matrix, callback) {
   async.forEachOf(assignment_matrix, function (pairing, _, inner_callback) {
     let sql_query = "UPDATE submission SET grader_id = ? WHERE id = ?"
@@ -494,8 +526,6 @@ function assign_submissions_to_grader(assignment_matrix, callback) {
     }
   })
 }
-
-
 
 async function insertAllSubmission(json_string) {
   console.log(json_string)
@@ -548,15 +578,40 @@ function insertAllGraders(json_string) {
   })
 }
 
+function insert_assignment_cap(id, assigment_id, student_id, cap) {
+  let sql_query = "INSERT INTO assignments_cap (id, assignment_id, student_id, cap) VALUES (? ? ? ?)"
+  db.query(sql_query, [id, assignment_id, student_id, cap], (err, _) => {
+    if (err) console.log(err);
+  })
+}
+
+function get_assignment_cap(assignment_id) {
+  return new Promise((resolve, reject) => {
+    let sql_query = `SELECT * from assignments_cap WHERE assignment_id=${assignment_id}`;
+    db.query(sql_query, (err, results) => {
+      if (err) {
+        console.log(err)
+        reject(err)
+      } else {
+        resolve(results)
+      }
+    })
+  })
+}
 
 
-async function run_distribution_pipeline(req, res) {
-  await runPipeline(res)
+
+async function run_distribution_pipeline(req, res, assignment_id) {
+  await runPipeline(res, assignment_id)
 }
 
 
 
 module.exports = {
+
+  insert_assignment_cap: insert_assignment_cap,
+
+  get_assignment_cap: get_assignment_cap,
 
   insertAllGraders: insertAllGraders,
 
