@@ -8,7 +8,7 @@ import Table from 'react-bootstrap/Table';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
-import Submissions from '../Submissions';
+import Submissions from '../grader/Submissions';
 
 export default function Dashboard(){
     const alert = useAlert();
@@ -186,6 +186,7 @@ export default function Dashboard(){
                         <th>Name</th>
                         <th>Weights</th>
                         <th>Offsets</th>
+                        <th>Cap</th>
                         <th>Total Assigned</th>
                         <th>
                             <select id="selectAssignments" onChange={event=>setAssignmentID(event.target.value)}>
@@ -200,6 +201,9 @@ export default function Dashboard(){
                             <td>{grader?.name}</td>
                             <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" min="0" pattern="[0-9]*" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "weight", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
                             <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "offset", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
+                            <td className="width-10">
+                                10
+                            </td>
                             <td className="width-10">
                                 {graders[grader?.id][assignment_id]?graders[grader?.id][assignment_id]["total_assigned"]:0}
                             </td>

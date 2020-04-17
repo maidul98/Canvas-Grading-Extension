@@ -1,6 +1,6 @@
-import React, { Component, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useRequest } from '@umijs/hooks';
-import LoadingIcon from './LoadingIcon';
+import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import Submissions from './Submissions';
 import Spinner from 'react-bootstrap/Spinner'
@@ -29,12 +29,13 @@ export default function AssignmentList(props) {
     });
 
     /**
-     * 
+     * Takes in a list of users for a assignment ID and returns a blob or
+     * returns an error otherwise. 
      */
     const downloadBulkSubmissions = useRequest(()=>{
         return fetch(`${process.env.REACT_APP_BASE_URL}/download-submission`, {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-            responseType: 'arraybuffer', // add this line 
+            method: 'POST', 
+            responseType: 'arraybuffer', 
             headers: {
               'Content-Type': 'application/json'
             },

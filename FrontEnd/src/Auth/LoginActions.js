@@ -1,6 +1,3 @@
-import React from 'react';
-
-
 export function login(){
     localStorage.setItem('jtw-token', 'fake-token');
     return true;

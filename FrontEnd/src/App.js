@@ -1,7 +1,7 @@
 import React from 'react';
-import {BrowserRouter, Route, Switch, Redirect, Link} from 'react-router-dom';
-import AssignmentList from './components/AssignmentList';
-import DetailedAssignmentView from './components/DetailedAssignmentView'
+import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import GraderDashboard from './components/grader/GraderDashboard';
+import DetailedAssignmentView from './components/grader/DetailedAssignmentView'
 import './index.css';
 import NavigationMenu from './components/NavigationMenu';
 import 'bootstrap/dist/css/bootstrap.min.css'; // bootstrap
@@ -26,7 +26,7 @@ class App extends React.Component {
       }
           <Switch>
             <Route path = "/" component={Welcome} exact/>
-            <PrivateRoute  exact path="/assignments" component={AssignmentList}/>
+            <PrivateRoute  exact path="/assignments" component={GraderDashboard}/>
             <PrivateRoute   path="/assignments/:assignment_id/:student_id" component={DetailedAssignmentView} />
             <PrivateRoute  path = "/dashboard" component={Dashboard}/>
           </Switch>
