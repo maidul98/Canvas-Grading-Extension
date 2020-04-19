@@ -102,8 +102,7 @@ function main_distribute(num_of_submissions, graderArray) {
             //submissions from this grader's workload; should return the submission 
             //id's of the [surplus] assignments which have been removed and now 
             //have a null grader 
-            extra_submissions =
-                extra_submissions.concat(handle_conflict(graderArray[i].grader_id, surplus));
+            //extra_submissions = extra_submissions.concat(handle_conflict(graderArray[i].grader_id, surplus));
         }
     }
 
@@ -232,6 +231,30 @@ function main_distribute(num_of_submissions, graderArray) {
  */
 function distribute(num_of_submissions, graderArray) {
 
+    //sum of each grader's num_assigned BEFORE distribution 
+    already_distributed = graderArray.reduce((total, element) => {
+        return total + element.num_assigned;
+    }, 0);
+
+    //DELETE START
+
+    starting = graderArray.reduce((total, element) => {
+        return total + element.num_assigned;
+    }, 0);
+
+    ending = graderArray.reduce((total, element) => {
+        return total + element.num_assigned;
+    }, 0);
+
+    let change = ending - starting;
+
+    console.log("num_of_subimssions: " + num_of_submissions);
+    console.log("change: " + change);
+
+    //DELETE END 
+
+
+
     //sort graders in order of worst to best offsets 
     //greater offset = worse offset
     //smaller offset = better offset 
@@ -308,15 +331,36 @@ function distribute(num_of_submissions, graderArray) {
             graderArray[i].incrementNumAssigned(assigned);
         }
 
-        //TOTAL number of assignments that have been distributed
-        distAssign = graderArray.reduce((total, element) => {
+        //sum of each grader's num_assigned AFTER distribution 
+        now_distributed = graderArray.reduce((total, element) => {
             return total + element.num_assigned;
         }, 0);
 
+        //TOTAL number of assignments that have been distributed
+        let assigned_dist = now_distributed - already_distributed;
+
         //number of assignments that still need to be distributed due to rounding
-        leftAssign = num_of_submissions - distAssign;
+        leftAssign = num_of_submissions - assigned_dist;
 
         //At this point in the program, all of the graders have an equal offset of 0.
+
+
+        //DELETE START
+
+        ending = graderArray.reduce((total, element) => {
+            return total + element.num_assigned;
+        }, 0);
+
+        let change = ending - starting;
+
+        console.log("let assigned: " + leftAssign);
+        console.log("num_of_subimssions: " + num_of_submissions);
+        console.log("change: " + change);
+        console.log(graderArray);
+
+        //DELETE END 
+
+
 
         /*distribute remaining assignments evenly at first, if possible*/
         addedAssignments = Math.floor(leftAssign / graderArray.length);
@@ -334,6 +378,22 @@ function distribute(num_of_submissions, graderArray) {
         //The array is shuffled once.
         //The first [leftAssign] elements of the resulting array are chosen. 
 
+        //DELETE START
+
+        ending = graderArray.reduce((total, element) => {
+            return total + element.num_assigned;
+        }, 0);
+
+        change = ending - starting;
+
+        console.log("num_of_subimssions: " + num_of_submissions);
+        console.log("change: " + change);
+        console.log(graderArray);
+
+        //DELETE END 
+
+
+
         let randomArr = [];
 
         for (var p = 0; p < graderArray.length; p++)
@@ -347,6 +407,11 @@ function distribute(num_of_submissions, graderArray) {
         }
 
     } //end of else statement
+
+
+
+
+
 
     return normalize_offset(graderArray);
 }
