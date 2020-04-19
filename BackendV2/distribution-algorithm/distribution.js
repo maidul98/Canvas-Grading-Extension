@@ -1,4 +1,5 @@
 var AssignmentGrader = require('./grader-model');
+var DistResult = require('./dist-result');
 
 /**
  * Shuffles the array a, in place
@@ -95,71 +96,128 @@ function main_distribute(num_of_submissions, graderArray) {
 
             //functionality to remove [surplus] randomly-selected ungraded 
             //submissions from this grader's workload; should return the submission 
-            //id's of the [surplus] assigbnments which have been removed and now 
+            //id's of the [surplus] assignments which have been removed and now 
             //have a null grader 
             extra_submissions =
                 extra_submissions.concat(handle_conflict(graderArray[i].grader_id, surplus));
         }
     }
 
+    console.log("num of submisssions as give in input: " + num_of_submissions);
+    console.log("surplus_num_submissions: " + surplus_num_submissions);
+
+
     num_of_submissions += surplus_num_submissions;
 
+    //update cap --> run same pipeline as distribute 
+    //obviously mapped.length may be 0 more likely in this case 
+    //with update cap -- WE WILL ALSO NEED THE ASSIGNMENT_ID PARAMETER 
 
-    //add those submission IDS to mapped in the 
-    //algo pipeline
     //at the end of algo pipeline, update progress bar 
     //also update progress bar, whenever grader is done grading any submissions 
 
-
-    //NEW OUTPUT OF MAIN_DISTIRBUTE SHOULD BE submissions_Array (arra of int (submission_ids), 
-    //grader_Array (array of assignment_grader objects), boolean...whether or not num_of_submissions =0
-    //becuz num_of_submissions can be positive int > 0 EVEN IF mapped.length = 0; 
-    //return an object with the aforementioned fields ^^^
-
     //END OF CONFLICT HANDLING 
+
 
     //initial distribution 
     //only offset & num_assigned should be altered 
 
-    graderArray = distribute(num_of_submissions, graderArray);
+    let bool_val = false;
 
-    left_to_distribute = 0;
+    if (num_of_submissions > 0) {
 
-    //checking if the any grader's num_assigned value exceeds their cap 
-    for (let i = 0; i < graderArray.length; i++) {
+        bool_val = true;
 
-        surplus = graderArray[i].num_assigned - graderArray[i].cap;
+        console.log("BEFORE DIST /n");
+        console.log(graderArray);
+        console.log("/n");
 
-        if (surplus > 0) {
-            graderArray[i].decrementNumAssigned(surplus);
-            graderArray[i].incrementOffset(surplus);
-            left_to_distribute += surplus;
-        }
-    }
+        graderArray = distribute(num_of_submissions, graderArray);
 
-    shuffle(graderArray);
+        console.log("OKKKKK -- AFTER DIST")
+        console.log("\n\n");
+        console.log(graderArray);
+        console.log("\n\n");
 
-    //[left_to_distribute] represents the total number of submissions that now 
-    //need to be distributed among available graders
+        let left_to_distribute = 0;
 
-    while (left_to_distribute !== 0) {
-
+        //checking if the any grader's num_assigned value exceeds their cap 
         for (let i = 0; i < graderArray.length; i++) {
-            if (left_to_distribute === 0) break;
-            let grader = graderArray[i];
-            if (grader.num_assigned < grader.cap) {
-                grader.incrementNumAssigned(1);
-                grader.decrementOffset(1);
-                left_to_distribute--;
+
+            surplus = graderArray[i].num_assigned - graderArray[i].cap;
+
+            if (surplus > 0) {
+                graderArray[i].decrementNumAssigned(surplus);
+                graderArray[i].incrementOffset(surplus);
+                left_to_distribute += surplus;
             }
+        }
+
+        graderArray = normalize_offset(graderArray);
+
+        //sort graders in order of worst to best offsets 
+        graderArray.sort(function (a, b) {
+            if (b.offset === a.offset) return 0;
+            return b.offset > a.offset ? 1 : -1;
+        });
+
+        console.log("LEFT TO DIST: " + left_to_distribute);
+
+        //[left_to_distribute] represents the total number of submissions that now 
+        //need to be distributed among available graders
+
+        while (left_to_distribute !== 0) {
+
+            for (let i = 0; i < graderArray.length; i++) {
+                if (left_to_distribute === 0) break;
+                let grader = graderArray[i];
+
+                console.log("GRADER ID: " + grader.grader_id);
+                console.log("GRADER NUM ASSIGNED: " + grader.num_assigned);
+                console.log("GRADER CAP: " + grader.cap);
+
+
+                if (grader.num_assigned < grader.cap) {
+
+                    grader.incrementNumAssigned(1);
+                    grader.decrementOffset(1);
+                    left_to_distribute--;
+                }
+            }
+
+            console.log("need to dist " + left_to_distribute);
         }
     }
 
     for (let i = 0; i < graderArray.length; i++)
         graderArray[i].update_dist_num_assigned(graderArray[i].num_assigned - graderArray[i].dist_num_assigned);
 
-    return normalize_offset(graderArray);
+    console.log("sanityy")
+    console.log("/n");
+    console.log(graderArray);
+    console.log("/n");
+
+    //SANITY CHECK 
+    //SUM OF ALL GRADERS DIST NUM ASSIGNED SHOULD BE EQUAL TO NUM_OF_SUBMISSIONS
+
+    summm = graderArray.reduce((total, element) => {
+        return total + element.dist_num_assigned;
+    }, 0);
+
+    if (summm !== num_of_submissions) {
+        console.log("WTHHH");
+        console.log("sum" + summm);
+        console.log("num_of_submissions" + num_of_submissions);
+        console.error();
+
+    }
+
+
+    graderArray = normalize_offset(graderArray);
+    return new DistResult(graderArray, extra_submissions, bool_val);
 }
+
+
 
 /**
  * Fairly distributes [num_of_submissions] assignments among [graders] 
@@ -297,7 +355,7 @@ module.exports.main_distribute = main_distribute
 
 //TESTING
 //grader_id, weight, offset, num_assigned, dist_num_assigned, cap
-/*
+
 arr = [
     new AssignmentGrader(1, 2, 0, 0, 0, 10),
     new AssignmentGrader(2, 2, 0, 0, 0, 100),
@@ -307,26 +365,29 @@ arr = [
 console.log(arr);
 console.log("\n\n");
 
-arr = main_distribute(50, arr);
+arr = main_distribute(50, arr).graderArray;
 
-console.log(arr);
+//console.log(arr);
+console.log("\n\n");
+for (let i = 0; i < 4; i++) {
+    arr[i].update_dist_num_assigned(arr[i].num_assigned);
+    if (arr[i].grader_id === 4)
+        arr[i].update_cap(4);
+}
+
+
+arr = main_distribute(50, arr).graderArray;;
+
+//console.log(arr);
 console.log("\n\n");
 for (let i = 0; i < 4; i++)
     arr[i].update_dist_num_assigned(arr[i].num_assigned);
 
 
-arr = main_distribute(50, arr);
+/*
+arr = main_distribute(50, arr).graderArray;;
 
-console.log(arr);
-console.log("\n\n");
-for (let i = 0; i < 4; i++)
-    arr[i].update_dist_num_assigned(arr[i].num_assigned);
-
-
-
-arr = main_distribute(50, arr);
-
-console.log(arr);
+//console.log(arr);
 console.log("\n\n");
 for (let i = 0; i < 4; i++)
     arr[i].update_dist_num_assigned(arr[i].num_assigned);
@@ -337,8 +398,19 @@ for (let i = 0; i < 4; i++)
         arr[i].cap += 90;
 
 
+arr[0].update_cap(50);
+arr[1].update_cap(70);
+arr[2].update_cap(70);
+arr[3].update_cap(30);
 
-arr = main_distribute(70, arr);
+console.log("CAPS ARRAY UPDATES HAVE BEEN MADE");
+console.log("\n\n");
+console.log(arr);
+console.log("\n\n");
+
+
+//arr = main_distribute(70, arr).graderArray;
+
 console.log(arr);
 console.log("\n\n");
 
