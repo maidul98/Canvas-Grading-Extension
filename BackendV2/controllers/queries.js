@@ -76,38 +76,6 @@ function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_up
 };
 
 
-
-//TODO: DELETE when pipeline has been tested
-function formMatchingMatrix(grader_array, submissions_array) {
-  //need to require('./grader-model'); ???
-  const len = submissions_array.length;
-
-  if (len === 0) {
-    console.log("There are currently no assignments to distribute.");
-    return [];
-  }
-
-  var matrix = new Array(len).fill(0).map(() => new Array(2).fill(0));
-  shuffle(submissions_array);
-
-  var counter = 0;
-  for (var j = 0; j < grader_array.length; j++) {
-    num_assigned = grader_array[j].num_assigned;
-    id = grader_array[j].grader_id;
-    for (var i = counter; i < counter + num_assigned; i++) {
-      matrix[i][0] = id;
-    }
-    counter += num_assigned;
-  }
-
-  for (var i = 0; i < len; i++)
-    matrix[i][1] = submissions_array[i];
-
-  return matrix;
-}
-
-
-
 /**
  * A function that updates the grader for a submission
  * @param {int} grader_id - A unique id for a grader
@@ -146,13 +114,49 @@ function detect_conflicts(graderArray) {
 
 
 
+async function get_surplus_submissions(graderID, surplus) {
+  let sql_query = `SELECT * FROM submission WHERE grader_id = ${graderID} ORDER BY grader_id`; // get submissions for this grader
+  let surplusArr = []
+  await db.query(
+    sql_query,
+    function (err, results) {
+      if (err) {
+        console.log(err)
+      } else {
+        count = 0
+        for (let i = 0; i < surplus; i++) { //loop to get [surplus] entries. Assuming that there are >= surplus entries in results.
+          surplusArr.push(results[i].id)
+        }
+      }
+    }
+  )
+
+  return surplusArr
+}
+
+function set_surplus_submissions(graderID, surplus) {
+
+  let sql_query = `UPDATE submission SET grader_id = NULL WHERE grader_id = ${graderID} ORDER BY grader_id LIMIT ${surplus}`
+  db.query(
+    sql_query,
+    function (err, _) {
+      if (err) return console.log(err)
+      return 'success'
+    }
+  )
+}
+
+
+// Remember even async/await return Promises
 
 //functionality to remove [surplus] randomly-selected ungraded 
 //submissions from this grader's workload; should return the submission 
 //id's of the [surplus] assignments which have been removed and now 
 //have a null grader 
-function handle_conflict(grader_id, surplus) {
-
+async function handle_conflicts(graderID, surplus) {
+  const submissionArr = await get_surplus_submissions(graderID, surplus)
+  await set_surplus_submissions(graderID, surplus)
+  return submissionArr
 }
 
 
@@ -662,6 +666,10 @@ module.exports = {
   update_grader_weight: update_grader_weight,
 
   get_assigned_submissions_for_graders: get_assigned_submissions_for_graders,
+
+  get_surplus_submissions: get_surplus_submissions,
+
+  set_surplus_submissions: set_surplus_submissions,
 
   get_assigned_submission_for_assigment: get_assigned_submission_for_assigment,
 
