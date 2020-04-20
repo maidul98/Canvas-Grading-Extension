@@ -5,6 +5,7 @@
  */
 var mysql = require('mysql');
 var AssignmentGrader = require('../distribution-algorithm/grader-model');
+var DetectConflictOutput = require('./detect-conflicts-result');
 var async = require('async')
 var distribution = require('../distribution-algorithm/distribution.js');
 
@@ -122,6 +123,38 @@ function assignGraderToSubmission(grader_id, submission_id) {
 };
 
 
+//TESTED :D 
+function detect_conflicts(graderArray) {
+
+  let extra_submissions = [];
+
+  //checks to see which graders have num_assigned > cap --> need for re-distribution
+  for (let i = 0; i < graderArray.length; i++) {
+
+    surplus = graderArray[i].num_assigned - graderArray[i].cap;
+
+    if (surplus > 0) {
+      graderArray[i].update_dist_num_assigned(graderArray[i].cap);
+      graderArray[i].update_num_assigned(graderArray[i].cap);
+      graderArray[i].incrementOffset(surplus);
+      extra_submissions = extra_submissions.concat(handle_conflict(graderArray[i].grader_id, surplus));
+    }
+  }
+
+  return new DetectConflictOutput(graderArray, extra_submissions);
+}
+
+
+
+
+//functionality to remove [surplus] randomly-selected ungraded 
+//submissions from this grader's workload; should return the submission 
+//id's of the [surplus] assignments which have been removed and now 
+//have a null grader 
+function handle_conflict(grader_id, surplus) {
+
+}
+
 
 async function runPipeline(res, assignment_id) {
   let assignmentsLeft;
@@ -132,30 +165,29 @@ async function runPipeline(res, assignment_id) {
           return submission_json.map(v => v.id);
         })
         .then(mapped => {
-          if (mapped.length === 0) {
-            assignmentsLeft = false;
-          }
-          else {
-            assignmentsLeft = true;
-            let output_of_algo = distribution.main_distribute(mapped.length, grader_array);
-            let matrix_of_pairs = distribution.formMatchingMatrix(output_of_algo, mapped);
+          let conflicts = detect_conflicts(grader_array);
+          mapped = mapped.concat(conflicts.submissionsArray);
+          assignmentsLeft = mapped.length > 0 ? true : false;
+          if (assignmentsLeft) {
+            let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
+            let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
             //update offsets of graders in DB with output_of_algo
-            update_grader_entries(output_of_algo, function (err) {
+            update_grader_entries(graders_assigned, function (err) {
               if (err) console.log(err);
             });
             //update submissions DB with matrix_of_pairs 
             assign_submissions_to_grader(matrix_of_pairs, function (err) {
               if (err) console.log(err);
             });
-            //update (overwrite) num_assigned of graders in DB with output_of_algo
-            update_total_assigned(output_of_algo, assignment_id, function (err) {
+            //update num_assigned of graders in DB with output_of_algo
+            update_total_assigned(graders_assigned, assignment_id, function (err) {
               if (err) console.log(err);
             });
           }
         })
         .catch(err => console.log(err));
     })
-    .then(assignmentsLeft ? res.send("Successfully distributed assignments.") : res.send("There are no assignments left to distribute."))
+    .then(assignmentsLeft ? res.send("Successfully distributed (or re-distributed) assignments.") : res.send("There are currently no assignments to distribute or re-distribute."))
     .catch(err => console.log(err));
 }
 
