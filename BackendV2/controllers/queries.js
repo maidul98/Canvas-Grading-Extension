@@ -493,7 +493,7 @@ function get_grading_progress_for_every_grader(req, res) {
 
 
 //IS THIS CORRECT -> TRYNA UPDATE NUM_ASSIGNED IN ASSIGNED_CAP TABLE 
-function update_total_assigned(grader_array, assignment_id, callback) {
+function update_total_assigned(grader_array, assignment_id, callback, req, res) {
   async.forEachOf(grader_array, function (grader, _, inner_callback) {
     let sql_query = "UPDATE assignment_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
     db.query(sql_query, [grader.num_assigned, grader.grader_id, assignment_id], (err, results) => {
@@ -511,11 +511,10 @@ function update_total_assigned(grader_array, assignment_id, callback) {
       callback(err)
     } else {
       callback(null)
+      res.send("updated")
     }
   });
 }
-//THIS FUNCTION ALSO NEEDS TO BE ACTUALLY CALLED WITHIN ALGO RUN PIPELIN!!! 
-//*****QUESTIONABLE CODE ABOVE -DIVYA LMAO  
 //DO I NEEDD TO ADD ANOTHER FUNC(ERROR) BELOW ALL THE CODE?? */
 
 
@@ -676,6 +675,8 @@ module.exports = {
   get_grading_progress_for_every_grader: get_grading_progress_for_every_grader,
 
   update_grader_entries: update_grader_entries,
+
+  update_total_assigned: update_total_assigned,
 
   update_single_grader_data: update_single_grader_data,
 
