@@ -95,8 +95,6 @@ function main_distribute(num_of_submissions, graderArray) {
         }
     }
 
-    graderArray = normalize_offset(graderArray);
-
     //sort graders in order of worst to best offsets 
     graderArray.sort(function (a, b) {
         if (b.offset === a.offset) return 0;
@@ -275,68 +273,50 @@ module.exports.formMatchingMatrix = formMatchingMatrix
 module.exports.main_distribute = main_distribute
 
 
-
-/*
 //TESTING
 //grader_id, weight, offset, num_assigned, dist_num_assigned, cap
 
+/*
 arr = [
-    new AssignmentGrader(1, 2, 0, 0, 0, 10),
-    new AssignmentGrader(2, 2, 0, 0, 0, 100),
+    new AssignmentGrader(1, 4, 0, 0, 0, 100),
+    new AssignmentGrader(2, 19, 0, 0, 0, 567),
     new AssignmentGrader(3, 2, 0, 0, 0, 100),
-    new AssignmentGrader(4, 2, 0, 0, 0, 100)];
+    new AssignmentGrader(4, 2, 0, 0, 0, 100),
+    new AssignmentGrader(5, 1, 0, 0, 0, 100)];
 
 console.log(arr);
 console.log("\n\n");
 
-arr = main_distribute(50, arr).graderArray;
-
+arr = main_distribute(390, arr);
 console.log(arr);
 console.log("\n\n");
-for (let i = 0; i < 4; i++) {
+
+for (let i = 0; i < 5; i++) {
     arr[i].update_dist_num_assigned(arr[i].num_assigned);
     if (arr[i].grader_id === 4)
         arr[i].update_cap(4);
 }
 
-
-arr = main_distribute(50, arr).graderArray;;
-
+arr = main_distribute(6, arr);
 console.log(arr);
 console.log("\n\n");
-for (let i = 0; i < 4; i++)
+
+for (let i = 0; i < 5; i++)
     arr[i].update_dist_num_assigned(arr[i].num_assigned);
 
-
-arr = main_distribute(50, arr).graderArray;;
-
+arr = main_distribute(50, arr);
 console.log(arr);
 console.log("\n\n");
-for (let i = 0; i < 4; i++)
+
+for (let i = 0; i < 5; i++) {
     arr[i].update_dist_num_assigned(arr[i].num_assigned);
+    if (arr[i].grader_id === 2)
+        arr[i].update_cap(10);
+}
 
-
-for (let i = 0; i < 4; i++)
-    if (arr[i].cap < 90)
-        arr[i].cap += 90;
-
-
-arr[0].update_cap(221);
-arr[1].update_cap(0);
-arr[2].update_cap(0);
-arr[3].update_cap(0);
-
-console.log("CAPS ARRAY UPDATES HAVE BEEN MADE");
-console.log("\n\n");
+arr = main_distribute(70, arr);
 console.log(arr);
 console.log("\n\n");
 
-
-arr = main_distribute(70, arr).graderArray;
-
-console.log(arr);
-console.log("\n\n");
-
-
-//total distributed = 220
 */
+//total distributed = 220
