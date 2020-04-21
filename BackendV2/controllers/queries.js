@@ -496,10 +496,9 @@ function get_grading_progress_for_every_grader(req, res) {
 function update_total_assigned(/*grader_array, assignment_id, callback, */req, res) {
 
   grader_array =
-    [
-      new AssignmentGrader(3, 2, 0, 17, 0, 100),
-      new AssignmentGrader(4, 2, 0, 16, 0, 100),
-      new AssignmentGrader(6, 1, 0, 15, 0, 100)];
+    [new AssignmentGrader(255551, 2, 0, 456, 0, 100),
+    new AssignmentGrader(23455, 2, 0, 234, 0, 100),
+    new AssignmentGrader(5641066, 1, 0, 777, 0, 100)];
 
   assignment_id = 1234;
 
@@ -525,7 +524,6 @@ function update_total_assigned(/*grader_array, assignment_id, callback, */req, r
     }
   });
 }
-//DO I NEEDD TO ADD ANOTHER FUNC(ERROR) BELOW ALL THE CODE?? */
 
 
 function update_grader_entries(grader_array, callback) {
