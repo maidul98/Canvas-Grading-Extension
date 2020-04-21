@@ -493,14 +493,24 @@ function get_grading_progress_for_every_grader(req, res) {
 
 
 //IS THIS CORRECT -> TRYNA UPDATE NUM_ASSIGNED IN ASSIGNED_CAP TABLE 
-function update_total_assigned(grader_array, assignment_id, callback, req, res) {
+function update_total_assigned(/*grader_array, assignment_id, callback, */req, res) {
+
+  grader_array =
+    [
+      new AssignmentGrader(3, 2, 0, 17, 0, 100),
+      new AssignmentGrader(4, 2, 0, 16, 0, 100),
+      new AssignmentGrader(6, 1, 0, 15, 0, 100)];
+
+  assignment_id = 1234;
+
   async.forEachOf(grader_array, function (grader, _, inner_callback) {
-    let sql_query = "UPDATE assignment_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
+
+    let sql_query = "UPDATE assignments_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
     db.query(sql_query, [grader.num_assigned, grader.grader_id, assignment_id], (err, results) => {
       if (err) {
         console.log(err)
         inner_callback(err)
-        callback(err)
+        //callback(err)
       } else {
         inner_callback(null)
       }
@@ -508,9 +518,9 @@ function update_total_assigned(grader_array, assignment_id, callback, req, res) 
   }, function (err) {
     if (err) {
       console.log(err);
-      callback(err)
+      //callback(err)
     } else {
-      callback(null)
+      //callback(null)
       res.send("updated")
     }
   });
