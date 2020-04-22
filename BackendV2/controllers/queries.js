@@ -8,6 +8,7 @@ var AssignmentGrader = require('../distribution-algorithm/grader-model');
 var DetectConflictOutput = require('./detect-conflicts-result');
 var async = require('async')
 var distribution = require('../distribution-algorithm/distribution.js');
+const axios = require('axios');
 
 /** Configure Heroku Connection */
 /** TODO: Store all these constants in a separate file, gitignore it and figure 
@@ -160,17 +161,21 @@ async function handle_conflicts(graderID, surplus) {
 }
 
 
-async function runPipeline(res, assignment_id) {
+async function runPipeline(req, res) {
   let assignmentsLeft;
-  get_grader_objects(assignment_id)
-    .then(grader_array => {
-      get_unassigned_submissions(assignment_id)
+  //axios.put(`/pull-submissions-and-update/${req.query.assignment_id}`,
+  // (req, res) => console.log("pulling submissions")).catch(err => console.log(err));
+  get_grader_objects(req.query.assignment_id)
+    .then(async grader_array => {
+      await get_unassigned_submissions(req.query.assignment_id)
         .then(submission_json => {
           return submission_json.map(v => v.id);
         })
         .then(mapped => {
           let conflicts = detect_conflicts(grader_array);
           mapped = mapped.concat(conflicts.submissionsArray);
+          console.log(mapped);
+          console.log(mapped.length);
           assignmentsLeft = mapped.length > 0 ? true : false;
           if (assignmentsLeft) {
             let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
@@ -180,18 +185,26 @@ async function runPipeline(res, assignment_id) {
               if (err) console.log(err);
             });
             //update submissions DB with matrix_of_pairs 
+            console.log("graders_assigned: ")
+            console.log(graders_assigned)
+            console.log("\n")
+            console.log("matrix of pairs: ")
+            console.log(matrix_of_pairs)
             assign_submissions_to_grader(matrix_of_pairs, function (err) {
               if (err) console.log(err);
             });
             //update num_assigned of graders in DB with output_of_algo
-            update_total_assigned(graders_assigned, assignment_id, function (err) {
+            update_total_assigned(graders_assigned, req.query.assignment_id, function (err) {
               if (err) console.log(err);
             });
           }
         })
         .catch(err => console.log(err));
     })
-    .then(assignmentsLeft ? res.send("Successfully distributed (or re-distributed) assignments.") : res.send("There are currently no assignments to distribute or re-distribute."))
+    .then(() => {
+      console.log("vallll" + assignmentsLeft);
+      assignmentsLeft ? res.send("Successfully distributed (or re-distributed) assignments.") : res.send("There are currently no assignments to distribute or re-distribute.")
+    })
     .catch(err => console.log(err));
 }
 
@@ -209,7 +222,7 @@ async function runPipeline(res, assignment_id) {
 function get_grader_objects(assignment_id) {
   return new Promise(function (resolve, reject) {
     get_assignment_cap(assignment_id)
-      .then((response) => {
+      .then(response => {
         response.sort(function (a, b) {
           if (a.grader_id === b.grader_id) return 0
           return b.grader_id > a.grader_id ? 1 : -1
@@ -232,16 +245,15 @@ function get_grader_objects(assignment_id) {
               if (a.id === b.id) return 0
               return b.id > a.id ? 1 : -1
             })
-
             // IMPORTANT: Assumes grader_array and the response from the assignments_cap
             // are equal in length. This needs to be satisfied by making sure every grader 
             // has an entry for every assignment in assignments_cap table.
-            if (grader_array.length != results.length) throw Error('you done messed up')
+            if (grader_array.length != response.length) throw Error('you done messed up')
             for (let i = 0; i < grader_array.length; i++) {
-              let assigned = results[i].total_assigned_for_assignment;
+              let assigned = response[i].total_assigned_for_assignment;
               grader_array[i].update_num_assigned(assigned);
               grader_array[i].update_dist_num_assigned(assigned);
-              grader_array[i].update_cap(results[i].cap);
+              grader_array[i].update_cap(response[i].cap);
             }
             resolve(grader_array)
           }
@@ -491,25 +503,14 @@ function get_grading_progress_for_every_grader(req, res) {
 
 //TOOD: Refactor the 3 functions into one function. 
 
-
-//IS THIS CORRECT -> TRYNA UPDATE NUM_ASSIGNED IN ASSIGNED_CAP TABLE 
-function update_total_assigned(/*grader_array, assignment_id, callback, */req, res) {
-
-  grader_array =
-    [new AssignmentGrader(255551, 2, 0, 456, 0, 100),
-    new AssignmentGrader(23455, 2, 0, 234, 0, 100),
-    new AssignmentGrader(5641066, 1, 0, 777, 0, 100)];
-
-  assignment_id = 1234;
-
+function update_total_assigned(grader_array, assignment_id, callback) {
   async.forEachOf(grader_array, function (grader, _, inner_callback) {
-
     let sql_query = "UPDATE assignments_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
     db.query(sql_query, [grader.num_assigned, grader.grader_id, assignment_id], (err, results) => {
       if (err) {
         console.log(err)
         inner_callback(err)
-        //callback(err)
+        callback(err)
       } else {
         inner_callback(null)
       }
@@ -517,10 +518,9 @@ function update_total_assigned(/*grader_array, assignment_id, callback, */req, r
   }, function (err) {
     if (err) {
       console.log(err);
-      //callback(err)
+      callback(err)
     } else {
-      //callback(null)
-      res.send("updated")
+      callback(null)
     }
   });
 }
@@ -528,6 +528,7 @@ function update_total_assigned(/*grader_array, assignment_id, callback, */req, r
 
 function update_grader_entries(grader_array, callback) {
   async.forEachOf(grader_array, function (grader, _, inner_callback) {
+    console.log("update_grader_entries");
     let sql_query = "UPDATE grader SET offset=? WHERE id=?"
     db.query(sql_query, [grader.offset, grader.grader_id], (err, results) => {
       if (err) {
@@ -552,6 +553,7 @@ function assign_submissions_to_grader(assignment_matrix, callback) {
   async.forEachOf(assignment_matrix, function (pairing, _, inner_callback) {
     let sql_query = "UPDATE submission SET grader_id = ? WHERE id = ?"
     db.query(sql_query, [pairing[0], pairing[1]], (err, results) => {
+      console.log(pairing[0] + "  " + pairing[1]);
       if (err) {
         console.log(err)
         inner_callback(err)
@@ -644,8 +646,8 @@ function get_assignment_cap(assignment_id) {
 
 
 
-async function run_distribution_pipeline(req, res, assignment_id) {
-  await runPipeline(res, assignment_id)
+async function run_distribution_pipeline(req, res) {
+  await runPipeline(req, res)
 }
 
 

@@ -35,7 +35,7 @@ router.get('/get-published-assignments', apiCalls.get_published_assignments);
 // router.get('/single-submission/:assignment_id/submissions/:user_id', apiCalls.get_single_submission);
 
 /** Get all graders for enrolled on Canvas */
-// router.get('/get-graders', apiCalls.get_all_graders);
+router.get('/get-graders', apiCalls.get_all_graders);
 
 /** Upload grades and comments for a specific user's submission for an assignment */
 router.put('/upload-submission-grades/assignments/:assignment_id/submissions/:user_id', apiCalls.grade_single_submission);
@@ -61,7 +61,7 @@ router.post('/update-grader-weight', queries.update_grader_weight);
 router.post('/update-graders-data', queries.update_multiple_graders_data_route);
 
 /** Updates the total number of submissions assigned to graders for a particular assignment. */
-router.post('/update-total-assigned/:assignment_id', queries.update_total_assigned);
+//router.post('/update-total-assigned/:assignment_id', queries.update_total_assigned);
 
 /** Get grading progress for a specific assignment */
 router.get('/get-grader-info', queries.get_grader_info);
