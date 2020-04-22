@@ -327,6 +327,28 @@ function update_single_grader_data(grader_id, grader_obj, callback) {
 
 
 /**
+ * Given a grader, this method updates the graders cap. Throws error otherwise. 
+ * @param {object} req 
+ * @param {object} res 
+ */
+function update_caps(req, res, next) {
+  console.log(req.body.cap)
+  console.log(req.body.grader_id)
+  let sql_query = "UPDATE assignments_cap SET cap = ?  WHERE grader_id = ?";
+  db.query(
+    sql_query, [req.body.cap, req.body.grader_id],
+    function (err, results) {
+      if (err) {
+        console.log(err);
+      }else{
+        res.send()
+      }
+    }
+  )
+}
+
+
+/**
    * This function takes in a grader_id and updates the weight for that grader
    * @param {*} grader_id
    * @param {*} weight 
@@ -493,23 +515,15 @@ function get_grading_progress_for_every_grader(req, res) {
 
 
 //IS THIS CORRECT -> TRYNA UPDATE NUM_ASSIGNED IN ASSIGNED_CAP TABLE 
-function update_total_assigned(/*grader_array, assignment_id, callback, */req, res) {
 
-  grader_array =
-    [new AssignmentGrader(255551, 2, 0, 456, 0, 100),
-    new AssignmentGrader(23455, 2, 0, 234, 0, 100),
-    new AssignmentGrader(5641066, 1, 0, 777, 0, 100)];
-
-  assignment_id = 1234;
-
+function update_total_assigned(grader_array, assignment_id, callback) {
   async.forEachOf(grader_array, function (grader, _, inner_callback) {
-
-    let sql_query = "UPDATE assignments_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
+    let sql_query = "UPDATE assignment_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
     db.query(sql_query, [grader.num_assigned, grader.grader_id, assignment_id], (err, results) => {
       if (err) {
         console.log(err)
         inner_callback(err)
-        //callback(err)
+        callback(err)
       } else {
         inner_callback(null)
       }
@@ -517,10 +531,9 @@ function update_total_assigned(/*grader_array, assignment_id, callback, */req, r
   }, function (err) {
     if (err) {
       console.log(err);
-      //callback(err)
+      callback(err)
     } else {
-      //callback(null)
-      res.send("updated")
+      callback(null)
     }
   });
 }
@@ -696,5 +709,7 @@ module.exports = {
 
   run_distribution_pipeline: run_distribution_pipeline,
 
-  get_grader_info: get_grader_info
+  get_grader_info: get_grader_info,
+
+  update_caps: update_caps,
 }
