@@ -8,7 +8,7 @@ var AssignmentGrader = require('../distribution-algorithm/grader-model');
 var DetectConflictOutput = require('./detect-conflicts-result');
 var async = require('async')
 var distribution = require('../distribution-algorithm/distribution.js');
-const pool = require('../connection');
+// const pool = require('../connection');
 const axios = require('axios');
 
 /** Configure Heroku Connection */
@@ -23,7 +23,19 @@ var db = mysql.createPool({
   multipleStatements: true,
   port: 3306,
   connectTimeout: 100000,
-  max_questions: 5000
+  max_questions: 10
+});
+
+const pool = mysql.createPool({
+  host: "us-cdbr-iron-east-04.cleardb.net",
+  user: "be9696052936bb",
+  password: "4f1c4dfa",
+  database: "heroku_aff64052225438d",
+  multipleStatements: true,
+  port: 3306,
+  connectTimeout: 100000,
+  max_questions: 20,
+  max_user_connections: 30
 });
 
 setInterval(function () {
@@ -69,7 +81,7 @@ function insertSingleGrader(id, name, offset, role, total_graded, weight, last_u
 
 //TODO: Modify query so that it updates if new query with same id comes in
 function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, name, user_id) {
-  let sql_query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, name, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  let query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, name, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
   /*connection.connection.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, name, user_id], (err, result) => {
     if (err) {
       console.log(err);
@@ -78,20 +90,12 @@ function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_up
   });
   */
 
+  pool.getConnection(function (err, connection) {
+    if (err) throw err;
+    connection.query(query, [id, grader_id, assignment_id, is_graded, last_updated, name, user_id]);
+    connection.release();
+  });
 
-  pool.connection.getConnection((err, connection) => {
-    if (err) {
-      console.log('error')
-    }
-
-    console.log(typeof (connection));
-    connection.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, name, user_id], (err, result) => {
-      if (err) {
-        console.log(err);
-      }
-      connection.release();
-    })
-  })
 };
 
 
