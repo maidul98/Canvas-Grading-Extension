@@ -339,6 +339,28 @@ function update_single_grader_data(grader_id, grader_obj, callback) {
 
 
 /**
+ * Given a grader, this method updates the graders cap. Throws error otherwise. 
+ * @param {object} req 
+ * @param {object} res 
+ */
+function update_caps(req, res, next) {
+  console.log(req.body.cap)
+  console.log(req.body.grader_id)
+  let sql_query = "UPDATE assignments_cap SET cap = ?  WHERE grader_id = ?";
+  db.query(
+    sql_query, [req.body.cap, req.body.grader_id],
+    function (err, results) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send()
+      }
+    }
+  )
+}
+
+
+/**
    * This function takes in a grader_id and updates the weight for that grader
    * @param {*} grader_id
    * @param {*} weight 
@@ -698,5 +720,7 @@ module.exports = {
 
   run_distribution_pipeline: run_distribution_pipeline,
 
-  get_grader_info: get_grader_info
+  get_grader_info: get_grader_info,
+
+  update_caps: update_caps,
 }

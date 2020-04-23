@@ -84,6 +84,10 @@ router.put('/distribute', queries.run_distribution_pipeline)
 //Params: assignment_id, [user_ids]
 router.post('/download-submission', download.downloadSubmissions)
 
+
+//Params: assignment_id, [user_ids]
+router.post('/update-gradercap', queries.update_caps)
+
 //NEED TO UPDATEEEEEE!!!
 router.get('/get-assignment-cap', (req, res) => {
     queries.get_assignment_cap(1234).then(response => res.send(response));
