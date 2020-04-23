@@ -245,6 +245,13 @@ function get_grader_objects(assignment_id) {
               if (a.id === b.id) return 0
               return b.id > a.id ? 1 : -1
             })
+
+            console.log("grader array")
+            console.log(grader_array)
+            console.log("\n cap response arr")
+            console.log(response)
+
+
             // IMPORTANT: Assumes grader_array and the response from the assignments_cap
             // are equal in length. This needs to be satisfied by making sure every grader 
             // has an entry for every assignment in assignments_cap table.
