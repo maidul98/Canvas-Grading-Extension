@@ -106,7 +106,7 @@ function detect_conflicts(graderArray) {
       graderArray[i].update_dist_num_assigned(graderArray[i].cap);
       graderArray[i].update_num_assigned(graderArray[i].cap);
       graderArray[i].incrementOffset(surplus);
-      extra_submissions = extra_submissions.concat(handle_conflict(graderArray[i].grader_id, surplus));
+      extra_submissions = extra_submissions.concat(handle_conflicts(graderArray[i].grader_id, surplus));
     }
   }
 
@@ -167,8 +167,10 @@ async function runPipeline(req, res) {
   // (req, res) => console.log("pulling submissions")).catch(err => console.log(err));
   get_grader_objects(req.body.assignment_id)
     .then(async grader_array => {
-      await get_unassigned_submissions(req.query.assignment_id)
+      await get_unassigned_submissions(req.body.assignment_id)
         .then(submission_json => {
+          console.log("submission_json")
+          console.log(submission_json)
           return submission_json.map(v => v.id);
         })
         .then(mapped => {
@@ -194,7 +196,7 @@ async function runPipeline(req, res) {
               if (err) console.log(err);
             });
             //update num_assigned of graders in DB with output_of_algo
-            update_total_assigned(graders_assigned, req.query.assignment_id, function (err) {
+            update_total_assigned(graders_assigned, req.body.assignment_id, function (err) {
               if (err) console.log(err);
             });
           }
@@ -541,6 +543,7 @@ function update_total_assigned(grader_array, assignment_id, callback) {
       } else {
         inner_callback(null)
       }
+      db.release()
     });
   }, function (err) {
     if (err) {
