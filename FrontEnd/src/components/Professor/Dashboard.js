@@ -165,6 +165,7 @@ export default function Dashboard(){
         }
     };
 
+
     /**
      * This method runs the distribute algo 
      */
@@ -174,9 +175,59 @@ export default function Dashboard(){
      }
 
      /**
+      * Calls the distribution pipline
+      */
+     const updateDistribution = useRequest(url => url, {
+        manual: true,
+        onSuccess: (result, params) => {
+        },
+        onError: (error, params) => {
+            alert.error('Something went wrong while updating the disturbaion, please contact admin');
+
+        }
+    });
+
+     /**
+     * Update caps 
+     */
+    const updateCaps = useRequest(url => url, {
+        manual: true,
+        onSuccess: (result, params) => {
+            alert.success('Weights and offsets updated successfully');
+            updateDistribution.run({
+                url: `${process.env.REACT_APP_BASE_URL}/distribute`,
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body:JSON.stringify({
+                    "assignment_id": assignment_id
+                })
+            })
+        },
+        onError: (error, params) => {
+            alert.error('Something went wrong while distributing assignments');
+
+        }
+    });
+     
+     /**
       * This method updates the cap in the database and runs the pipe line to refect the changes
       */
-     function handleCapChange(){
+     function handleCapChange(event){
+         let grader_id = event.target.getAttribute('data-grader-id')
+         let grader_cap = event.target.value
+         console.log(assignment_id)
+         console.log(grader_id)
+         updateCaps.run({
+            url: `${process.env.REACT_APP_BASE_URL}/update-gradercap`,
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body:JSON.stringify({
+                "cap": grader_cap,
+                "grader_id": grader_id,
+                "assignment_id": assignment_id
+            }), 
+        })
+
          
      }
 

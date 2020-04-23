@@ -160,12 +160,12 @@ async function handle_conflicts(graderID, surplus) {
   return submissionArr
 }
 
-
 async function runPipeline(req, res) {
+
   let assignmentsLeft;
   //axios.put(`/pull-submissions-and-update/${req.query.assignment_id}`,
   // (req, res) => console.log("pulling submissions")).catch(err => console.log(err));
-  get_grader_objects(req.query.assignment_id)
+  get_grader_objects(req.body.assignment_id)
     .then(async grader_array => {
       await get_unassigned_submissions(req.query.assignment_id)
         .then(submission_json => {
@@ -343,12 +343,10 @@ function update_single_grader_data(grader_id, grader_obj, callback) {
  * @param {object} req 
  * @param {object} res 
  */
-function update_caps(req, res, next) {
-  console.log(req.body.cap)
-  console.log(req.body.grader_id)
-  let sql_query = "UPDATE assignments_cap SET cap = ?  WHERE grader_id = ?";
+function update_caps(req, res) {
+  let sql_query = "UPDATE assignments_cap SET cap = ?  WHERE grader_id = ? AND assignment_id = ?";
   db.query(
-    sql_query, [req.body.cap, req.body.grader_id],
+    sql_query, [req.body.cap, req.body.grader_id, req.body.assignment_id],
     function (err, results) {
       if (err) {
         console.log(err);
@@ -669,7 +667,12 @@ function get_assignment_cap(assignment_id) {
 
 
 async function run_distribution_pipeline(req, res) {
-  await runPipeline(req, res)
+  try{
+    await runPipeline(req, res) 
+    // res.send()
+  }catch(error){
+    res.status(404)
+  }
 }
 
 
