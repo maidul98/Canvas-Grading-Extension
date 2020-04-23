@@ -8,6 +8,7 @@ var AssignmentGrader = require('../distribution-algorithm/grader-model');
 var DetectConflictOutput = require('./detect-conflicts-result');
 var async = require('async')
 var distribution = require('../distribution-algorithm/distribution.js');
+const pool = require('../connection');
 const axios = require('axios');
 
 /** Configure Heroku Connection */
@@ -69,11 +70,29 @@ function insertSingleGrader(id, name, offset, role, total_graded, weight, last_u
 //TODO: Modify query so that it updates if new query with same id comes in
 function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, name, user_id) {
   let sql_query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, name, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
-  db.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, name, user_id], (err, result) => {
+  /*connection.connection.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, name, user_id], (err, result) => {
     if (err) {
       console.log(err);
     }
+    connection.connection.release();
   });
+  */
+
+
+  pool.connection.getConnection((err, connection) => {
+    if (err) {
+      console.log('error')
+    }
+
+    console.log(typeof (connection));
+    /*connection.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, name, user_id], (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      connection.release();
+    })
+    */
+  })
 };
 
 
@@ -488,7 +507,6 @@ function get_grader_info(req, res) {
   );
 }
 
-
 /**
 * This function gets the grading progress for each grader given assignment_id
 * @param {*} assigment_id
@@ -677,10 +695,10 @@ function get_assignment_cap(assignment_id) {
 
 
 async function run_distribution_pipeline(req, res) {
-  try{
-    await runPipeline(req, res) 
+  try {
+    await runPipeline(req, res)
     // res.send()
-  }catch(error){
+  } catch (error) {
     res.status(404)
   }
 }
