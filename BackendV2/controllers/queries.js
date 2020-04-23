@@ -85,13 +85,12 @@ function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_up
     }
 
     console.log(typeof (connection));
-    /*connection.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, name, user_id], (err, result) => {
+    connection.query(sql_query, [id, grader_id, assignment_id, is_graded, last_updated, name, user_id], (err, result) => {
       if (err) {
         console.log(err);
       }
       connection.release();
     })
-    */
   })
 };
 
