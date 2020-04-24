@@ -106,16 +106,12 @@ function set_surplus_submissions(graderID, submission_id, assignment_id) {
 }
 
 
-
-// Remember even async/await return Promises
-
-//functionality to remove [surplus] randomly-selected ungraded 
-//submissions from this grader's workload; should return the submission 
-//id's of the [surplus] assignments which have been removed and now 
-//have a null grader 
-
-//handle_conflicts(4, 2, 109377);
-
+/**
+ * 
+ * @param {*} graderID 
+ * @param {*} surplus 
+ * @param {*} assignment_id 
+ */
 async function handle_conflicts(graderID, surplus, assignment_id) {
   const submissionArr = await get_surplus_submissions(graderID, surplus, assignment_id)
   return submissionArr
