@@ -46,7 +46,6 @@ function assignGraderToSubmission(grader_id, submission_id) {
 
 };
 
-
 //TESTED :D 
 function detect_conflicts(graderArray, assignment_id) {
 
@@ -114,6 +113,7 @@ function set_surplus_submissions(graderID, surplus, assignment_id) {
     connection.release();
   });
 }
+
 
 
 // Remember even async/await return Promises
@@ -498,8 +498,6 @@ function get_grading_progress_for_every_grader(req, res) {
     }
   });
 }
-
-
 
 //TOOD: Refactor the 3 functions into one function. 
 

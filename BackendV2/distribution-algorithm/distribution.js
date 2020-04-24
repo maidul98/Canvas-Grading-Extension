@@ -12,8 +12,6 @@ function shuffle(a) {
     return a;
 }
 
-
-
 /**
  * Precondition: The minimum offset among all graders must be less than or 
  * equal to 1000000. 
@@ -33,8 +31,6 @@ function normalize_offset(graderArray) {
 
     return graderArray;
 }
-
-
 
 /**
  * Randomly assigns each grader from [grader_array] exactly [dist_num_assigned] 
@@ -279,7 +275,10 @@ module.exports.shuffle = shuffle
 module.exports.formMatchingMatrix = formMatchingMatrix
 module.exports.main_distribute = main_distribute
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 6719ccc841a41af15365f305823c4e35cd463778
 //TESTING
 //grader_id, weight, offset, num_assigned, dist_num_assigned, cap
 
