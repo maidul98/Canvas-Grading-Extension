@@ -118,6 +118,8 @@ function detect_conflicts(graderArray) {
     surplus = graderArray[i].num_assigned - graderArray[i].cap;
 
     if (surplus > 0) {
+      console.log("SURPLUS ALERT: " + surplus + "THE GRADER " + graderArray[i].grader_id + " HAS NUM ASSIGNED OF " + graderArray[i].num_assigned + " but cap of " + graderArray[i].cap)
+
       graderArray[i].update_dist_num_assigned(graderArray[i].cap);
       graderArray[i].update_num_assigned(graderArray[i].cap);
       graderArray[i].incrementOffset(surplus);
@@ -135,6 +137,9 @@ async function get_surplus_submissions(graderID, surplus) {
   let surplusArr = []
   let data = [graderID]
 
+  console.log("THE GRADER ID PROBLEM: ")
+  console.log(data)
+
   db.getConnection(function (err, connection) {
     if (err) throw err;
     connection.query(query, data, function (error, results) {
@@ -148,7 +153,7 @@ async function get_surplus_submissions(graderID, surplus) {
   });
 
   return surplusArr
-  
+
 }
 
 function set_surplus_submissions(graderID, surplus) {
@@ -177,7 +182,6 @@ async function handle_conflicts(graderID, surplus) {
 }
 
 async function runPipeline(req, res) {
-
   let assignmentsLeft;
   //axios.put(`/pull-submissions-and-update/${req.query.assignment_id}`,
   // (req, res) => console.log("pulling submissions")).catch(err => console.log(err));
@@ -255,7 +259,7 @@ function get_grader_objects(assignment_id) {
                 if (a.id === b.id) return 0
                 return b.id > a.id ? 1 : -1
               })
-  
+
               // IMPORTANT: Assumes grader_array and the response from the assignments_cap
               // are equal in length. This needs to be satisfied by making sure every grader 
               // has an entry for every assignment in assignments_cap table.

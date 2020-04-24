@@ -77,15 +77,15 @@ function formMatchingMatrix(grader_array, submissions_array) {
  */
 function main_distribute(num_of_submissions, graderArray) {
 
-    console.log("num of subs" + num_of_submissions);
-    console.log(graderArray);
+    // console.log("num of subs" + num_of_submissions);
+    // console.log(graderArray);
 
     //initial distribution 
     //only offset & num_assigned should be altered 
     graderArray = distribute(num_of_submissions, graderArray);
 
-    console.log("\n");
-    console.log(graderArray);
+    // console.log("\n");
+    // console.log(graderArray);
 
 
     let left_to_distribute = 0;
@@ -129,9 +129,6 @@ function main_distribute(num_of_submissions, graderArray) {
 
     for (let i = 0; i < graderArray.length; i++)
         graderArray[i].update_dist_num_assigned(graderArray[i].num_assigned - graderArray[i].dist_num_assigned);
-
-    console.log("\n");
-    console.log(normalize_offset(graderArray));
 
     return normalize_offset(graderArray);
 }
@@ -290,20 +287,27 @@ module.exports.main_distribute = main_distribute
 /*
 arr = [
     new AssignmentGrader(1, 1, 0, 0, 0, 100),
-    new AssignmentGrader(2, 2, -2, 0, 0, 100),
+    new AssignmentGrader(2, 2, 0, 0, 0, 100),
     new AssignmentGrader(3, 2, 0, 0, 0, 100),
-    new AssignmentGrader(4, 3, 1, 0, 0, 100)];
+    new AssignmentGrader(4, 3, 0, 0, 0, 100)];
 
 console.log(arr);
 console.log("\n\n");
 
-arr = main_distribute(10, arr);
+arr = main_distribute(50, arr);
 console.log(arr);
 console.log("\n\n");
 
+arr[0].update_cap(3);
 
-result = formMatchingMatrix(arr, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+arr = main_distribute(50, arr);
+console.log(arr);
+console.log("\n\n");
+
 */
+
+//result = formMatchingMatrix(arr, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+//* /
 
 /*
 for (let i = 0; i < 5; i++) {
