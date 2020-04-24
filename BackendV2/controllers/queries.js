@@ -167,49 +167,58 @@ async function runPipeline(req, res) {
    * 
    * @returns A new Promise object
    */
-  async function get_grader_objects(assignment_id) {
-    try{
-      let assignment_caps = await get_assignment_cap(assignment_id)
-      assignment_caps.sort(function (a, b) {
-        if (a.grader_id === b.grader_id) return 0
-        return b.grader_id > a.grader_id ? 1 : -1
-      })
-      
-      let query = "SELECT * FROM grader"
-      pool.query(query, (error, results) => {
-        if (error) {
-          throw error
-        } else {
-          grader_array = []
-          results.forEach(grader => {
-            let id = grader.id
-            let offset = grader.offset
-            let weight = grader.weight
-            let graderObj = new AssignmentGrader(id, weight, offset, -1, -1, -1)
-            grader_array.push(graderObj)
-          })
-          grader_array.sort(function (a, b) {
-            if (a.id === b.id) return 0
-            return b.id > a.id ? 1 : -1
-          })
-  
-          // IMPORTANT: Assumes grader_array and the response from the assignments_cap
-          // are equal in length. This needs to be satisfied by making sure every grader 
-          // has an entry for every assignment in assignments_cap table.
-          if (grader_array.length != assignment_caps.length) throw Error('you done messed up')
-          for (let i = 0; i < grader_array.length; i++) {
-            let assigned = assignment_caps[i].total_assigned_for_assignment;
-            grader_array[i].update_num_assigned(assigned);
-            grader_array[i].update_dist_num_assigned(assigned);
-            grader_array[i].update_cap(assignment_caps[i].cap);
+/** returns a list of AssignmentGrader objects, which will be input in the 
+   * algorithm. 
+   * 
+   * This method will query a list of all the graders, and create 
+   * AssignmentGrader instances for each of those graders with their respective
+   * id, current weight and offset, and the curr_assigned initialized to 0. 
+   * 
+   * @returns A new Promise object
+   */
+function get_grader_objects(assignment_id) {
+  return new Promise(function (resolve, reject) {
+    get_assignment_cap(assignment_id)
+      .then(response => {
+        response.sort(function (a, b) {
+          if (a.grader_id === b.grader_id) return 0
+          return b.grader_id > a.grader_id ? 1 : -1
+        })
+        let sql_query = "SELECT * FROM grader"
+        pool.query(sql_query, (err, results) => {
+          if (err) {
+            console.log(err)
+            return reject(err)
+          } else {
+            grader_array = []
+            results.forEach(grader => {
+              let id = grader.id
+              let offset = grader.offset
+              let weight = grader.weight
+              let graderObj = new AssignmentGrader(id, weight, offset, -1, -1, -1)
+              grader_array.push(graderObj)
+            })
+            grader_array.sort(function (a, b) {
+              if (a.id === b.id) return 0
+              return b.id > a.id ? 1 : -1
+            })
+            // IMPORTANT: Assumes grader_array and the response from the assignments_cap
+            // are equal in length. This needs to be satisfied by making sure every grader 
+            // has an entry for every assignment in assignments_cap table.
+            if (grader_array.length != response.length) throw Error('you done messed up')
+            for (let i = 0; i < grader_array.length; i++) {
+              let assigned = response[i].total_assigned_for_assignment;
+              grader_array[i].update_num_assigned(assigned);
+              grader_array[i].update_dist_num_assigned(assigned);
+              grader_array[i].update_cap(response[i].cap);
+            }
+            resolve(grader_array)
           }
-          return grader_array
-        }
-      });
-    }catch(error){
-      throw error
-    }
-  }
+        })
+      })
+
+  })
+}
 
 
 
