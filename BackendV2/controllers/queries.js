@@ -122,59 +122,37 @@ async function handle_conflicts(graderID, surplus, assignment_id) {
 }
 
 async function runPipeline(req, res) {
-  let assignmentsLeft;
-  //axios.put(`/pull-submissions-and-update/${req.query.assignment_id}`,
-  // (req, res) => console.log("pulling submissions")).catch(err => console.log(err));
-  get_grader_objects(req.body.assignment_id)
-    .then(async grader_array => {
-      await get_unassigned_submissions(req.body.assignment_id)
-        .then(submission_json => {
-          return submission_json.map(v => v.id);
-        })
-        .then(async mapped => {
-          let conflicts = await detect_conflicts(grader_array, req.body.assignment_id);
-          mapped = mapped.concat(conflicts.submissionsArray);
-          console.log("\n 1) MAPPED: all submission IDs that need to be dist")
-          console.log(mapped)
-          assignmentsLeft = mapped.length > 0 ? true : false;
-          if (assignmentsLeft) {
-            let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
-            console.log("2nd mapped")
-            console.log(mapped)
+  try{
+    let grader_array = await get_grader_objects(req.body.assignment_id);
+    let submission_json = await get_unassigned_submissions(req.body.assignment_id);
+    let mapped = submission_json.map(v => v.id);
+  
+    let conflicts = await detect_conflicts(grader_array, req.body.assignment_id);
+    mapped = mapped.concat(conflicts.submissionsArray);
+    assignmentsLeft = mapped.length > 0 ? true : false;
+    
+    if (assignmentsLeft) {
+      let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
+      let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
+      //update offsets of graders in DB with output_of_algo
+      await update_grader_entries(graders_assigned)
+      //updates submissions and graders in DB with matrix_of_pairs
+      await assign_submissions_to_grader(matrix_of_pairs)
+      //update num_assigned of graders in DB with output_of_algo
+      await update_total_assigned(graders_assigned, req.body.assignment_id);
+      res.send("Successfully distributed (or re-distributed) assignments.")
+    }else{
+      res.send("There are currently no assignments to distribute or re-distribute.")
+    }
+  }catch(error){
+    //rewind changes in DB
+    res.staus(403).send("Something went wrong")
+  }
 
-            let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
-            console.log("\nmatrix of pairs")
-            console.log(matrix_of_pairs)
-            //update offsets of graders in DB with output_of_algo
-            console.log(graders_assigned)
-            await update_grader_entries(graders_assigned)
-            
-            await assign_submissions_to_grader(matrix_of_pairs)
-            //update num_assigned of graders in DB with output_of_algo
-            await update_total_assigned(graders_assigned, req.body.assignment_id);
-            console.log('done')
-          }
-        })
-        .catch(err => console.log(err));
-    })
-    .then(() => {
-      console.log("vallll" + assignmentsLeft);
-      assignmentsLeft ? res.send("Successfully distributed (or re-distributed) assignments.") : res.send("There are currently no assignments to distribute or re-distribute.")
-    })
-    .catch(err => console.log(err));
 }
 
 
 
-/** returns a list of AssignmentGrader objects, which will be input in the 
-   * algorithm. 
-   * 
-   * This method will query a list of all the graders, and create 
-   * AssignmentGrader instances for each of those graders with their respective
-   * id, current weight and offset, and the curr_assigned initialized to 0. 
-   * 
-   * @returns A new Promise object
-   */
 /** returns a list of AssignmentGrader objects, which will be input in the 
    * algorithm. 
    * 
