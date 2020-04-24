@@ -170,8 +170,7 @@ export default function Dashboard(){
      * This method runs the distribute algo 
      */
      function handleDistributeBtn(){
-         //call 
-         return
+         console.log(gradersData)
      }
 
      /**
