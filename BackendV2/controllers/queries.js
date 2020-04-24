@@ -8,32 +8,8 @@ var AssignmentGrader = require('../distribution-algorithm/grader-model');
 var DetectConflictOutput = require('./detect-conflicts-result');
 var async = require('async')
 var distribution = require('../distribution-algorithm/distribution.js');
-// const pool = require('../connection');
+const pool = require('../pool');
 const axios = require('axios');
-
-/** Configure Heroku Connection */
-/** TODO: Store all these constants in a separate file, gitignore it and figure 
- * out deployment mechanism - where will these pins be stored? That is a later 
- * problem */
-
-var db = mysql.createPool({
-  host: "us-cdbr-iron-east-04.cleardb.net",
-  user: "be9696052936bb",
-  password: "4f1c4dfa",
-  database: "heroku_aff64052225438d",
-});
-
-// var db = mysql.createPool({
-//   host: "localhost",
-//   user: "root",
-//   password: "",
-//   database: "cs5150",
-// });
-
-
-// setInterval(function () {
-//   db.query('SELECT 1');
-// }, 15000);
 
 /**
  * Function that inserts a single assignment with relevant arguments into the database.
@@ -44,48 +20,12 @@ var db = mysql.createPool({
  */
 // function insertSingleAssignment(id, name, due_date, last_updated, points_possible) {
 //   let sql_query = "INSERT IGNORE INTO assignment (id, name, due_date, last_updated, points_possible) VALUES (?, ?, ?, ?, ?)";
-//   db.query(sql_query, [id, name, due_date, last_updated, points_possible], (err, result) => {
+//   pool.query(sql_query, [id, name, due_date, last_updated, points_possible], (err, result) => {
 //     if (err) {
 //       console.log(err);
 //     }
 //   });
 // };
-
-/**
- * Function that inserts a single grader with relevant arguments into the database.
- * @param {int} id - Unique ID for the grader
- * @param {string} name - Grader name
- * @param {int} offset - Offset of submissions for the grader
- * @param {string} role - The type of grader (TA, consultant, grader)
- * @param {int} total_graded - Total number of submissions graded
- * @param {int} weight - Submission weight assigned to grader
- * @param {string} last_updated - When the grader was last updated
- */
-function insertSingleGrader(id, name, offset, role, total_graded, weight, last_updated) {
-  let query = "INSERT IGNORE INTO grader (id, name, offset, role, total_graded, weight, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?)";
-  let data = [id, name, offset, role, total_graded, weight, last_updated]
-
-  db.getConnection(function (err, connection) {
-    if (err) throw err;
-    connection.query(query, data);
-    connection.release();
-  });
-};
-
-
-
-//TODO: Modify query so that it updates if new query with same id comes in
-function insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, name, user_id) {
-  let query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, name, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
-  let data = [id, grader_id, assignment_id, is_graded, last_updated, name, user_id]
-
-  db.getConnection(function (err, connection) {
-    if (err) throw err;
-    connection.query(query, data);
-    connection.release();
-  });
-
-};
 
 
 /**
@@ -97,7 +37,7 @@ function assignGraderToSubmission(grader_id, submission_id) {
   let query = "UPDATE submission SET grader_id = ? WHERE id = ?";
   let data = [grader_id, submission_id]
 
-  db.getConnection(function (err, connection) {
+  pool.getConnection(function (err, connection) {
     if (err) throw err;
     connection.query(query, data);
     connection.release();
@@ -137,10 +77,14 @@ async function get_surplus_submissions(graderID, surplus) {
   let surplusArr = []
   let data = [graderID]
 
+<<<<<<< HEAD
   console.log("THE GRADER ID PROBLEM: ")
   console.log(data)
 
   db.getConnection(function (err, connection) {
+=======
+  pool.getConnection(function (err, connection) {
+>>>>>>> 78e7e52ed98297d9eb495f04db49607f83f968be
     if (err) throw err;
     connection.query(query, data, function (error, results) {
       if (error) return console.log(err)
@@ -161,7 +105,7 @@ function set_surplus_submissions(graderID, surplus) {
   let query = `UPDATE submission SET grader_id = NULL WHERE grader_id =? ORDER BY grader_id LIMIT ?`
   let data = [graderID, surplus]
 
-  db.getConnection(function (err, connection) {
+  pool.getConnection(function (err, connection) {
     if (err) throw err;
     connection.query(query, data)
     connection.release();
@@ -231,6 +175,15 @@ async function runPipeline(req, res) {
    * 
    * @returns A new Promise object
    */
+/** returns a list of AssignmentGrader objects, which will be input in the 
+   * algorithm. 
+   * 
+   * This method will query a list of all the graders, and create 
+   * AssignmentGrader instances for each of those graders with their respective
+   * id, current weight and offset, and the curr_assigned initialized to 0. 
+   * 
+   * @returns A new Promise object
+   */
 function get_grader_objects(assignment_id) {
   return new Promise(function (resolve, reject) {
     get_assignment_cap(assignment_id)
@@ -239,42 +192,37 @@ function get_grader_objects(assignment_id) {
           if (a.grader_id === b.grader_id) return 0
           return b.grader_id > a.grader_id ? 1 : -1
         })
-        let query = "SELECT * FROM grader"
-
-        db.getConnection(function (err, connection) {
-          if (err) throw err;
-          connection.query(query, (err, results) => {
-            if (err) {
-              reject(err)
-            } else {
-              grader_array = []
-              results.forEach(grader => {
-                let id = grader.id
-                let offset = grader.offset
-                let weight = grader.weight
-                let graderObj = new AssignmentGrader(id, weight, offset, -1, -1, -1)
-                grader_array.push(graderObj)
-              })
-              grader_array.sort(function (a, b) {
-                if (a.id === b.id) return 0
-                return b.id > a.id ? 1 : -1
-              })
-
-              // IMPORTANT: Assumes grader_array and the response from the assignments_cap
-              // are equal in length. This needs to be satisfied by making sure every grader 
-              // has an entry for every assignment in assignments_cap table.
-              if (grader_array.length != response.length) throw Error('you done messed up')
-              for (let i = 0; i < grader_array.length; i++) {
-                let assigned = response[i].total_assigned_for_assignment;
-                grader_array[i].update_num_assigned(assigned);
-                grader_array[i].update_dist_num_assigned(assigned);
-                grader_array[i].update_cap(response[i].cap);
-              }
-              connection.release();
-              resolve(grader_array)
+        let sql_query = "SELECT * FROM grader"
+        pool.query(sql_query, (err, results) => {
+          if (err) {
+            console.log(err)
+            return reject(err)
+          } else {
+            grader_array = []
+            results.forEach(grader => {
+              let id = grader.id
+              let offset = grader.offset
+              let weight = grader.weight
+              let graderObj = new AssignmentGrader(id, weight, offset, -1, -1, -1)
+              grader_array.push(graderObj)
+            })
+            grader_array.sort(function (a, b) {
+              if (a.id === b.id) return 0
+              return b.id > a.id ? 1 : -1
+            })
+            // IMPORTANT: Assumes grader_array and the response from the assignments_cap
+            // are equal in length. This needs to be satisfied by making sure every grader 
+            // has an entry for every assignment in assignments_cap table.
+            if (grader_array.length != response.length) throw Error('you done messed up')
+            for (let i = 0; i < grader_array.length; i++) {
+              let assigned = response[i].total_assigned_for_assignment;
+              grader_array[i].update_num_assigned(assigned);
+              grader_array[i].update_dist_num_assigned(assigned);
+              grader_array[i].update_cap(response[i].cap);
             }
-          })
-        });
+            resolve(grader_array)
+          }
+        })
       })
 
   })
@@ -288,7 +236,7 @@ function get_grader_objects(assignment_id) {
 function get_grader_table(_, res, _) {
   let query = "SELECT * FROM grader";
 
-  db.getConnection(function (err, connection) {
+  pool.getConnection(function (err, connection) {
     if (err) throw err;
     connection.query(query, (err, results) => {
       if (err) {
@@ -310,7 +258,7 @@ function get_unassigned_submissions(assignment_id) {
   return new Promise((resolve, reject) => {
     let query = `SELECT * FROM submission WHERE grader_id IS NULL AND assignment_id = ${assignment_id}`;
 
-    db.getConnection(function (err, connection) {
+    pool.getConnection(function (err, connection) {
       if (err) throw err;
       connection.query(query, (err, results) => {
         connection.release();
@@ -351,7 +299,7 @@ function update_multiple_graders_data(graders_arr, callback) {
     let { id, ...data } = grader;
     queries += mysql.format("UPDATE grader SET ? WHERE id = ?; ", [data, id]);
   });
-  db.query(queries, callback);
+  pool.query(queries, callback);
 }
 
 /**
@@ -361,7 +309,7 @@ function update_multiple_graders_data(graders_arr, callback) {
  */
 function update_single_grader_data(grader_id, grader_obj, callback) {
   let sql_query = "UPDATE grader SET ? WHERE id = ?";
-  db.query(sql_query, [grader_obj, grader_id], callback)
+  pool.query(sql_query, [grader_obj, grader_id], callback)
 }
 
 
@@ -372,7 +320,7 @@ function update_single_grader_data(grader_id, grader_obj, callback) {
  */
 function update_caps(req, res) {
   let sql_query = "UPDATE assignments_cap SET cap = ?  WHERE grader_id = ? AND assignment_id = ?";
-  db.query(
+  pool.query(
     sql_query, [req.body.cap, req.body.grader_id, req.body.assignment_id],
     function (err, results) {
       if (err) {
@@ -392,7 +340,7 @@ function update_caps(req, res) {
    */
 function update_grader_weight(req, res) {
   let sql_query = "UPDATE grader SET weight = ? WHERE id = ?";
-  db.query(sql_query, [req.body.weight, req.body.grader_id], (err) => {
+  pool.query(sql_query, [req.body.weight, req.body.grader_id], (err) => {
     if (err) {
       res.status(406).send({
         status: "fail",
@@ -412,7 +360,7 @@ function update_grader_weight(req, res) {
  */
 function get_assigned_submissions_for_graders(req, res) {
   let sql_query = "SELECT grader_id, id AS submission_id FROM submission WHERE assignment_id=? AND grader_id IS NOT NULL order by grader_id";
-  db.query(
+  pool.query(
     sql_query, [req.query.assignment_id],
     function (err, results) {
       if (err) {
@@ -437,7 +385,7 @@ function get_assigned_submissions_for_graders(req, res) {
   */
 function get_assigned_submission_for_assigment(req, res) {
   let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
-  db.query(
+  pool.query(
     sql_query, [req.query.assigment_id, req.query.user_id],
     function (err, results) {
       if (err) {
@@ -455,7 +403,7 @@ function get_assigned_submission_for_assigment(req, res) {
 */
 function get_grading_progress_for_every_grader(req, res) {
   let sql_query = "SELECT submission.id, grader_id, assignment_id, is_graded, offset, weight, total_graded FROM submission JOIN grader ON submission.grader_id = grader.id WHERE assignment_id=? AND grader_id IS NOT NULL";
-  db.query(sql_query, [req.query.assigment_id], (err, results) => {
+  pool.query(sql_query, [req.query.assigment_id], (err, results) => {
     if (err) {
       res.status(406).send({
         status: "fail",
@@ -495,7 +443,7 @@ function get_grading_progress_for_every_grader(req, res) {
  */
 function get_grader_info(req, res) {
   let sql_query = "SELECT * FROM grader";
-  db.query(sql_query, [req.query.assigment_id], (err, results) => {
+  pool.query(sql_query, [req.query.assigment_id], (err, results) => {
 
     if (err) {
       console.log("err");
@@ -513,7 +461,7 @@ function get_grader_info(req, res) {
 */
 function get_grading_progress_for_every_grader(req, res) {
   let sql_query = "SELECT submission.id, grader_id, assignment_id, is_graded, offset, weight, total_graded FROM submission JOIN grader ON submission.grader_id = grader.id WHERE assignment_id=? AND grader_id IS NOT NULL";
-  db.query(sql_query, [req.query.assigment_id], (err, results) => {
+  pool.query(sql_query, [req.query.assigment_id], (err, results) => {
     if (err) {
       res.status(406).send({
         status: "fail",
@@ -553,7 +501,7 @@ function update_total_assigned(grader_array, assignment_id, callback) {
   async.forEachOf(grader_array, function (grader, _, inner_callback) {
     let query = "UPDATE assignments_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
     let data = [grader.num_assigned, grader.grader_id, assignment_id]
-    db.getConnection(function (err, connection) {
+    pool.getConnection(function (err, connection) {
       if (err) throw err;
       connection.query(query, data, (err, results) => {
         connection.release();
@@ -574,7 +522,7 @@ function update_grader_entries(grader_array, callback) {
     let query = "UPDATE grader SET offset=? WHERE id=?"
     let data = [grader.offset, grader.grader_id]
 
-    db.getConnection(function (err, connection) {
+    pool.getConnection(function (err, connection) {
       if (err) throw err;
       connection.query(query, data, (err, results) => {
         connection.release();
@@ -601,7 +549,7 @@ function assign_submissions_to_grader(assignment_matrix, callback) {
   async.forEachOf(assignment_matrix, function (pairing, _, inner_callback) {
     let query = "UPDATE submission SET grader_id = ? WHERE id = ?"
     let data = [pairing[0], pairing[1]]
-    db.getConnection(function (err, connection) {
+    pool.getConnection(function (err, connection) {
       if (err) throw err;
       connection.query(query, data, (err, results) => {
         connection.release();
@@ -626,59 +574,59 @@ function assign_submissions_to_grader(assignment_matrix, callback) {
 }
 
 async function insertAllSubmission(json_string) {
-  console.log(json_string)
-  json_string.forEach(e => {
-    let id = e.id;
-    let grader_id = e.grader_id;
-    let assignment_id = e.assignment_id;
-    let is_graded = e.is_graded;
-    let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
-    let name = e.name;
-    let user_id = e.user_id
+  pool.getConnection(function (err, connection) {
+    if (err) throw err;
+    json_string.forEach(e => {
+      let id = e.id;
+      let grader_id = e.grader_id;
+      let assignment_id = e.assignment_id;
+      let is_graded = e.is_graded;
+      let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
+      let name = e.name;
+      let user_id = e.user_id
 
-    insertSingleSubmission(id, grader_id, assignment_id, is_graded, last_updated, name, user_id);
-  });
-}
+      let query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, name, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      let data = [id, grader_id, assignment_id, is_graded, last_updated, name, user_id]
+      connection.query(query, data);
+    });
 
+    connection.release();
 
-
-function insertConflict(id, grader_id, reason, approved, reassigned_grader_id, submission_id) {
-  let sql_query = "INSERT IGNORE INTO conflict (id, grader_id, reason, approved, reassigned_grader_id, submission_id) VALUES (?, ?, ?, ?, ?, ?)";
-  db.query(sql_query, [id, grader_id, reason, approved, reassigned_grader_id, submission_id], (err, _) => {
-    if (err) {
-      console.log(err);
-    }
   })
 }
 
 
-
 function insertAllGraders(json_string) {
-  json_string.forEach(e => {
-    let id = e.id;
-    let grader_name = e.user.name;
-    let offset = 0;
+  pool.getConnection(function (error, connection) {
+    json_string.forEach(e => {
+      let id = e.id;
+      let grader_name = e.user.name;
+      let offset = 0;
 
-    let role;
-    if (e.type == 'TaEnrollment') {
-      role = "TA";
-    } else if (e.type == "ObserverEnrollment") {
-      role = "Grader";
-    } else {
-      role = "Consultant";
-    }
+      let role;
+      if (e.type == 'TaEnrollment') {
+        role = "TA";
+      } else if (e.type == "ObserverEnrollment") {
+        role = "Grader";
+      } else {
+        role = "Consultant";
+      }
 
-    let total_graded = 0;
-    let weight = -1;
-    let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
+      let total_graded = 0;
+      let weight = -1;
+      let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
 
-    insertSingleGrader(id, grader_name, offset, role, total_graded, weight, last_updated);
+      let query = "INSERT IGNORE INTO grader (id, name, offset, role, total_graded, weight, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      let data = [id, grader_name, offset, role, total_graded, weight, last_updated]
+      connection.query(query, data);
+    });
+    connection.release();
   })
 }
 
 function insert_assignment_cap(id, assigment_id, student_id, cap) {
   let sql_query = "INSERT INTO assignments_cap (id, assignment_id, student_id, cap) VALUES (? ? ? ?)"
-  db.query(sql_query, [id, assignment_id, student_id, cap], (err, _) => {
+  pool.query(sql_query, [id, assignment_id, student_id, cap], (err, _) => {
     if (err) console.log(err);
   })
 }
@@ -687,7 +635,7 @@ function get_assignment_cap(assignment_id) {
   return new Promise((resolve, reject) => {
     let query = `SELECT * from assignments_cap WHERE assignment_id=${assignment_id}`;
 
-    db.getConnection(function (err, connection) {
+    pool.getConnection(function (err, connection) {
       if (err) throw err;
       connection.query(query, (err, results) => {
         if (err) {
@@ -699,6 +647,7 @@ function get_assignment_cap(assignment_id) {
         connection.release();
       })
     });
+
   })
 }
 
@@ -722,8 +671,6 @@ module.exports = {
   get_assignment_cap: get_assignment_cap,
 
   insertAllGraders: insertAllGraders,
-
-  insertConflict: insertConflict,
 
   insertAllSubmission: insertAllSubmission,
 
