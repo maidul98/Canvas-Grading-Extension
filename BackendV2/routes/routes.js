@@ -86,7 +86,7 @@ router.post('/download-submission', download.downloadSubmissions)
 
 //testing for handling conflict 
 router.post('/test_handle', async (req, res) => {
-    await queries.handle_conflicts(4, 5, 109377);
+    await queries.handle_conflicts(4, 3, 109377);
     res.send("succesful yay")
 })
 

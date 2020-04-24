@@ -78,16 +78,18 @@ async function get_surplus_submissions(graderID, surplus, assignment_id) {
 
   pool.getConnection(function (err, connection) {
     if (err) throw err;
-    connection.query(query, data, function (error, results) {
-
+    connection.query(query, data, async function (error, results) {
 
       console.log("RESULTS ARR: ")
       console.log(results)
+
+      if (results.length < surplus) throw new Error("The number of ungraded assignments is less than the workload reduction.");
 
       if (error) return console.log(err)
       for (let i = 0; i < surplus; i++) { //loop to get [surplus] entries. Assuming that there are >= surplus entries in results.
         console.log(results[i])
         surplusArr.push(results[i].id)
+        await set_surplus_submissions(graderID, results[i].id, assignment_id)
       }
 
       console.log("SURPLUS ARR: ")
@@ -95,22 +97,20 @@ async function get_surplus_submissions(graderID, surplus, assignment_id) {
 
       connection.release();
       return surplusArr
-
     });
-
-
   });
 }
 
-function set_surplus_submissions(graderID, surplus, assignment_id) {
+function set_surplus_submissions(graderID, submission_id, assignment_id) {
 
-  let query = `UPDATE submission SET grader_id = NULL WHERE grader_id =? AND assignment_id =? AND is_graded =? ORDER BY id LIMIT ?`
-  let data = [graderID, assignment_id, 0, surplus]
+  let query = `UPDATE submission SET grader_id = NULL WHERE grader_id =? AND id =? AND assignment_id =?`
+  let data = [graderID, submission_id, assignment_id]
 
   pool.getConnection(function (err, connection) {
     if (err) throw err;
     connection.query(query, data)
     connection.release();
+    return true;
   });
 }
 
@@ -127,7 +127,6 @@ function set_surplus_submissions(graderID, surplus, assignment_id) {
 
 async function handle_conflicts(graderID, surplus, assignment_id) {
   const submissionArr = await get_surplus_submissions(graderID, surplus, assignment_id)
-  await set_surplus_submissions(graderID, surplus, assignment_id)
   return submissionArr
 }
 

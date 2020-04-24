@@ -275,10 +275,6 @@ module.exports.shuffle = shuffle
 module.exports.formMatchingMatrix = formMatchingMatrix
 module.exports.main_distribute = main_distribute
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 6719ccc841a41af15365f305823c4e35cd463778
 //TESTING
 //grader_id, weight, offset, num_assigned, dist_num_assigned, cap
 
