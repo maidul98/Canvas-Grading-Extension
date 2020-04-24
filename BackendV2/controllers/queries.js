@@ -313,10 +313,10 @@ function get_unassigned_submissions(assignment_id) {
     db.getConnection(function (err, connection) {
       if (err) throw err;
       connection.query(query, (err, results) => {
+        connection.release();
         if (err) {
           reject(err)
         } else {
-          connection.release();
           return resolve(results)
         }
       })
@@ -556,6 +556,7 @@ function update_total_assigned(grader_array, assignment_id, callback) {
     db.getConnection(function (err, connection) {
       if (err) throw err;
       connection.query(query, data, (err, results) => {
+        connection.release();
         if (err) {
           inner_callback(err)
           callback(err)
@@ -563,7 +564,6 @@ function update_total_assigned(grader_array, assignment_id, callback) {
           inner_callback(null)
         }
       })
-      connection.release();
     });
   })
 }
@@ -571,13 +571,13 @@ function update_total_assigned(grader_array, assignment_id, callback) {
 
 function update_grader_entries(grader_array, callback) {
   async.forEachOf(grader_array, function (grader, _, inner_callback) {
-    console.log("update_grader_entries");
     let query = "UPDATE grader SET offset=? WHERE id=?"
     let data = [grader.offset, grader.grader_id]
 
     db.getConnection(function (err, connection) {
       if (err) throw err;
       connection.query(query, data, (err, results) => {
+        connection.release();
         if (err) {
           console.log(err)
           inner_callback(err)
@@ -586,7 +586,6 @@ function update_grader_entries(grader_array, callback) {
           inner_callback(null)
         }
       })
-      connection.release();
     });
   }, function (err) {
     if (err) {
@@ -605,6 +604,7 @@ function assign_submissions_to_grader(assignment_matrix, callback) {
     db.getConnection(function (err, connection) {
       if (err) throw err;
       connection.query(query, data, (err, results) => {
+        connection.release();
         console.log(pairing[0] + "  " + pairing[1]);
         if (err) {
           console.log(err)
@@ -614,7 +614,6 @@ function assign_submissions_to_grader(assignment_matrix, callback) {
           inner_callback(null)
         }
       })
-      connection.release();
     });
   }, function (err) {
     if (err) {
