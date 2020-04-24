@@ -84,6 +84,11 @@ router.post('/distribute', queries.run_distribution_pipeline)
 //Params: assignment_id, [user_ids]
 router.post('/download-submission', download.downloadSubmissions)
 
+//testing for handling conflict 
+router.post('/test_handle', async (req, res) => {
+    await queries.handle_conflicts(4, 5, 109377);
+    res.send("succesful yay")
+})
 
 //Params: assignment_id, [user_ids]
 router.post('/update-gradercap', queries.update_caps)

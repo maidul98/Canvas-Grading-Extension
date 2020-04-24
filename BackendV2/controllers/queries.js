@@ -48,7 +48,7 @@ function assignGraderToSubmission(grader_id, submission_id) {
 
 
 //TESTED :D 
-function detect_conflicts(graderArray) {
+function detect_conflicts(graderArray, assignment_id) {
 
   let extra_submissions = [];
 
@@ -63,7 +63,7 @@ function detect_conflicts(graderArray) {
       graderArray[i].update_dist_num_assigned(graderArray[i].cap);
       graderArray[i].update_num_assigned(graderArray[i].cap);
       graderArray[i].incrementOffset(surplus);
-      extra_submissions = extra_submissions.concat(handle_conflicts(graderArray[i].grader_id, surplus));
+      extra_submissions = extra_submissions.concat(handle_conflicts(graderArray[i].grader_id, surplus, assignment_id));
     }
   }
 
@@ -71,39 +71,42 @@ function detect_conflicts(graderArray) {
 }
 
 
-
-async function get_surplus_submissions(graderID, surplus) {
-  let query = `SELECT * FROM submission WHERE grader_id =?  ORDER BY grader_id`; // get submissions for this grader
+//should be returning a 1D array of submisions IDs that are not graded by graderID for that specific assignment_id
+async function get_surplus_submissions(graderID, surplus, assignment_id) {
+  let query = `SELECT * FROM submission WHERE grader_id =? AND assignment_id =? AND is_graded =? ORDER BY id`; // get submissions for this grader
   let surplusArr = []
-  let data = [graderID]
+  let data = [graderID, assignment_id, 0]
 
-<<<<<<< HEAD
-  console.log("THE GRADER ID PROBLEM: ")
-  console.log(data)
-
-  db.getConnection(function (err, connection) {
-=======
   pool.getConnection(function (err, connection) {
->>>>>>> 78e7e52ed98297d9eb495f04db49607f83f968be
     if (err) throw err;
     connection.query(query, data, function (error, results) {
+
+
+      console.log("RESULTS ARR: ")
+      console.log(results)
+
       if (error) return console.log(err)
-      count = 0
       for (let i = 0; i < surplus; i++) { //loop to get [surplus] entries. Assuming that there are >= surplus entries in results.
-        surplusArr.push(results[i].grader_id)
+        console.log(results[i])
+        surplusArr.push(results[i].id)
       }
+
+      console.log("SURPLUS ARR: ")
+      console.log(surplusArr)
+
+      connection.release();
+      return surplusArr
+
     });
-    connection.release();
+
+
   });
-
-  return surplusArr
-
 }
 
-function set_surplus_submissions(graderID, surplus) {
+function set_surplus_submissions(graderID, surplus, assignment_id) {
 
-  let query = `UPDATE submission SET grader_id = NULL WHERE grader_id =? ORDER BY grader_id LIMIT ?`
-  let data = [graderID, surplus]
+  let query = `UPDATE submission SET grader_id = NULL WHERE grader_id =? AND assignment_id =? AND is_graded =? ORDER BY id LIMIT ?`
+  let data = [graderID, assignment_id, 0, surplus]
 
   pool.getConnection(function (err, connection) {
     if (err) throw err;
@@ -119,9 +122,12 @@ function set_surplus_submissions(graderID, surplus) {
 //submissions from this grader's workload; should return the submission 
 //id's of the [surplus] assignments which have been removed and now 
 //have a null grader 
-async function handle_conflicts(graderID, surplus) {
-  const submissionArr = await get_surplus_submissions(graderID, surplus)
-  await set_surplus_submissions(graderID, surplus)
+
+//handle_conflicts(4, 2, 109377);
+
+async function handle_conflicts(graderID, surplus, assignment_id) {
+  const submissionArr = await get_surplus_submissions(graderID, surplus, assignment_id)
+  await set_surplus_submissions(graderID, surplus, assignment_id)
   return submissionArr
 }
 
@@ -136,7 +142,7 @@ async function runPipeline(req, res) {
           return submission_json.map(v => v.id);
         })
         .then(mapped => {
-          let conflicts = detect_conflicts(grader_array);
+          let conflicts = detect_conflicts(grader_array, req.body.assignment_id);
           mapped = mapped.concat(conflicts.submissionsArray);
           assignmentsLeft = mapped.length > 0 ? true : false;
           if (assignmentsLeft) {
@@ -711,4 +717,6 @@ module.exports = {
   get_grader_info: get_grader_info,
 
   update_caps: update_caps,
+
+  handle_conflicts: handle_conflicts,
 }
