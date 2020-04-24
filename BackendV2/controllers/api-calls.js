@@ -192,43 +192,43 @@ exports.grade_batch_submissions = function (req, res) {
 };
 
 // Don't touch this for now
-exports.pull_submissions_and_update_for_assignment = function (req, res) {
-  axios
-    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user&per_page=3000`, config)
-    .then(response => {
-      dbJSON = [];
-      visitedGroups = new Set();
-      response.data.forEach(element => {
-        if (element.workflow_state === 'submitted') {
-          json = {
-            id: element.id,
-            grader_id: element.grader_id,
-            assignment_id: element.assignment_id,
-            is_graded: element.graded_at !== null,
-            updated_at: element.submitted_at,
-            name: element.user.name,
-            user_id: element.user.id
-          };
-          console.log(json);
-          if (element.group.id !== null && !visitedGroups.has(element.group.id)) {
-            visitedGroups.add(element.group.id);
-            dbJSON.push(json);
-          } else if (element.group.id === null) {
-            dbJSON.push(json);
-          }
+// exports.pull_submissions_and_update_for_assignment = function (req, res) {
+//   axios
+//     .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user&per_page=3000`, config)
+//     .then(response => {
+//       dbJSON = [];
+//       visitedGroups = new Set();
+//       response.data.forEach(element => {
+//         if (element.workflow_state === 'submitted') {
+//           json = {
+//             id: element.id,
+//             grader_id: element.grader_id,
+//             assignment_id: element.assignment_id,
+//             is_graded: element.graded_at !== null,
+//             updated_at: element.submitted_at,
+//             name: element.user.name,
+//             user_id: element.user.id
+//           };
+//           console.log(json);
+//           if (element.group.id !== null && !visitedGroups.has(element.group.id)) {
+//             visitedGroups.add(element.group.id);
+//             dbJSON.push(json);
+//           } else if (element.group.id === null) {
+//             dbJSON.push(json);
+//           }
 
-        }
-      });
+//         }
+//       });
 
-      queries.insertAllSubmission(dbJSON);
+//       queries.insertAllSubmission(dbJSON);
 
-      res.status(200).send({ status: 'success' });
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(406).send({ status: 'operation failed' });
-    });
-};
+//       res.status(200).send({ status: 'success' });
+//     })
+//     .catch(err => {
+//       console.log(err);
+//       res.status(406).send({ status: 'operation failed' });
+//     });
+// };
 
 /**
  * Takes in a API call for Canvas API and returns the result

@@ -72,7 +72,7 @@ router.get('/get-grader-info', queries.get_grader_info);
 /** Downloads a specific user's submission for a specific assignment */
 router.get('/download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
 
-router.put('/pull-submissions-and-update/:assignment_id', apiCalls.pull_submissions_and_update_for_assignment)
+// router.put('/pull-submissions-and-update/:assignment_id', apiCalls.pull_submissions_and_update_for_assignment)
 
 router.post('/canvas-api', apiCalls.GETcanvas_API_call);
 
