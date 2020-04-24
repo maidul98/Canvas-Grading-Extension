@@ -35,7 +35,7 @@ router.get('/get-published-assignments', apiCalls.get_published_assignments);
 // router.get('/single-submission/:assignment_id/submissions/:user_id', apiCalls.get_single_submission);
 
 /** Get all graders for enrolled on Canvas */
-// router.get('/get-graders', apiCalls.get_all_graders);
+router.get('/get-graders', apiCalls.get_all_graders);
 
 /** Upload grades and comments for a specific user's submission for an assignment */
 router.put('/upload-submission-grades/assignments/:assignment_id/submissions/:user_id', apiCalls.grade_single_submission);
@@ -60,6 +60,9 @@ router.post('/update-grader-weight', queries.update_grader_weight);
 /** Update data for multiple graders */
 router.post('/update-graders-data', queries.update_multiple_graders_data_route);
 
+/** Updates the total number of submissions assigned to graders for a particular assignment. */
+//router.post('/update-total-assigned/:assignment_id', queries.update_total_assigned);
+
 /** Get grading progress for a specific assignment */
 router.get('/get-grader-info', queries.get_grader_info);
 
@@ -76,10 +79,14 @@ router.post('/canvas-api', apiCalls.GETcanvas_API_call);
 router.put('/canvas-api', apiCalls.PUTcanvas_API_call);
 
 /** Runs the entire assignments-distribution pipeline & updates the database. */
-router.put('/distribute', queries.run_distribution_pipeline)
+router.post('/distribute', queries.run_distribution_pipeline)
 
 //Params: assignment_id, [user_ids]
 router.post('/download-submission', download.downloadSubmissions)
+
+
+//Params: assignment_id, [user_ids]
+router.post('/update-gradercap', queries.update_caps)
 
 //NEED TO UPDATEEEEEE!!!
 router.get('/get-assignment-cap', (req, res) => {

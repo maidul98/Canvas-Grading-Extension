@@ -20,7 +20,7 @@ const config = {
 /** Obtains all the student enrollments for the specific class. */
 exports.student_enrollments = function (_, res) {
   try {
-    axios.get('https://canvas.cornell.edu/api/v1/courses/15037/enrollments',
+    axios.get('https://canvas.cornell.edu/api/v1/courses/15037/enrollments?per_page=1000',
       config)
       .then(response => {
         result = [];
@@ -109,7 +109,7 @@ exports.get_single_submission = function (req, res) {
 //TODO: Need to change this once we figure out how graders are going to be enrolled.
 exports.get_all_graders = function (_, res) {
   axios
-    .get('https://canvas.cornell.edu/api/v1/courses/15037/enrollments',
+    .get('https://canvas.cornell.edu/api/v1/courses/15037/enrollments?per_page=1000',
       config)
     .then(response => {
       result = [];
@@ -144,14 +144,14 @@ exports.grade_single_submission = function (req, res) {
     'submission[posted_grade]': req.body.assigned_grade
   };
 
-    axios
-        .put(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}`, qs.stringify(formData), config)
-        .then(r => {
-            res.status(200)
-                .send({ status: 'success', data: r.data });
-        })
-        .catch(err => {
-            res.status(406).send({ status: 'Update failed', message: err });
+  axios
+    .put(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}`, qs.stringify(formData), config)
+    .then(r => {
+      res.status(200)
+        .send({ status: 'success', data: r.data });
+    })
+    .catch(err => {
+      res.status(406).send({ status: 'Update failed', message: err });
     });
 };
 
@@ -178,23 +178,23 @@ exports.grade_batch_submissions = function (req, res) {
     formData[`grade_data[${j.id}][group_comment]`] = j.is_group_comment;
     formData[`grade_data[${j.id}][posted_grade]`] = j.assigned_grade;
   });
-    // console.log(formData)
-    //send grades to Canvas
-    axios
-        .post(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), config)
-        .then(result => {
-            res.send({ status: 'success', data: result.data });
-        })
-        .catch(err => {
-            res.status(406)
-                .send({ status: 'fail', data: req.body });
-        });
+  // console.log(formData)
+  //send grades to Canvas
+  axios
+    .post(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), config)
+    .then(result => {
+      res.send({ status: 'success', data: result.data });
+    })
+    .catch(err => {
+      res.status(406)
+        .send({ status: 'fail', data: req.body });
+    });
 };
 
 // Don't touch this for now
 exports.pull_submissions_and_update_for_assignment = function (req, res) {
   axios
-    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user`, config)
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user&per_page=3000`, config)
     .then(response => {
       dbJSON = [];
       visitedGroups = new Set();

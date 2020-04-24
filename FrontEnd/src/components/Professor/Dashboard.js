@@ -1,3 +1,4 @@
+  
 import React, {useEffect, useState} from 'react';
 import { useRequest } from '@umijs/hooks';
 import Alert from 'react-bootstrap/Alert';
@@ -164,6 +165,73 @@ export default function Dashboard(){
         }
     };
 
+
+    /**
+     * This method runs the distribute algo 
+     */
+     function handleDistributeBtn(){
+         //call 
+         return
+     }
+
+     /**
+      * Calls the distribution pipline
+      */
+     const updateDistribution = useRequest(url => url, {
+        manual: true,
+        onSuccess: (result, params) => {
+        },
+        onError: (error, params) => {
+            alert.error('Something went wrong while updating the disturbaion, please contact admin');
+
+        }
+    });
+
+     /**
+     * Update caps 
+     */
+    const updateCaps = useRequest(url => url, {
+        manual: true,
+        onSuccess: (result, params) => {
+            alert.success('Weights and offsets updated successfully');
+            updateDistribution.run({
+                url: `${process.env.REACT_APP_BASE_URL}/distribute`,
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body:JSON.stringify({
+                    "assignment_id": assignment_id
+                })
+            })
+        },
+        onError: (error, params) => {
+            alert.error('Something went wrong while distributing assignments');
+
+        }
+    });
+     
+     /**
+      * This method updates the cap in the database and runs the pipe line to refect the changes
+      */
+     function handleCapChange(event){
+         let grader_id = event.target.getAttribute('data-grader-id')
+         let grader_cap = event.target.value
+         console.log(assignment_id)
+         console.log(grader_id)
+         updateCaps.run({
+            url: `${process.env.REACT_APP_BASE_URL}/update-gradercap`,
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body:JSON.stringify({
+                "cap": grader_cap,
+                "grader_id": grader_id,
+                "assignment_id": assignment_id
+            }), 
+        })
+
+         
+     }
+
+
     useEffect(()=>{
         fetchAssignments.run(`${process.env.REACT_APP_BASE_URL}/get-published-assignments`);
         fetchGradersData.run();
@@ -202,7 +270,7 @@ export default function Dashboard(){
                             <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" min="0" pattern="[0-9]*" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "weight", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
                             <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "offset", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
                             <td className="width-10">
-                                10
+                                <FormControl placeholder="None" data-grader-id={grader?.id} type="number"  onChange={handleCapChange} />
                             </td>
                             <td className="width-10">
                                 {graders[grader?.id][assignment_id]?graders[grader?.id][assignment_id]["total_assigned"]:0}
@@ -217,6 +285,9 @@ export default function Dashboard(){
                 </tbody>
             </Table>
             <Button onClick={submit} className={changed?'visible':'invisible'}>Save</Button>
+
+            <hr/>
+            <Button onClick={handleDistributeBtn}>Distribute</Button>            
         </div>
     );
 }
