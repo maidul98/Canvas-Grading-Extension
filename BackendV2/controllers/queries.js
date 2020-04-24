@@ -47,7 +47,7 @@ function assignGraderToSubmission(grader_id, submission_id) {
 };
 
 //TESTED :D 
-function detect_conflicts(graderArray, assignment_id) {
+async function detect_conflicts(graderArray, assignment_id) {
 
   let extra_submissions = [];
 
@@ -62,7 +62,8 @@ function detect_conflicts(graderArray, assignment_id) {
       graderArray[i].update_dist_num_assigned(graderArray[i].cap);
       graderArray[i].update_num_assigned(graderArray[i].cap);
       graderArray[i].incrementOffset(surplus);
-      extra_submissions = extra_submissions.concat(handle_conflicts(graderArray[i].grader_id, surplus, assignment_id));
+      let conflict_array = await handle_conflicts(graderArray[i].grader_id, surplus, assignment_id)
+      extra_submissions = extra_submissions.concat(conflict_array);
     }
   }
 
@@ -71,34 +72,24 @@ function detect_conflicts(graderArray, assignment_id) {
 
 
 //should be returning a 1D array of submisions IDs that are not graded by graderID for that specific assignment_id
-async function get_surplus_submissions(graderID, surplus, assignment_id) {
-  let query = `SELECT * FROM submission WHERE grader_id =? AND assignment_id =? AND is_graded =? ORDER BY id`; // get submissions for this grader
-  let surplusArr = []
-  let data = [graderID, assignment_id, 0]
+function get_surplus_submissions(graderID, surplus, assignment_id) {
+  return new Promise(function(resolve, reject){
+    let query = `SELECT * FROM submission WHERE grader_id =? AND assignment_id =? AND is_graded =? ORDER BY id`; // get submissions for this grader
+    let surplusArr = []
+    let data = [graderID, assignment_id, 0]
 
-  pool.getConnection(function (err, connection) {
-    if (err) throw err;
-    connection.query(query, data, async function (error, results) {
+    pool.query(query, data, async function (error, results) {
+      if (error){reject(error)}
 
-      console.log("RESULTS ARR: ")
-      console.log(results)
-
-      if (results.length < surplus) throw new Error("The number of ungraded assignments is less than the workload reduction.");
-
-      if (error) return console.log(err)
-      for (let i = 0; i < surplus; i++) { //loop to get [surplus] entries. Assuming that there are >= surplus entries in results.
+      if (results.length < surplus) reject(new Error("The number of ungraded assignments is less than the workload reduction."))
+      for (let i = 0; i < surplus; i++) { 
         console.log(results[i])
         surplusArr.push(results[i].id)
         await set_surplus_submissions(graderID, results[i].id, assignment_id)
       }
-
-      console.log("SURPLUS ARR: ")
-      console.log(surplusArr)
-
-      connection.release();
-      return surplusArr
+      resolve(surplusArr)
     });
-  });
+  })
 }
 
 function set_surplus_submissions(graderID, submission_id, assignment_id) {
@@ -140,24 +131,28 @@ async function runPipeline(req, res) {
         .then(submission_json => {
           return submission_json.map(v => v.id);
         })
-        .then(mapped => {
-          let conflicts = detect_conflicts(grader_array, req.body.assignment_id);
+        .then(async mapped => {
+          let conflicts = await detect_conflicts(grader_array, req.body.assignment_id);
           mapped = mapped.concat(conflicts.submissionsArray);
+          console.log("\n 1) MAPPED: all submission IDs that need to be dist")
+          console.log(mapped)
           assignmentsLeft = mapped.length > 0 ? true : false;
           if (assignmentsLeft) {
             let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
+            console.log("2nd mapped")
+            console.log(mapped)
+
             let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
+            console.log("\nmatrix of pairs")
+            console.log(matrix_of_pairs)
             //update offsets of graders in DB with output_of_algo
-            update_grader_entries(graders_assigned, function (err) {
-              if (err) throw err;
-            });
-            assign_submissions_to_grader(matrix_of_pairs, function (err) {
-              if (err) throw err;
-            });
+            console.log(graders_assigned)
+            await update_grader_entries(graders_assigned)
+            
+            await assign_submissions_to_grader(matrix_of_pairs)
             //update num_assigned of graders in DB with output_of_algo
-            update_total_assigned(graders_assigned, req.body.assignment_id, function (err) {
-              if (err) console.log(err);
-            });
+            await update_total_assigned(graders_assigned, req.body.assignment_id);
+            console.log('done')
           }
         })
         .catch(err => console.log(err));
@@ -190,47 +185,23 @@ async function runPipeline(req, res) {
    * @returns A new Promise object
    */
 function get_grader_objects(assignment_id) {
-  return new Promise(function (resolve, reject) {
-    get_assignment_cap(assignment_id)
-      .then(response => {
-        response.sort(function (a, b) {
-          if (a.grader_id === b.grader_id) return 0
-          return b.grader_id > a.grader_id ? 1 : -1
-        })
-        let sql_query = "SELECT * FROM grader"
-        pool.query(sql_query, (err, results) => {
-          if (err) {
-            console.log(err)
-            return reject(err)
-          } else {
-            grader_array = []
-            results.forEach(grader => {
-              let id = grader.id
-              let offset = grader.offset
-              let weight = grader.weight
-              let graderObj = new AssignmentGrader(id, weight, offset, -1, -1, -1)
-              grader_array.push(graderObj)
-            })
-            grader_array.sort(function (a, b) {
-              if (a.id === b.id) return 0
-              return b.id > a.id ? 1 : -1
-            })
-            // IMPORTANT: Assumes grader_array and the response from the assignments_cap
-            // are equal in length. This needs to be satisfied by making sure every grader 
-            // has an entry for every assignment in assignments_cap table.
-            if (grader_array.length != response.length) throw Error('you done messed up')
-            for (let i = 0; i < grader_array.length; i++) {
-              let assigned = response[i].total_assigned_for_assignment;
-              grader_array[i].update_num_assigned(assigned);
-              grader_array[i].update_dist_num_assigned(assigned);
-              grader_array[i].update_cap(response[i].cap);
-            }
-            resolve(grader_array)
-          }
-        })
+  return new Promise(function(resolve, reject){
+    let query = "SELECT grader.id, assignments_cap.cap, grader.offset, assignments_cap.total_assigned_for_assignment, grader.weight FROM grader INNER JOIN assignments_cap ON grader.id=assignments_cap.grader_id WHERE assignments_cap.assignment_id = ?"
+    pool.query(query, [assignment_id], function(error, results){
+      if (error){reject(error)}
+      grader_array = []
+      results.forEach(grader => {
+        let id = grader.id
+        let offset = grader.offset
+        let cap = grader.cap
+        let weight = grader.weight
+        let total_assigned = grader.total_assigned_for_assignment
+        let graderObj = new AssignmentGrader(id, weight, offset, total_assigned, total_assigned, cap)
+        grader_array.push(graderObj)
       })
-
-  })
+      resolve(grader_array)
+    })
+  });
 }
 
 
@@ -500,80 +471,127 @@ function get_grading_progress_for_every_grader(req, res) {
 
 //TOOD: Refactor the 3 functions into one function. 
 
-function update_total_assigned(grader_array, assignment_id, callback) {
-  async.forEachOf(grader_array, function (grader, _, inner_callback) {
-    let query = "UPDATE assignments_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
-    let data = [grader.num_assigned, grader.grader_id, assignment_id]
+function update_total_assigned(grader_array, assignment_id) {
+  return new Promise(function(resolve, reject) {
     pool.getConnection(function (err, connection) {
-      if (err) throw err;
-      connection.query(query, data, (err, results) => {
-        connection.release();
-        if (err) {
-          inner_callback(err)
-          callback(err)
-        } else {
-          inner_callback(null)
-        }
+      if (err) {reject(err)}
+      async.forEachOf(grader_array, function (grader) {
+        let query = "UPDATE assignments_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
+        let data = [grader.num_assigned, grader.grader_id, assignment_id]
+        connection.query(query, data, (err, results) => {
+          if (err) {reject(err)}
+        });
       })
-    });
-  })
-}
-
-
-function update_grader_entries(grader_array, callback) {
-  async.forEachOf(grader_array, function (grader, _, inner_callback) {
-    let query = "UPDATE grader SET offset=? WHERE id=?"
-    let data = [grader.offset, grader.grader_id]
-
-    pool.getConnection(function (err, connection) {
-      if (err) throw err;
-      connection.query(query, data, (err, results) => {
-        connection.release();
-        if (err) {
-          console.log(err)
-          inner_callback(err)
-          callback(err)
-        } else {
-          inner_callback(null)
-        }
-      })
-    });
-  }, function (err) {
-    if (err) {
-      console.log(err);
-      callback(err)
-    } else {
-      callback(null)
-    }
+      connection.release();
+      resolve()
+    })
   });
+  // async.forEachOf(grader_array, function (grader, _, inner_callback) {
+  //   let query = "UPDATE assignments_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
+  //   let data = [grader.num_assigned, grader.grader_id, assignment_id]
+  //   pool.getConnection(function (err, connection) {
+  //     if (err) throw err;
+  //     connection.query(query, data, (err, results) => {
+  //       connection.release();
+  //       if (err) {
+  //         inner_callback(err)
+  //         callback(err)
+  //       } else {
+  //         inner_callback(null)
+  //       }
+  //     })
+  //   });
+  // })
 }
 
-function assign_submissions_to_grader(assignment_matrix, callback) {
-  async.forEachOf(assignment_matrix, function (pairing, _, inner_callback) {
-    let query = "UPDATE submission SET grader_id = ? WHERE id = ?"
-    let data = [pairing[0], pairing[1]]
+
+function update_grader_entries(grader_array) {
+  return new Promise(function(resolve, reject) {
     pool.getConnection(function (err, connection) {
-      if (err) throw err;
-      connection.query(query, data, (err, results) => {
+        if (err) {reject(err)}
+        async.forEachOf(grader_array, function (grader) {
+          let query = "UPDATE grader SET offset=? WHERE id=?"
+          let data = [grader.offset, grader.grader_id]
+          connection.query(query, data, (err, results) => {
+            if (err) {reject(err)}
+          });
+        });
         connection.release();
-        console.log(pairing[0] + "  " + pairing[1]);
-        if (err) {
-          console.log(err)
-          inner_callback(err)
-          callback(err)
-        } else {
-          inner_callback(null)
-        }
+        resolve();
+      });
+  });
+  // async.forEachOf(grader_array, function (grader, _, inner_callback) {
+  //   let query = "UPDATE grader SET offset=? WHERE id=?"
+  //   let data = [grader.offset, grader.grader_id]
+
+  //   pool.getConnection(function (err, connection) {
+  //     if (err) throw err;
+  //     connection.query(query, data, (err, results) => {
+  //       connection.release();
+  //       if (err) {
+  //         console.log(err)
+  //         inner_callback(err)
+  //         callback(err)
+  //       } else {
+  //         inner_callback(null)
+  //       }
+  //     })
+  //   });
+  // }, function (err) {
+  //   if (err) {
+  //     console.log(err);
+  //     callback(err)
+  //   } else {
+  //     callback(null)
+  //   }
+  // });
+}
+
+function assign_submissions_to_grader(assignment_matrix) {
+  return new Promise(function(resolve, reject) {
+    pool.getConnection(function (err, connection) {
+      if (err) reject(err);
+      async.forEachOf(assignment_matrix, function (pairing) {
+        let query = "UPDATE submission SET grader_id = ? WHERE id = ?"
+        let data = [pairing[0], pairing[1]]
+        connection.query(query, data, (err, results) => {
+          if(err){
+            reject(err)
+          }
+        })
       })
+      connection.release();
+      resolve();
     });
-  }, function (err) {
-    if (err) {
-      console.log(err)
-      callback(err)
-    } else {
-      callback(null)
-    }
   })
+// fix here
+
+
+  // async.forEachOf(assignment_matrix, function (pairing, _, inner_callback) {
+  //   let query = "UPDATE submission SET grader_id = ? WHERE id = ?"
+  //   let data = [pairing[0], pairing[1]]
+  //   pool.getConnection(function (err, connection) {
+  //     if (err) throw err;
+  //     connection.query(query, data, (err, results) => {
+  //       connection.release();
+  //       console.log(pairing[0] + "  " + pairing[1]);
+  //       if (err) {
+  //         console.log(err)
+  //         inner_callback(err)
+  //         callback(err)
+  //       } else {
+  //         inner_callback(null)
+  //       }
+  //     })
+  //   });
+  // }, function (err) {
+  //   if (err) {
+  //     console.log(err)
+  //     callback(err)
+  //   } else {
+  //     callback(null)
+  //   }
+  // })
 }
 
 async function insertAllSubmission(json_string) {
