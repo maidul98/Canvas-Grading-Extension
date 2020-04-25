@@ -146,7 +146,11 @@ export default function Dashboard(){
             if(gradersData[grader_id].offset && gradersData[grader_id].offset==""){
                 delete gradersData[grader_id].offset;
             }
-            if(gradersData[grader_id].weight || gradersData[grader_id].offset){
+            if(gradersData[grader_id].cap && gradersData[grader_id].cap==""){
+                console.log("asdfasdf");
+                delete gradersData[grader_id].cap;
+            }
+            if(gradersData[grader_id].weight || gradersData[grader_id].offset || gradersData[grader_id].cap){
                 data.push({"id": grader_id, ...gradersData[grader_id]});
             }
             return data;
@@ -269,7 +273,7 @@ export default function Dashboard(){
                             <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" min="0" pattern="[0-9]*" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "weight", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
                             <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "offset", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
                             <td className="width-10">
-                                <FormControl placeholder="None" data-grader-id={grader?.id} type="number"  onChange={handleCapChange} />
+                                <FormControl placeholder="None" data-grader-id={grader?.id} type="number"  onChange={event=>{updateGradersData(grader.id, "cap", event.target.value.trim()); handleCapChange(event)}} />
                             </td>
                             <td className="width-10">
                                 {graders[grader?.id][assignment_id]?graders[grader?.id][assignment_id]["total_assigned"]:0}
