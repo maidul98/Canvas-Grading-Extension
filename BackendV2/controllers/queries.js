@@ -73,16 +73,16 @@ async function detect_conflicts(graderArray, assignment_id) {
 
 //should be returning a 1D array of submisions IDs that are not graded by graderID for that specific assignment_id
 function get_surplus_submissions(graderID, surplus, assignment_id) {
-  return new Promise(function(resolve, reject){
+  return new Promise(function (resolve, reject) {
     let query = `SELECT * FROM submission WHERE grader_id =? AND assignment_id =? AND is_graded =? ORDER BY id`; // get submissions for this grader
     let surplusArr = []
     let data = [graderID, assignment_id, 0]
 
     pool.query(query, data, async function (error, results) {
-      if (error){reject(error)}
+      if (error) { reject(error) }
 
       if (results.length < surplus) reject(new Error("The number of ungraded assignments is less than the workload reduction."))
-      for (let i = 0; i < surplus; i++) { 
+      for (let i = 0; i < surplus; i++) {
         console.log(results[i])
         surplusArr.push(results[i].id)
         await set_surplus_submissions(graderID, results[i].id, assignment_id)
@@ -118,18 +118,20 @@ async function handle_conflicts(graderID, surplus, assignment_id) {
 }
 
 async function runPipeline(req, res) {
-  try{
+  try {
 
     await pull_submissions_from_canvas(req.body.assignment_id)
 
     let grader_array = await get_grader_objects(req.body.assignment_id);
+    console.log("first print: ")
+    console.log(grader_array)
     let submission_json = await get_unassigned_submissions(req.body.assignment_id);
     let mapped = submission_json.map(v => v.id);
-  
+
     let conflicts = await detect_conflicts(grader_array, req.body.assignment_id);
     mapped = mapped.concat(conflicts.submissionsArray);
     assignmentsLeft = mapped.length > 0 ? true : false;
-    
+
     if (assignmentsLeft) {
       let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
       let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
@@ -141,12 +143,12 @@ async function runPipeline(req, res) {
       await update_total_assigned(graders_assigned, req.body.assignment_id) //update num_assigned of graders in DB with output_of_algo
 
       res.send("Successfully distributed (or re-distributed) assignments.")
-    }else{
+    } else {
       res.send("There are currently no assignments to distribute or re-distribute.")
     }
-  }catch(error){
+  } catch (error) {
     //rewind changes in DB
-    res.staus(403).send("Something went wrong")
+    res.status(403).send("Something went wrong")
   }
 
 }
@@ -163,10 +165,10 @@ async function runPipeline(req, res) {
    * @returns A new Promise object
    */
 function get_grader_objects(assignment_id) {
-  return new Promise(function(resolve, reject){
+  return new Promise(function (resolve, reject) {
     let query = "SELECT grader.id, assignments_cap.cap, grader.offset, assignments_cap.total_assigned_for_assignment, grader.weight FROM grader INNER JOIN assignments_cap ON grader.id=assignments_cap.grader_id WHERE assignments_cap.assignment_id = ?"
-    pool.query(query, [assignment_id], function(error, results){
-      if (error){reject(error)}
+    pool.query(query, [assignment_id], function (error, results) {
+      if (error) { reject(error) }
       grader_array = []
       results.forEach(grader => {
         let id = grader.id
@@ -236,6 +238,7 @@ function update_multiple_graders_data_route(req, res) {
         status: "fail",
         message: "Something went wrong"
       });
+      console.log(err)
     } else {
       res.send("success");
     }
@@ -251,7 +254,9 @@ function update_multiple_graders_data(graders_arr, callback) {
   let queries = "";
   graders_arr.forEach(grader => {
     let { id, ...data } = grader;
-    queries += mysql.format("UPDATE grader SET ? WHERE id = ?; ", [data, id]);
+    console.log(grader)
+    console.log(id)
+    queries += mysql.format("UPDATE grader SET ? WHERE id = ?;", [data, id]);
   });
   pool.query(queries, callback);
 }
@@ -450,14 +455,14 @@ function get_grading_progress_for_every_grader(req, res) {
 //TOOD: Refactor the 3 functions into one function. 
 
 function update_total_assigned(grader_array, assignment_id) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.getConnection(function (err, connection) {
-      if (err) {reject(err)}
+      if (err) { reject(err) }
       async.forEachOf(grader_array, function (grader) {
         let query = "UPDATE assignments_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
         let data = [grader.num_assigned, grader.grader_id, assignment_id]
         connection.query(query, data, (err, results) => {
-          if (err) {reject(err)}
+          if (err) { reject(err) }
         });
       })
       connection.release();
@@ -468,31 +473,31 @@ function update_total_assigned(grader_array, assignment_id) {
 
 
 function update_grader_entries(grader_array) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.getConnection(function (err, connection) {
-        if (err) {reject(err)}
-        async.forEachOf(grader_array, function (grader) {
-          let query = "UPDATE grader SET offset=? WHERE id=?"
-          let data = [grader.offset, grader.grader_id]
-          connection.query(query, data, (err, results) => {
-            if (err) {reject(err)}
-          });
+      if (err) { reject(err) }
+      async.forEachOf(grader_array, function (grader) {
+        let query = "UPDATE grader SET offset=? WHERE id=?"
+        let data = [grader.offset, grader.grader_id]
+        connection.query(query, data, (err, results) => {
+          if (err) { reject(err) }
         });
-        connection.release();
-        resolve();
       });
+      connection.release();
+      resolve();
+    });
   });
 }
 
 function assign_submissions_to_grader(assignment_matrix) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.getConnection(function (err, connection) {
       if (err) reject(err);
       async.forEachOf(assignment_matrix, function (pairing) {
         let query = "UPDATE submission SET grader_id = ? WHERE id = ?"
         let data = [pairing[0], pairing[1]]
         connection.query(query, data, (err, results) => {
-          if(err){
+          if (err) {
             reject(err)
           }
         })
@@ -523,8 +528,8 @@ async function insertAllSubmission(json_string) {
 }
 
 
-function pull_submissions_from_canvas (assignment_id) {
-  return new Promise(async function(resolve, reject){
+function pull_submissions_from_canvas(assignment_id) {
+  return new Promise(async function (resolve, reject) {
     const config = {
       //TODO: Factor out bearer tokens into another file that isn't publicly accessible.
       headers: {
@@ -546,7 +551,7 @@ function pull_submissions_from_canvas (assignment_id) {
           name: element.user.name,
           user_id: element.user.id
         };
-  
+
         if (element.group.id !== null && !visitedGroups.has(element.group.id)) {
           visitedGroups.add(element.group.id);
           dbJSON.push(json);
@@ -555,9 +560,9 @@ function pull_submissions_from_canvas (assignment_id) {
         }
       }
     });
-    
+
     // insertAllSubmission(dbJSON);
-  
+
     pool.getConnection(function (err, connection) {
       if (err) throw reject(err);
       dbJSON.forEach(e => {
@@ -653,6 +658,8 @@ async function run_distribution_pipeline(req, res) {
     await runPipeline(req, res)
     // res.send()
   } catch (error) {
+    console.log("error")
+    console.log(error)
     res.status(404)
   }
 }

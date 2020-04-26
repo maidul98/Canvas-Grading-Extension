@@ -75,8 +75,8 @@ function main_distribute(num_of_submissions, graderArray) {
 
     // console.log("num of subs" + num_of_submissions);
     // console.log(graderArray);
-console.log("\n\nINITIAL PULLED FROM DB")
-console.log(graderArray)
+    console.log("\n\nINITIAL PULLED FROM DB")
+    console.log(graderArray)
 
     //initial distribution 
     //only offset & num_assigned should be altered 
