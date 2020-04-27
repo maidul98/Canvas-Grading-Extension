@@ -92,7 +92,7 @@ export default function Dashboard(){
         currentDropdown.current=event.target.value
     }
 
-    if(fetchGradersData.loading | updateGraderDetails | fetchAssignmentsList) return <LoadingIcon />;
+    if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList) return <LoadingIcon />;
 
     return (
         <div className="container">

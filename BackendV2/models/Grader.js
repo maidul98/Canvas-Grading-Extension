@@ -61,7 +61,10 @@ module.exports.updateGraderInfo = function (grader_object) {
         if (err) {reject(err)}
       });
 
-      //assignments that have alterd their caps
+      if(!assigmentsCapChange.length){
+        resolve();
+      }
+      
       async.forEachOf(assigmentsCapChange, async function (assignment_id) {
         try{
           await distrbute.runPipeline(assignment_id);
@@ -72,6 +75,7 @@ module.exports.updateGraderInfo = function (grader_object) {
           //also undo all of the changes done earler
         }
       });
+
     })
   })
 }
