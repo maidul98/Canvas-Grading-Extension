@@ -312,6 +312,93 @@ function update_grader_weight(req, res) {
   );
 }
 
+
+
+
+
+/**
+ * updates assignments cap table for all new published assignments for all graders
+ * @param {*} req 
+ * @param {*} res 
+ */
+async function update_assignments_cap_table() {
+
+  let assignment_ids = [109377, 109378, 109379]
+
+  const check_assignment_exists = assignment_id => {
+    return new Promise((resolve, reject) => {
+      let sql_query = "SELECT * FROM assignments_cap WHERE assignment_id =?"
+      pool.getConnection(function (err, connection) {
+        if (err) reject(err);
+        connection.query(sql_query, [assignment_id], (err, response) => {
+          if (err) return reject(err);
+          return resolve((response.length !== 0))
+        })
+        connection.release();
+      })
+    })
+  }
+
+
+
+  const insert_into_assignments_cap = (assignment_id, grader_id) => {
+    return new Promise((resolve, reject) => {
+      console.log("HELOOO: " + grader_id, assignment_id)
+      let sql_query = "INSERT INTO assignments_cap SET total_assigned_for_assignment=?, cap=?, grader_id=?, assignment_id=?"
+      pool.getConnection(function (err, connection) {
+        if (err) return reject(err)
+        connection.query(sql_query, [0, 100, grader_id, assignment_id], (err) => {
+          if (err) return reject(err)
+          return resolve();
+        })
+        connection.release();
+      });
+    })
+    /*
+    .then((state) => {
+      assert(state.action === 'DONE', 'should change state');
+    })
+    .catch((error) => {
+      assert.isNotOk(error, 'Promise error');
+    });
+  */
+  }
+
+  const get_graders = () => {
+    return new Promise((resolve, reject) => {
+      let query = "SELECT * FROM grader";
+      pool.getConnection(function (err, connection) {
+        if (err) reject(err);
+        connection.query(query, (err, results) => {
+          if (err) return reject(err);
+          return resolve(results)
+        })
+        connection.release();
+      });
+    })
+  }
+
+  assignment_ids = assignment_ids.filter(async assignmentId => {
+    let exists = await check_assignment_exists(assignmentId)
+    console.log("val: " + (exists))
+    return !exists
+  })
+
+  let graders = await get_graders()
+  graders = graders.map(grader => grader.id)
+  console.log("graders: ")
+  console.log(graders)
+
+  assignment_ids.forEach(assignment_id => {
+    async.forEachOf(async grader_id => {
+      await insert_into_assignments_cap(assignment_id, grader_id)
+    })
+  })
+
+}
+
+
+
 /**
  * @param {*} assignment_id
  * Returns the assigned submissions for every grader for an assignment:
@@ -715,4 +802,6 @@ module.exports = {
   update_caps: update_caps,
 
   handle_conflicts: handle_conflicts,
+
+  update_assignments_cap_table: update_assignments_cap_table
 }
