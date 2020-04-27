@@ -1,5 +1,6 @@
 const pool = require('../pool');
-var async = require('async')
+var async = require('async');
+const distrbute = require("../controllers/queries");
 
 /**
  * Get weights, net_id, and offset, cap, total assigned for all graders. 
@@ -30,7 +31,8 @@ module.exports.updateGraderInfo = function (grader_object) {
       if (err) {reject(err)}
       let queries = []
       let queriesData = []
-      grader_object.map(function (grader) {
+      let assigmentsCapChange = []
+      grader_object.map(async function (grader) {
         for (const property in grader) {
           switch(property) {
             case 'weight':
@@ -43,6 +45,7 @@ module.exports.updateGraderInfo = function (grader_object) {
               queriesData.push(grader['cap']);
               queriesData.push(grader['id']);
               queriesData.push(grader['assignment_id']);
+              assigmentsCapChange.push(grader['assignment_id'])
               break;
             case 'offset':
               queries.push('UPDATE grader SET offset=? WHERE id=?')
@@ -53,11 +56,22 @@ module.exports.updateGraderInfo = function (grader_object) {
           }
         }
       })
+
       connection.query(queries.join(';'),queriesData, (err, results) => {
         if (err) {reject(err)}
       });
-      connection.release();
-      resolve();
+
+      //assignments that have alterd their caps
+      async.forEachOf(assigmentsCapChange, async function (assignment_id) {
+        try{
+          await distrbute.runPipeline(assignment_id);
+          connection.release();
+          resolve();
+        }catch(error){
+          reject(error)
+          //also undo all of the changes done earler
+        }
+      });
     })
   })
 }

@@ -117,40 +117,38 @@ async function handle_conflicts(graderID, surplus, assignment_id) {
   return submissionArr
 }
 
-async function runPipeline(req, res) {
-  try {
-
-    await pull_submissions_from_canvas(req.body.assignment_id)
-
-    let grader_array = await get_grader_objects(req.body.assignment_id);
-    console.log("first print: ")
-    console.log(grader_array)
-    let submission_json = await get_unassigned_submissions(req.body.assignment_id);
-    let mapped = submission_json.map(v => v.id);
-
-    let conflicts = await detect_conflicts(grader_array, req.body.assignment_id);
-    mapped = mapped.concat(conflicts.submissionsArray);
-    assignmentsLeft = mapped.length > 0 ? true : false;
-
-    if (assignmentsLeft) {
-      let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
-      let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
-
-      await update_grader_entries(graders_assigned) //update offsets of graders in DB with output_of_algo
-
-      await assign_submissions_to_grader(matrix_of_pairs) //updates submissions and graders in DB with matrix_of_pairs
-
-      await update_total_assigned(graders_assigned, req.body.assignment_id) //update num_assigned of graders in DB with output_of_algo
-
-      res.send("Successfully distributed (or re-distributed) assignments.")
-    } else {
-      res.send("There are currently no assignments to distribute or re-distribute.")
+function runPipeline(assignment_id) {
+  return new Promise(async function(resolve, reject){
+    try {
+      await pull_submissions_from_canvas(assignment_id)
+      let grader_array = await get_grader_objects(assignment_id);
+      console.log("first print: ")
+      console.log(grader_array)
+      let submission_json = await get_unassigned_submissions(assignment_id);
+      let mapped = submission_json.map(v => v.id);
+  
+      let conflicts = await detect_conflicts(grader_array, assignment_id);
+      mapped = mapped.concat(conflicts.submissionsArray);
+      assignmentsLeft = mapped.length > 0 ? true : false;
+  
+      if (assignmentsLeft) {
+        let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
+        let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
+  
+        await update_grader_entries(graders_assigned) //update offsets of graders in DB with output_of_algo
+  
+        await assign_submissions_to_grader(matrix_of_pairs) //updates submissions and graders in DB with matrix_of_pairs
+  
+        await update_total_assigned(graders_assigned, assignment_id) //update num_assigned of graders in DB with output_of_algo
+  
+        resolve("Successfully distributed (or re-distributed) assignments.")
+      } else {
+        resolve("There are currently no assignments to distribute or re-distribute.")
+      }
+    } catch (error) {
+      reject("Something went wrong with run pipeline")
     }
-  } catch (error) {
-    //rewind changes in DB
-    res.status(403).send("Something went wrong")
-  }
-
+  })
 }
 
 
@@ -596,8 +594,8 @@ function get_assignment_cap(assignment_id) {
 
 async function run_distribution_pipeline(req, res) {
   try {
-    await runPipeline(req, res)
-    // res.send()
+    await runPipeline(req.body.assignment_id)
+    res.send()
   } catch (error) {
     console.log("error")
     console.log(error)
@@ -652,4 +650,5 @@ module.exports = {
   update_caps: update_caps,
 
   handle_conflicts: handle_conflicts,
+  runPipeline: runPipeline,
 }
