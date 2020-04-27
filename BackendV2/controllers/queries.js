@@ -356,62 +356,6 @@ function get_assigned_submission_for_assigment(req, res) {
   );
 }
 
-/**
-* This function gets the grading progress for each grader given assignment_id
-* @param {*} assigment_id
-*/
-function get_grading_progress_for_every_grader(req, res) {
-  let sql_query = "SELECT submission.id, grader_id, assignment_id, is_graded, offset, weight, total_graded FROM submission JOIN grader ON submission.grader_id = grader.id WHERE assignment_id=? AND grader_id IS NOT NULL";
-  pool.query(sql_query, [req.query.assigment_id], (err, results) => {
-    if (err) {
-      res.status(406).send({
-        status: "fail",
-        message: "Something went wrong"
-      });
-    } else {
-      let graders = {};
-      let progress = [];
-      results.forEach((submission) => {
-        if (!(submission.grader_id in graders)) {
-          graders[submission.grader_id] = [submission.weight, submission.offset];
-        }
-      });
-      Object.keys(graders).forEach((grader) => {
-        let grader_total = 0;
-        let grader_completed = 0;
-        results.forEach((submission) => {
-          if (submission.grader_id == grader) {
-            grader_total += 1;
-            if (submission.is_graded == 1) {
-              grader_completed += 1;
-            }
-          }
-        })
-        progress.push({ "grader": grader[0], "global": { "weight": graders[grader][0], "offset": graders[grader][1] }, "progress": { "total": grader_total, "completed": grader_completed } })
-      })
-      res.json(progress);
-    }
-  });
-}
-
-
-/**
- * Get weights, net_id, and offset for all graders
- * @param {*} req 
- * @param {*} res 
- */
-function get_grader_info(req, res) {
-  let sql_query = "SELECT * FROM grader";
-  pool.query(sql_query, [req.query.assigment_id], (err, results) => {
-
-    if (err) {
-      console.log("err");
-    } else {
-      res.json(results);
-    }
-  }
-  );
-}
 
 /**
 * This function gets the grading progress for each grader given assignment_id
@@ -560,9 +504,6 @@ function pull_submissions_from_canvas(assignment_id) {
         }
       }
     });
-
-    // insertAllSubmission(dbJSON);
-
     pool.getConnection(function (err, connection) {
       if (err) throw reject(err);
       dbJSON.forEach(e => {
@@ -676,8 +617,6 @@ module.exports = {
 
   insertAllSubmission: insertAllSubmission,
 
-  get_grader_info: get_grader_info,
-
   get_unassigned_submissions: get_unassigned_submissions,
 
   get_grader_objects: get_grader_objects,
@@ -709,8 +648,6 @@ module.exports = {
   assign_submissions_to_grader: assign_submissions_to_grader,
 
   run_distribution_pipeline: run_distribution_pipeline,
-
-  get_grader_info: get_grader_info,
 
   update_caps: update_caps,
 

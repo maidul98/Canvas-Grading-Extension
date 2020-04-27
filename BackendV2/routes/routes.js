@@ -10,6 +10,9 @@ var apiCalls = require('../controllers/api-calls');
 var queries = require('../controllers/queries');
 var download = require('../controllers/DownloadController');
 
+//Imports all files from the controllers folder
+var controllers = require('../controllers/');
+
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -60,11 +63,11 @@ router.post('/update-grader-weight', queries.update_grader_weight);
 /** Update data for multiple graders */
 router.post('/update-graders-data', queries.update_multiple_graders_data_route);
 
-/** Updates the total number of submissions assigned to graders for a particular assignment. */
-//router.post('/update-total-assigned/:assignment_id', queries.update_total_assigned);
 
 /** Get grading progress for a specific assignment */
-router.get('/get-grader-info', queries.get_grader_info);
+router.get('/get-grader-info', controllers.ProfessorDashboardController.getGraderInfo);
+
+router.post('/update-grader-info', controllers.ProfessorDashboardController.updateGraderInfo);
 
 /** Get grading progress for a specific assignment */
 // router.get('/get-grading-progress-for-every-grader', queries.get_grading_progress_for_every_grader);

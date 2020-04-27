@@ -13,7 +13,11 @@ export default function ExtendedSubmissionView(props){
                 </div>
                 <div id="grade_input">
                     <span className="out-of-text">Grade out of 100</span>
-                    <input type="text" data-grade={props.data?.user_id} ref={input => props.gradeInput.current = input} name="assigned_grade" defaultValue={props.data?.score} onChange={(event)=>props.handleCommentGrade(props.data?.user_id, event, 'grade')} type="number" min={0} max={100}></input>
+                    <input type="text" data-grade={props.data?.user_id} 
+                    ref={input => props.gradeInput.current = input} 
+                    name="assigned_grade" defaultValue={props.data?.score} 
+                    onChange={(event)=>props.handleCommentGrade(props.data?.user_id, event, 'grade')} 
+                    type="number" min={0} max={100}></input>
                 </div>
             </div>
             <textarea

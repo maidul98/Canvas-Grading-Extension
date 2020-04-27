@@ -43,7 +43,7 @@ export default function DetailedAssignmentView(props){
             method:'post', 
             data:{endpoint:`assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}?include[]=user&include[]=submission_comments`}
         });
-    });
+    }, []);
 
 
     function handleSubmit(){

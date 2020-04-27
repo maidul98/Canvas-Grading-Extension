@@ -5,6 +5,10 @@ const pool = mysql.createPool({
     user: "be9696052936bb",
     password: "4f1c4dfa",
     database: "heroku_aff64052225438d",
+<<<<<<< Updated upstream
     multipleStatements: true
+=======
+    multipleStatements:true
+>>>>>>> Stashed changes
 });
 module.exports = pool;
