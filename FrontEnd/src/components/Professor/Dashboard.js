@@ -1,5 +1,5 @@
   
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import { useRequest } from '@umijs/hooks';
 import { useAlert } from 'react-alert'
 import LoadingIcon from '../LoadingIcon';
@@ -7,11 +7,10 @@ import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import FormControl from 'react-bootstrap/FormControl';
-
 export default function Dashboard(){
     const alert = useAlert();
-    const graderEditObject = useRef([]);
-    const currentDropdown = useRef("null")
+    const [graderEditObject, setGraderEditObject] = useState([])
+    const currentDropdown = useRef("");
 
     /**
      * Get the list of assignments from Canvas from which the user can drop down from 
@@ -48,16 +47,18 @@ export default function Dashboard(){
      * @param {int} grader_id 
      */
     function handleUpdate(event, type, grader_id){
-        let found = graderEditObject.current.some(graders=> graders.id == grader_id)
+        let oldGraderEditObject = graderEditObject;
+        let found = oldGraderEditObject.some(graders=> graders.id == grader_id)
         if(found){
-            let index = graderEditObject.current.findIndex(gradersArray => gradersArray.id == grader_id);
-            graderEditObject.current[index][type]=parseInt(event.target.value)
+            let index = oldGraderEditObject.findIndex(gradersArray => gradersArray.id == grader_id);
+            oldGraderEditObject[index][type]=parseInt(event.target.value)
         }else{
             let new_grader = {id:grader_id};
             new_grader[type]=parseInt(event.target.value);
             new_grader['assignment_id']=currentDropdown.current;
-            graderEditObject.current.push(new_grader);
+            oldGraderEditObject.push(new_grader);
         }
+        setGraderEditObject([...oldGraderEditObject]);
     }
 
     /**
@@ -68,11 +69,12 @@ export default function Dashboard(){
         url:`${process.env.REACT_APP_BASE_URL}/update-grader-info`,
         method:'post',
         headers: { 'Content-Type': 'application/json' },
-        body:JSON.stringify(graderEditObject.current)
+        body:JSON.stringify(graderEditObject)
     }, {
         manual: true,
         onSuccess: (result, params)=>{
             fetchGradersData.run(currentDropdown.current)
+            setGraderEditObject([])
             alert.success('Updated changes');
         },
         onError: (error, params) => {
@@ -140,7 +142,7 @@ export default function Dashboard(){
                     }
                 </tbody>
             </Table>
-            <Button onClick={updateGraderDetails.run}>Update</Button>           
+                {graderEditObject.length? <Button onClick={updateGraderDetails.run}>Update</Button>: <></>}           
         </div>
     );
 }
