@@ -6,5 +6,6 @@ const pool = mysql.createPool({
     password: "4f1c4dfa",
     database: "heroku_aff64052225438d",
     multipleStatements: true
+
 });
 module.exports = pool;
