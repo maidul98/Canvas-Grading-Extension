@@ -122,8 +122,6 @@ function runPipeline(assignment_id) {
     try {
       await pull_submissions_from_canvas(assignment_id)
       let grader_array = await get_grader_objects(assignment_id);
-      console.log("first print: ")
-      console.log(grader_array)
       let submission_json = await get_unassigned_submissions(assignment_id);
       let mapped = submission_json.map(v => v.id);
 
