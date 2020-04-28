@@ -3,7 +3,7 @@ var async = require('async');
 const distrbute = require("../controllers/queries");
 
 /**
- * Get weights, net_id, and offset, cap, total assigned for all graders. 
+ * Get weights, net_id, and offset, cap, total assigned for all graders given a assignment_id. 
  * Used for professor dashboard.
  * @param {*} req 
  * @param {*} res 
@@ -64,7 +64,7 @@ module.exports.updateGraderInfo = function (grader_object) {
       if(!assigmentsCapChange.length){
         resolve();
       }
-      
+      // Run algo since caps changed
       async.forEachOf(assigmentsCapChange, async function (assignment_id) {
         try{
           await distrbute.runPipeline(assignment_id);
@@ -75,7 +75,22 @@ module.exports.updateGraderInfo = function (grader_object) {
           //also undo all of the changes done earler
         }
       });
+    })
+  })
+}
 
+/**
+ * Gets all of the users in the graders table 
+ */
+module.exports.getAll = async function() {
+  return new Promise((resolve, reject) => {
+    let query = "SELECT * FROM grader";
+    pool.query(query, (err, results) => {
+      if (err) {
+        return reject(err)
+      } else {
+        return resolve(results)
+      }
     })
   })
 }

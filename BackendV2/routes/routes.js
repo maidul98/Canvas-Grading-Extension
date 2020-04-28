@@ -93,7 +93,7 @@ router.post('/test_handle', async (req, res) => {
     res.send("succesful yay")
 })
 
-router.post('/runUpdate', queries.runUpdate)
+router.post('/check-for-new-assignments', controllers.AssignmentsCapController.populateAssignmentsCapTable)
 
 //Params: assignment_id, [user_ids]
 router.post('/update-gradercap', queries.update_caps)
