@@ -1,256 +1,118 @@
   
-import React, {useEffect, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import { useRequest } from '@umijs/hooks';
-import Alert from 'react-bootstrap/Alert';
 import { useAlert } from 'react-alert'
 import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import ProgressBar from 'react-bootstrap/ProgressBar';
-import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
-import Submissions from '../grader/Submissions';
-
 export default function Dashboard(){
     const alert = useAlert();
-    const [assignments, setAssignments] = useState([]);
-    const [gradedSubmissions, setGradedSubmissions] = useState({});
-    /* graders store the grading progress and total number of assigned submissions for each grader for every assignment
-    {
-        "grader1_id": {"assignment1_id": {"progress": 0, "total_assigned": 10}, 
-                        "assignment2_id": {"progress": 50, "total_assigned": 10}}
-    }
-    */
-    const [graders, setGraders] = useState({});
-    const [changed, setChanged] = useState(false);
-    const [assignment_id, setAssignmentID] = useState(null);
-    /* gradersData (to store user inputs):
-    {
-        "grader1_id": {"weight": 5}
-        "grader2_id": {"weight": 2, "offset": 0}
-    }
-    */
-    const [gradersData, setGradersData] = useState({});
-    /**
-     * Get each graders info such as net_id, weight and progress given an assigment_id 
-     */
-    const fetchGradersData = useRequest(() => {
-        return {
-            "url":`${process.env.REACT_APP_BASE_URL}/get-grader-info`,
-            "method":'get'
-        }
-    }, {
-        manual: true,
-        onSuccess: (result, params) => {
-            let updatedGraders = result.reduce((obj, grader)=>{
-                obj[grader.id] = {};
-                return obj;
-            }, {})
-            setGraders(updatedGraders);
-        },
-        onError: (error, params) => {
-            alert.error('Something went wrong while fetching graders, please try refreshing the page.');
-        },
-        formatResult: []
-    });
+    const [graderEditObject, setGraderEditObject] = useState([])
+    const currentDropdown = useRef("");
+    const [assignment_id_list, setAssignment_id_list] = useState([])
 
     /**
-     * Get the full list of assignments ordred from new to old
+     * Get the list of assignments from Canvas from which the user can drop down from 
      */
-    const fetchAssignments = useRequest(url => url, {
-        manual: true,
-        onSuccess: (result, params) => {
-            let reOrdered = result.sort(function compare(a, b) {
-                var dateA = new Date(a.due_at);
-                var dateB = new Date(b.due_at);
-                return dateB-dateA;
-            });
-            setAssignments(reOrdered);
-            setAssignmentID(reOrdered[0].id)
+    const fetchAssignmentsList = useRequest(`${process.env.REACT_APP_BASE_URL}/get-published-assignments`, {
+        onSuccess: (result, params)=>{
+            if(result[0].id != undefined){
+                fetchGradersData.run(result[0].id);
+                currentDropdown.current = result[0].id;
+            }
+            let assignment_id_list = result.map(assignment => assignment.id)
+            setAssignment_id_list(assignment_id_list)
+            updateCapsTable.run();
+            //if there are new assignments, add them to the caps table 
+            // updateCapsTable.run()
         },
         onError: (error, params) => {
             alert.error("Something went wrong while fetching assignments, please try refreshing the page");
         },
-        formatResult: []
+        initialData: []
     });
 
-    const fetchSubmissions = useRequest( (assignmentID) => {
-        return {
-            url:`${process.env.REACT_APP_BASE_URL}/canvas-api`, 
-            method:'post', 
-            data:{endpoint:`assignments/${assignmentID}/submissions`}
+    /**
+     * 
+     */
+    const updateCapsTable = useRequest({
+        manual:false,
+        url:`${process.env.REACT_APP_BASE_URL}/check-for-new-assignments`,
+        method:'post',
+        headers: { 'Content-Type': 'application/json' },
+        body:JSON.stringify({"assignment_ids": assignment_id_list})
+    });
+
+    /**
+     * Get grader detials from DB
+     */
+    const fetchGradersData = useRequest((assignment_id) =>`${process.env.REACT_APP_BASE_URL}/get-grader-info?assignment_id=${assignment_id}`, {
+        manual: true,
+        onError: (error, params) => {
+            alert.error('Something went wrong while fetching graders, please try refreshing the page.');
+        },
+        initialData: []
+    });
+
+    /**
+     * When changes are detected, they are made into an object of the following form 
+     * {assignment_id: int id: int weight: int} 
+     * @param {obj} event 
+     * @param {string} type 
+     * @param {int} grader_id 
+     */
+    function handleUpdate(event, type, grader_id){
+        let oldGraderEditObject = graderEditObject;
+        let found = oldGraderEditObject.some(graders=> graders.id == grader_id)
+        if(found){
+            let index = oldGraderEditObject.findIndex(gradersArray => gradersArray.id == grader_id);
+            oldGraderEditObject[index][type]=parseInt(event.target.value)
+        }else{
+            let new_grader = {id:grader_id};
+            new_grader[type]=parseInt(event.target.value);
+            new_grader['assignment_id']=currentDropdown.current;
+            oldGraderEditObject.push(new_grader);
         }
+        setGraderEditObject([...oldGraderEditObject]);
+    }
+
+    /**
+     * Sends the grader object to the backend to be be updated in the database 
+     */
+    const updateGraderDetails = useRequest({
+        manual:true,
+        url:`${process.env.REACT_APP_BASE_URL}/update-grader-info`,
+        method:'post',
+        headers: { 'Content-Type': 'application/json' },
+        body:JSON.stringify(graderEditObject)
     }, {
         manual: true,
-        onSuccess: (results, params) => {
-            const assignmentID = params[0];
-            gradedSubmissions[assignmentID] = new Set();
-            results.filter(submission=>submission.score).forEach(submission=>gradedSubmissions[assignmentID].add(submission.id.toString()));
-            setGradedSubmissions(gradedSubmissions);
-            fetchAssignedSubmissions.run(`/get-assigned-submissions-for-graders?assignment_id=${assignmentID}`, params[0]);
+        onSuccess: (result, params)=>{
+            fetchGradersData.run(currentDropdown.current)
+            setGraderEditObject([])
+            alert.success('Updated changes');
         },
         onError: (error, params) => {
-           alert.error("Something went wrong while fetching graders' progress, please try refreshing the page.")
-        }
-    })
-
-    const fetchAssignedSubmissions = useRequest( (url, assignmentID) => url, {
-        manual: true,
-        onSuccess: (results, params) => {
-            const assignmentID = params[1];
-            let updatedGraders = {...graders}
-            Object.keys(graders).forEach(grader=>{
-                if(results[grader]){
-                    let graded = results[grader].filter(submission=>gradedSubmissions[assignmentID].has(submission));
-                    updatedGraders[grader][assignmentID] = {"progress": Math.round(graded.length/results[grader].length*100), "total_assigned": results[grader].length}
-                }
-            })
-            setGraders(updatedGraders);
+            alert.error('Something went wrong while fetching graders, please try refreshing the page.');
         },
-        onError: (error, params) => {
-            alert.error("Something went wrong while fetching graders' progress, please try refreshing the page.");
-        }
-    })
-
-    const updateGradersData = (grader_id, field, val) => {
-        if(val!=""){
-            setGradersData({...gradersData, [grader_id]: {...gradersData[grader_id], [field]: parseInt(val)}})
-        } else {
-            setGradersData({...gradersData, [grader_id]: {...gradersData[grader_id], [field]:""}})
-        }
-    };
+        initialData: []
+    });
 
     /**
-     * Update the db with weights and offsets for users
+     * Sets current selected assignment and repulls updates from DB
+     * @param {*} event 
      */
-    const submitData = useRequest(url => url, {
-        manual: true,
-        onSuccess: (result, params) => {
-            alert.success('Weights and offsets updated successfully');
-            setChanged(false);
-            setGradersData({});
-        },
-        onError: (error, params) => {
-            alert.error('Something went wrong while submitting changes, please try resubmitting.');
+    function handleDropdown(event){
+        fetchGradersData.run(event.target.value)
+        currentDropdown.current=event.target.value
+    }
 
-        }
-    });
-
-    /* need routes for submitting weights */     
-    const submit = () =>{
-        let finalData = Object.keys(gradersData)
-        .reduce((data, grader_id)=>{
-            if(gradersData[grader_id].weight && gradersData[grader_id].weight==""){
-                delete gradersData[grader_id].weight;
-            }
-            if(gradersData[grader_id].offset && gradersData[grader_id].offset==""){
-                delete gradersData[grader_id].offset;
-            }
-            if(gradersData[grader_id].cap && gradersData[grader_id].cap==""){
-                console.log("asdfasdf");
-                delete gradersData[grader_id].cap;
-            }
-            if(gradersData[grader_id].weight || gradersData[grader_id].offset || gradersData[grader_id].cap){
-                data.push({"id": grader_id, ...gradersData[grader_id]});
-            }
-            return data;
-        }, [])
-        console.log(finalData);
-        if(finalData.length > 0){
-            submitData.run({
-                url: `${process.env.REACT_APP_BASE_URL}/update-graders-data`,
-                method: 'post',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(finalData),
-            })
-        } else {
-            setGradersData({});
-            alert.show("No changes detected");
-        }
-    };
-
-
-    /**
-     * This method runs the distribute algo 
-     */
-     function handleDistributeBtn(){
-         console.log(gradersData)
-     }
-
-     /**
-      * Calls the distribution pipline
-      */
-     const updateDistribution = useRequest(url => url, {
-        manual: true,
-        onSuccess: (result, params) => {
-        },
-        onError: (error, params) => {
-            alert.error('Something went wrong while updating the disturbaion, please contact admin');
-
-        }
-    });
-
-     /**
-     * Update caps 
-     */
-    const updateCaps = useRequest(url => url, {
-        manual: true,
-        onSuccess: (result, params) => {
-            alert.success('Weights and offsets updated successfully');
-            updateDistribution.run({
-                url: `${process.env.REACT_APP_BASE_URL}/distribute`,
-                method: 'post',
-                headers: { 'Content-Type': 'application/json' },
-                body:JSON.stringify({
-                    "assignment_id": assignment_id
-                })
-            })
-        },
-        onError: (error, params) => {
-            alert.error('Something went wrong while distributing assignments');
-
-        }
-    });
-     
-     /**
-      * This method updates the cap in the database and runs the pipe line to refect the changes
-      */
-     function handleCapChange(event){
-         let grader_id = event.target.getAttribute('data-grader-id')
-         let grader_cap = event.target.value
-         console.log(assignment_id)
-         console.log(grader_id)
-         updateCaps.run({
-            url: `${process.env.REACT_APP_BASE_URL}/update-gradercap`,
-            method: 'post',
-            headers: { 'Content-Type': 'application/json' },
-            body:JSON.stringify({
-                "cap": grader_cap,
-                "grader_id": grader_id,
-                "assignment_id": assignment_id
-            }), 
-        })
-
-         
-     }
-
-
-    useEffect(()=>{
-        fetchAssignments.run(`${process.env.REACT_APP_BASE_URL}/get-published-assignments`);
-        fetchGradersData.run();
-    },[]);
-
-    useEffect(()=>{
-        if(assignment_id && !gradedSubmissions[assignment_id]){
-            fetchSubmissions.run(assignment_id);
-        }
-    }, [assignment_id])
-
-    if(fetchAssignments.loading) return <LoadingIcon />;
+    if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList | updateCapsTable) return <LoadingIcon />;
 
     return (
         <div className="container">
-            {submitData.loading | fetchAssignedSubmissions.loading | fetchSubmissions.loading?<LoadingIcon/>:null}
             <Table bordered hover  id="dashboardTable">
                 <thead>
                     <tr>
@@ -258,39 +120,46 @@ export default function Dashboard(){
                         <th>Weights</th>
                         <th>Offsets</th>
                         <th>Cap</th>
-                        <th>Total Assigned</th>
+                        <th>Assigned</th>
                         <th>
-                            <select id="selectAssignments" onChange={event=>setAssignmentID(event.target.value)}>
-                                {assignments.map(assignment=><option value={assignment.id} key={assignment.id}>Progress for {assignment.name}</option>)}
-                            </select>
+                        <select id="selectAssignments" value={currentDropdown.current} onChange={event=>handleDropdown(event)}>
+                            {
+                            fetchAssignmentsList.data.map(assignment=>
+                            <option value={assignment.id} key={assignment.id}>Progress for {assignment.name}</option>)
+                            }
+                        </select>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    {fetchGradersData?.data?.map(grader=>
-                        <tr key={grader?.id}>
+                    {fetchGradersData.data.map(grader=>
+                        <tr key={grader.id}>
                             <td>{grader?.name}</td>
-                            <td className="width-10"><FormControl defaultValue={grader?.weight} placeholder="Enter" type="number" min="0" pattern="[0-9]*" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "weight", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
-                            <td className="width-10"><FormControl defaultValue={grader?.offset} placeholder="Enter" type="number" id={grader?.id} onChange={event=>{if(event.target.validity.valid){updateGradersData(grader.id, "offset", event.target.value.trim())}; setChanged(true)}}></FormControl></td>
                             <td className="width-10">
-                                <FormControl placeholder="None" data-grader-id={grader?.id} type="number"  onChange={event=>{updateGradersData(grader.id, "cap", event.target.value.trim()); handleCapChange(event)}} />
+                                <FormControl defaultValue={grader.weight} 
+                                onChange={event=>handleUpdate(event, "weight", grader.id)}
+                                placeholder="Enter" type="number" min="0" pattern="[0-9]*"/>
                             </td>
                             <td className="width-10">
-                                {graders[grader?.id][assignment_id]?graders[grader?.id][assignment_id]["total_assigned"]:0}
+                                <FormControl defaultValue={grader.offset} 
+                                onChange={event=>handleUpdate(event, "offset", grader.id)}
+                                placeholder="Enter" type="number"/></td>
+                            <td className="width-10">
+                                <FormControl defaultValue={grader.cap} 
+                                onChange={event=>handleUpdate(event, "cap", grader.id)}
+                                placeholder="None"  type="number" min="0" pattern="[0-9]*" />
+                            </td>
+                            <td className="width-10">
+                                {grader.total_assigned_for_assignment}
                             </td>
                             <td>
-                                {graders[grader?.id][assignment_id]?
-                                <ProgressBar now={graders[grader?.id][assignment_id]["progress"]} label={`${graders[grader?.id][assignment_id]["progress"]}%`} />
-                                :<p>No assigned submissions yet</p>}
+
                             </td>
                         </tr>)
                     }
                 </tbody>
             </Table>
-            <Button onClick={submit} className={changed?'visible':'invisible'}>Save</Button>
-
-            <hr/>
-            <Button onClick={handleDistributeBtn}>Distribute</Button>            
+                {graderEditObject.length? <Button onClick={updateGraderDetails.run}>Update</Button>: <></>}           
         </div>
     );
 }

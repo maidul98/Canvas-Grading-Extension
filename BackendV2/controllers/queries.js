@@ -73,16 +73,18 @@ async function detect_conflicts(graderArray, assignment_id) {
 
 //should be returning a 1D array of submisions IDs that are not graded by graderID for that specific assignment_id
 function get_surplus_submissions(graderID, surplus, assignment_id) {
-  return new Promise(function(resolve, reject){
+  return new Promise(function (resolve, reject) {
     let query = `SELECT * FROM submission WHERE grader_id =? AND assignment_id =? AND is_graded =? ORDER BY id`; // get submissions for this grader
     let surplusArr = []
     let data = [graderID, assignment_id, 0]
 
     pool.query(query, data, async function (error, results) {
-      if (error){reject(error)}
+      if (error) { reject(error) }
 
       if (results.length < surplus) reject(new Error("The number of ungraded assignments is less than the workload reduction."))
-      for (let i = 0; i < surplus; i++) { 
+      
+      // TO DO: max user connection error here
+      for (let i = 0; i < surplus; i++) {
         console.log(results[i])
         surplusArr.push(results[i].id)
         await set_surplus_submissions(graderID, results[i].id, assignment_id)
@@ -117,38 +119,38 @@ async function handle_conflicts(graderID, surplus, assignment_id) {
   return submissionArr
 }
 
-async function runPipeline(req, res) {
-  try{
+function runPipeline(assignment_id) {
+  return new Promise(async function (resolve, reject) {
+    try {
+      await pull_submissions_from_canvas(assignment_id)
+      let grader_array = await get_grader_objects(assignment_id);
+      console.log("first print: ")
+      console.log(grader_array)
+      let submission_json = await get_unassigned_submissions(assignment_id);
+      let mapped = submission_json.map(v => v.id);
 
-    await pull_submissions_from_canvas(req.body.assignment_id)
+      let conflicts = await detect_conflicts(grader_array, assignment_id);
+      mapped = mapped.concat(conflicts.submissionsArray);
+      assignmentsLeft = mapped.length > 0 ? true : false;
 
-    let grader_array = await get_grader_objects(req.body.assignment_id);
-    let submission_json = await get_unassigned_submissions(req.body.assignment_id);
-    let mapped = submission_json.map(v => v.id);
-  
-    let conflicts = await detect_conflicts(grader_array, req.body.assignment_id);
-    mapped = mapped.concat(conflicts.submissionsArray);
-    assignmentsLeft = mapped.length > 0 ? true : false;
-    
-    if (assignmentsLeft) {
-      let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
-      let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
+      if (assignmentsLeft) {
+        let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
+        let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
 
-      await update_grader_entries(graders_assigned) //update offsets of graders in DB with output_of_algo
+        await update_grader_entries(graders_assigned) //update offsets of graders in DB with output_of_algo
 
-      await assign_submissions_to_grader(matrix_of_pairs) //updates submissions and graders in DB with matrix_of_pairs
+        await assign_submissions_to_grader(matrix_of_pairs) //updates submissions and graders in DB with matrix_of_pairs
 
-      await update_total_assigned(graders_assigned, req.body.assignment_id) //update num_assigned of graders in DB with output_of_algo
+        await update_total_assigned(graders_assigned, assignment_id) //update num_assigned of graders in DB with output_of_algo
 
-      res.send("Successfully distributed (or re-distributed) assignments.")
-    }else{
-      res.send("There are currently no assignments to distribute or re-distribute.")
+        resolve("Successfully distributed (or re-distributed) assignments.")
+      } else {
+        resolve("There are currently no assignments to distribute or re-distribute.")
+      }
+    } catch (error) {
+      reject("Something went wrong with run pipeline")
     }
-  }catch(error){
-    //rewind changes in DB
-    res.staus(403).send("Something went wrong")
-  }
-
+  })
 }
 
 
@@ -163,10 +165,10 @@ async function runPipeline(req, res) {
    * @returns A new Promise object
    */
 function get_grader_objects(assignment_id) {
-  return new Promise(function(resolve, reject){
+  return new Promise(function (resolve, reject) {
     let query = "SELECT grader.id, assignments_cap.cap, grader.offset, assignments_cap.total_assigned_for_assignment, grader.weight FROM grader INNER JOIN assignments_cap ON grader.id=assignments_cap.grader_id WHERE assignments_cap.assignment_id = ?"
-    pool.query(query, [assignment_id], function(error, results){
-      if (error){reject(error)}
+    pool.query(query, [assignment_id], function (error, results) {
+      if (error) { reject(error) }
       grader_array = []
       results.forEach(grader => {
         let id = grader.id
@@ -223,10 +225,7 @@ function get_unassigned_submissions(assignment_id) {
         }
       })
     });
-
-
   })
-
 }
 
 function update_multiple_graders_data_route(req, res) {
@@ -236,6 +235,7 @@ function update_multiple_graders_data_route(req, res) {
         status: "fail",
         message: "Something went wrong"
       });
+      console.log(err)
     } else {
       res.send("success");
     }
@@ -251,7 +251,9 @@ function update_multiple_graders_data(graders_arr, callback) {
   let queries = "";
   graders_arr.forEach(grader => {
     let { id, ...data } = grader;
-    queries += mysql.format("UPDATE grader SET ? WHERE id = ?; ", [data, id]);
+    console.log(grader)
+    console.log(id)
+    queries += mysql.format("UPDATE grader SET ? WHERE id = ?;", [data, id]);
   });
   pool.query(queries, callback);
 }
@@ -307,6 +309,29 @@ function update_grader_weight(req, res) {
   );
 }
 
+
+
+
+//START OF UPDATING ASSIGNMENTS CAP FUNCTIONALITY 
+
+
+
+async function get_graders() {
+  return new Promise((resolve, reject) => {
+    let query = "SELECT * FROM grader";
+    pool.query(query, (err, results) => {
+      if (err) {
+        return reject(err)
+      } else {
+        return resolve(results)
+      }
+    })
+  })
+}
+
+
+
+
 /**
  * @param {*} assignment_id
  * Returns the assigned submissions for every grader for an assignment:
@@ -351,62 +376,6 @@ function get_assigned_submission_for_assigment(req, res) {
   );
 }
 
-/**
-* This function gets the grading progress for each grader given assignment_id
-* @param {*} assigment_id
-*/
-function get_grading_progress_for_every_grader(req, res) {
-  let sql_query = "SELECT submission.id, grader_id, assignment_id, is_graded, offset, weight, total_graded FROM submission JOIN grader ON submission.grader_id = grader.id WHERE assignment_id=? AND grader_id IS NOT NULL";
-  pool.query(sql_query, [req.query.assigment_id], (err, results) => {
-    if (err) {
-      res.status(406).send({
-        status: "fail",
-        message: "Something went wrong"
-      });
-    } else {
-      let graders = {};
-      let progress = [];
-      results.forEach((submission) => {
-        if (!(submission.grader_id in graders)) {
-          graders[submission.grader_id] = [submission.weight, submission.offset];
-        }
-      });
-      Object.keys(graders).forEach((grader) => {
-        let grader_total = 0;
-        let grader_completed = 0;
-        results.forEach((submission) => {
-          if (submission.grader_id == grader) {
-            grader_total += 1;
-            if (submission.is_graded == 1) {
-              grader_completed += 1;
-            }
-          }
-        })
-        progress.push({ "grader": grader[0], "global": { "weight": graders[grader][0], "offset": graders[grader][1] }, "progress": { "total": grader_total, "completed": grader_completed } })
-      })
-      res.json(progress);
-    }
-  });
-}
-
-
-/**
- * Get weights, net_id, and offset for all graders
- * @param {*} req 
- * @param {*} res 
- */
-function get_grader_info(req, res) {
-  let sql_query = "SELECT * FROM grader";
-  pool.query(sql_query, [req.query.assigment_id], (err, results) => {
-
-    if (err) {
-      console.log("err");
-    } else {
-      res.json(results);
-    }
-  }
-  );
-}
 
 /**
 * This function gets the grading progress for each grader given assignment_id
@@ -450,14 +419,14 @@ function get_grading_progress_for_every_grader(req, res) {
 //TOOD: Refactor the 3 functions into one function. 
 
 function update_total_assigned(grader_array, assignment_id) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.getConnection(function (err, connection) {
-      if (err) {reject(err)}
+      if (err) { reject(err) }
       async.forEachOf(grader_array, function (grader) {
         let query = "UPDATE assignments_cap SET total_assigned_for_assignment=? WHERE grader_id=? AND assignment_id=?"
         let data = [grader.num_assigned, grader.grader_id, assignment_id]
         connection.query(query, data, (err, results) => {
-          if (err) {reject(err)}
+          if (err) { reject(err) }
         });
       })
       connection.release();
@@ -468,31 +437,31 @@ function update_total_assigned(grader_array, assignment_id) {
 
 
 function update_grader_entries(grader_array) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.getConnection(function (err, connection) {
-        if (err) {reject(err)}
-        async.forEachOf(grader_array, function (grader) {
-          let query = "UPDATE grader SET offset=? WHERE id=?"
-          let data = [grader.offset, grader.grader_id]
-          connection.query(query, data, (err, results) => {
-            if (err) {reject(err)}
-          });
+      if (err) { reject(err) }
+      async.forEachOf(grader_array, function (grader) {
+        let query = "UPDATE grader SET offset=? WHERE id=?"
+        let data = [grader.offset, grader.grader_id]
+        connection.query(query, data, (err, results) => {
+          if (err) { reject(err) }
         });
-        connection.release();
-        resolve();
       });
+      connection.release();
+      resolve();
+    });
   });
 }
 
 function assign_submissions_to_grader(assignment_matrix) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.getConnection(function (err, connection) {
       if (err) reject(err);
       async.forEachOf(assignment_matrix, function (pairing) {
         let query = "UPDATE submission SET grader_id = ? WHERE id = ?"
         let data = [pairing[0], pairing[1]]
         connection.query(query, data, (err, results) => {
-          if(err){
+          if (err) {
             reject(err)
           }
         })
@@ -523,8 +492,8 @@ async function insertAllSubmission(json_string) {
 }
 
 
-function pull_submissions_from_canvas (assignment_id) {
-  return new Promise(async function(resolve, reject){
+function pull_submissions_from_canvas(assignment_id) {
+  return new Promise(async function (resolve, reject) {
     const config = {
       //TODO: Factor out bearer tokens into another file that isn't publicly accessible.
       headers: {
@@ -546,7 +515,7 @@ function pull_submissions_from_canvas (assignment_id) {
           name: element.user.name,
           user_id: element.user.id
         };
-  
+
         if (element.group.id !== null && !visitedGroups.has(element.group.id)) {
           visitedGroups.add(element.group.id);
           dbJSON.push(json);
@@ -555,9 +524,6 @@ function pull_submissions_from_canvas (assignment_id) {
         }
       }
     });
-    
-    // insertAllSubmission(dbJSON);
-  
     pool.getConnection(function (err, connection) {
       if (err) throw reject(err);
       dbJSON.forEach(e => {
@@ -577,17 +543,6 @@ function pull_submissions_from_canvas (assignment_id) {
     })
   })
 };
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -650,9 +605,11 @@ function get_assignment_cap(assignment_id) {
 
 async function run_distribution_pipeline(req, res) {
   try {
-    await runPipeline(req, res)
-    // res.send()
+    await runPipeline(req.body.assignment_id)
+    res.send()
   } catch (error) {
+    console.log("error")
+    console.log(error)
     res.status(404)
   }
 }
@@ -668,8 +625,6 @@ module.exports = {
   insertAllGraders: insertAllGraders,
 
   insertAllSubmission: insertAllSubmission,
-
-  get_grader_info: get_grader_info,
 
   get_unassigned_submissions: get_unassigned_submissions,
 
@@ -703,9 +658,12 @@ module.exports = {
 
   run_distribution_pipeline: run_distribution_pipeline,
 
-  get_grader_info: get_grader_info,
-
   update_caps: update_caps,
 
   handle_conflicts: handle_conflicts,
+
+  runPipeline: runPipeline,
+
+  // get_existing_assignments: get_existing_assignments,
+
 }

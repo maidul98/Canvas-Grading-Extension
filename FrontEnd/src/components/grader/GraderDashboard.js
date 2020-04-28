@@ -10,10 +10,11 @@ export default function AssignmentList(props) {
     const [assignments, setAssignments] = useState([]);
     const [bulk_edit, setBulk_edit]     = useState(false);
     const [current_assignment_id, setCurrent_assignment_id] = useState(0);
-    const [showControls, setShowControls] = useState(false)
+    const [showControls, setShowControls] = useState(false);
+    const [downloadGraderIds, setDownloadGraderIds] = useState({});
 
     /**
-     * 
+     * Get the list of assignments from Canvas  
      */
     const fetchAssignments = useRequest(url => url, {
         manual: true,
@@ -38,13 +39,13 @@ export default function AssignmentList(props) {
             responseType: 'arraybuffer', 
             headers: {
               'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ "assignment_id":93965, "user_ids": [59709, 59714, 22778], "grader_id": 1 }) // body data type must match "Content-Type" header
+            }, 
+            body: JSON.stringify(downloadGraderIds)
         })
     },{
         manual: true,
         onSuccess: async (response, params) => {
-            let zip = await response.blob()
+            let zip = await response.blob();
             FileSaver.saveAs(zip, "Submissions.zip");
         },
     });
@@ -85,7 +86,13 @@ export default function AssignmentList(props) {
                     </select>
                 </div>
                 <div className="assignments-container">
-                    <Submissions key={current_assignment_id} assignment_id={current_assignment_id} bulk_edit={bulk_edit} showControls={setShowControls}/>
+                    <Submissions
+                    setDownloadGraderIds={setDownloadGraderIds} 
+                    key={current_assignment_id} 
+                    assignment_id={current_assignment_id}
+                    bulk_edit={bulk_edit} 
+                    showControls={setShowControls}
+                    />
                 </div>
             </div>
         </div>
