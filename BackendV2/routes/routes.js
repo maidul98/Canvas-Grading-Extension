@@ -93,7 +93,7 @@ router.post('/test_handle', async (req, res) => {
     res.send("succesful yay")
 })
 
-router.post('/update_insert_caps_table', queries.update_assignments_cap_table)
+router.post('/runUpdate', queries.runUpdate)
 
 //Params: assignment_id, [user_ids]
 router.post('/update-gradercap', queries.update_caps)

@@ -223,10 +223,7 @@ function get_unassigned_submissions(assignment_id) {
         }
       })
     });
-
-
   })
-
 }
 
 function update_multiple_graders_data_route(req, res) {
@@ -313,87 +310,119 @@ function update_grader_weight(req, res) {
 
 
 
+//START OF UPDATING ASSIGNMENTS CAP FUNCTIONALITY 
 
-/**
- * updates assignments cap table for all new published assignments for all graders
- * @param {*} req 
- * @param {*} res 
- */
-async function update_assignments_cap_table() {
-
-  let assignment_ids = [109377, 109378, 109379]
-
-  const check_assignment_exists = assignment_id => {
-    return new Promise((resolve, reject) => {
-      let sql_query = "SELECT * FROM assignments_cap WHERE assignment_id =?"
-      pool.getConnection(function (err, connection) {
-        if (err) reject(err);
-        connection.query(sql_query, [assignment_id], (err, response) => {
-          if (err) return reject(err);
-          return resolve((response.length !== 0))
-        })
+async function insert_into_assignments_cap(assignment_id, grader_id) {
+  return new Promise((resolve, reject) => {
+    let query = `INSERT INTO assignments_cap SET total_assigned_for_assignment=0, cap=100, grader_id=${grader_id}, assignment_id=${assignment_id}`;
+    pool.getConnection(function (err, connection) {
+      if (err) return reject(err)
+      connection.query(query, (err) => {
         connection.release();
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve()
+        }
       })
-    })
-  }
-
-
-
-  const insert_into_assignments_cap = (assignment_id, grader_id) => {
-    return new Promise((resolve, reject) => {
-      console.log("HELOOO: " + grader_id, assignment_id)
-      let sql_query = "INSERT INTO assignments_cap SET total_assigned_for_assignment=?, cap=?, grader_id=?, assignment_id=?"
-      pool.getConnection(function (err, connection) {
-        if (err) return reject(err)
-        connection.query(sql_query, [0, 100, grader_id, assignment_id], (err) => {
-          if (err) return reject(err)
-          return resolve();
-        })
-        connection.release();
-      });
-    })
-    /*
-    .then((state) => {
-      assert(state.action === 'DONE', 'should change state');
-    })
-    .catch((error) => {
-      assert.isNotOk(error, 'Promise error');
     });
-  */
-  }
-
-  const get_graders = () => {
-    return new Promise((resolve, reject) => {
-      let query = "SELECT * FROM grader";
-      pool.getConnection(function (err, connection) {
-        if (err) reject(err);
-        connection.query(query, (err, results) => {
-          if (err) return reject(err);
-          return resolve(results)
-        })
-        connection.release();
-      });
-    })
-  }
-
-  assignment_ids = assignment_ids.filter(async assignmentId => {
-    let exists = await check_assignment_exists(assignmentId)
-    console.log("val: " + (exists))
-    return !exists
   })
-
-  let graders = await get_graders()
-  graders = graders.map(grader => grader.id)
-  console.log("graders: ")
-  console.log(graders)
-
-  assignment_ids.forEach(assignment_id => {
-    async.forEachOf(async grader_id => {
-      await insert_into_assignments_cap(assignment_id, grader_id)
-    })
-  })
-
 }
+
+
+async function get_graders() {
+  return new Promise((resolve, reject) => {
+    let query = "SELECT * FROM grader";
+    pool.getConnection(function (err, connection) {
+      if (err) return reject(err);
+      connection.query(query, (err, results) => {
+        connection.release();
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve(results)
+        }
+      })
+    });
+  })
+}
+
+async function get_existing_assignments(grader_id) {
+  return new Promise((resolve, reject) => {
+    let query = `SELECT * FROM assignments_cap WHERE grader_id = ${grader_id}`;
+    pool.getConnection(function (err, connection) {
+      if (err) return reject(err);
+      connection.query(query, (err, results) => {
+        connection.release();
+        if (err) {
+          return reject(err)
+        } else {
+          results = results.map(result => result.assignment_id)
+          return resolve(results)
+        }
+      })
+    });
+  })
+}
+
+
+
+
+async function update_assignments_cap_table(req, res) {
+  try {
+    await runUpdate(req.body.assignment_id) //UPDATE --> SHOULD PASS IN AN ARRAY OF ASSIGNMENT IDs
+    res.send()
+  } catch (error) {
+    console.log("error")
+    console.log(error)
+    res.status(404)
+  }
+}
+
+
+
+async function runUpdate(/*assignment_ids*/) {
+
+  let assignment_ids = [1, 2, 3, 4, 56, 7634, 81, 2002, 100, 92, 109377, 109378, 25611, 2562, 82, 82, 97653];
+
+  return new Promise(async function (resolve, reject) {
+    try {
+      let graders = await get_graders();
+      graders = graders.map(grader => grader.id);
+
+      console.log("check 1")
+      console.log(graders)
+
+      let existing_assignmentIDs = []
+
+      if (graders.length !== 0)
+        existing_assignmentIDs = await get_existing_assignments(graders[0]);
+
+      console.log("check 2")
+      console.log(existing_assignmentIDs)
+
+      assignment_ids = assignment_ids.filter(assignment => !existing_assignmentIDs.includes(assignment))
+
+      console.log("check 3")
+      console.log(assignment_ids)
+
+      assignment_ids.forEach(assignment_id => {
+        graders.forEach(async grader_id => {
+          console.log("assignmen id: " + assignment_id + "  grader: " + grader_id)
+          await insert_into_assignments_cap(assignment_id, grader_id)
+        })
+      });
+
+      console.log("ENDDD")
+      resolve("Successfully updated the assignments_cap table.")
+
+    } catch (error) {
+      reject("Something went wrong with updating the assignments_cap table")
+    }
+  })
+}
+
+//END OF UPDATING ASSIGNMENT CAPS FUNCTIONALITY
 
 
 
@@ -740,5 +769,10 @@ module.exports = {
 
   update_assignments_cap_table: update_assignments_cap_table,
 
-  runPipeline: runPipeline
+  runPipeline: runPipeline,
+
+  get_existing_assignments: get_existing_assignments,
+
+  runUpdate: runUpdate
+
 }
