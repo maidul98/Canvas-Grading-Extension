@@ -61,7 +61,7 @@ exports.download_single_submission = function (req, res) {
 
 exports.get_published_assignments = function (_, res) {
   axios
-    .get('https://canvas.cornell.edu/api/v1/courses/15037/assignments', config)
+    .get('https://canvas.cornell.edu/api/v1/courses/15037/assignments?per_page=20', config)
     .then(result => {
       const assignmentJSONArray = result.data;
       const filtered = assignmentJSONArray.filter(assignment => assignment.published);
