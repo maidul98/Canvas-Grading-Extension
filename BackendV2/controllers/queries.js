@@ -82,6 +82,8 @@ function get_surplus_submissions(graderID, surplus, assignment_id) {
       if (error) { reject(error) }
 
       if (results.length < surplus) reject(new Error("The number of ungraded assignments is less than the workload reduction."))
+      
+      // TO DO: max user connection error here
       for (let i = 0; i < surplus; i++) {
         console.log(results[i])
         surplusArr.push(results[i].id)
