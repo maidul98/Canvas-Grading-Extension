@@ -350,6 +350,23 @@ function get_assigned_submission_for_assigment(req, res) {
   );
 }
 
+function set_assignments_as_graded(submission_ids) {
+  return new Promise((resolve, reject) => {
+    queries = []
+    submission_ids.forEach(id => {
+      queries.push(`UPDATE submission SET is_graded = 1 where id = ${id}`)
+    })
+
+    pool.getConnection(function (err, connection) {
+      if (err) return reject(err)
+      connection.query(queries.join(';'), (con_err) => {
+        if (con_err) return reject(con_err)
+        connection.release()
+        return resolve()
+      })
+    })
+  })
+}
 
 /**
 * This function gets the grading progress for each grader given assignment_id
@@ -612,6 +629,8 @@ module.exports = {
   get_assigned_submissions_for_graders: get_assigned_submissions_for_graders,
 
   get_surplus_submissions: get_surplus_submissions,
+
+  set_assignments_as_graded,
 
   set_surplus_submissions: set_surplus_submissions,
 

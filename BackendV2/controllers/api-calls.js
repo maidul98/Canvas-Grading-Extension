@@ -78,7 +78,7 @@ exports.get_submissions_for_assignment = function (req, res) {
   // res.status(400);
   // res.send('None shall pass');
   axios
-    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions?include[]=group&include[]=submission_comments`, config)
+    .get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.query.assignment_id}/submissions?include[]=group&include[]=submission_comments`, config)
     .then(result => {
       const submissionsJSONArray = result.data;
       res.json(submissionsJSONArray);
@@ -136,13 +136,19 @@ exports.get_all_graders = function (_, res) {
 /**
  * 
  */
-exports.grade_single_submission = function (req, res) {
+exports.grade_single_submission = async function (req, res) {
 
   let formData = {
     'comment[text_comment]': req.body.comment,
     'comment[group_comment]': req.body.is_group_comment,
     'submission[posted_grade]': req.body.assigned_grade
   };
+
+  try {
+    await queries.set_assignments_as_graded([req.params.user_id])
+  } catch (error) {
+    res.status(406).send(error.message)
+  }
 
   axios
     .put(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/${req.params.user_id}`, qs.stringify(formData), config)
@@ -171,14 +177,22 @@ exports.grade_single_submission = function (req, res) {
     }
   ]
  */
-exports.grade_batch_submissions = function (req, res) {
+exports.grade_batch_submissions = async function (req, res) {
   let formData = {};
+  let submission_ids = []
   req.body.forEach(j => {
     formData[`grade_data[${j.id}][text_comment]`] = j.comment;
     formData[`grade_data[${j.id}][group_comment]`] = j.is_group_comment;
     formData[`grade_data[${j.id}][posted_grade]`] = j.assigned_grade;
+    submission_ids.push(j.id)
   });
   // console.log(formData)
+
+  try {
+    await queries.set_assignments_as_graded(submission_ids)
+  } catch (err) {
+    res.status(406).send(error.message)
+  }
   //send grades to Canvas
   axios
     .post(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), config)
