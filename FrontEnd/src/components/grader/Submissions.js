@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import { useRequest } from '@umijs/hooks';
@@ -9,7 +9,7 @@ import BasicSubmissionView from './bulk_edit/BasicSubmissionView'
 export default function Submissions(props){
     const alert = useAlert();
     const gradesAndComments = useRef([]);
-    const gradeInput = useRef()
+    const gradeInput = useRef();
 
     /**
      * Get all of the submissions that are tasked for this grader from distribution algo 
@@ -22,15 +22,20 @@ export default function Submissions(props){
                 alert.show('You have no assigned submissions for this assignment yet')
                 props.showControls(false)
             }else{
-                //remove any older alerts
                 alert.removeAll()
-                //concurrently pull all submission for quick edit
-                result.map((submission) =>{
+                let user_ids = []
+                result.map((submission) =>{//concurrently pull all submission for quick edit
+                    user_ids.push(submission['user_id'])
                     singleSubmissionFetch.run(submission['user_id'], submission['name'])
-                })
-
+                });
+                let downloadObject = {
+                    "assignment_id":props.assignment_id,
+                    "user_ids": user_ids,
+                    "grader_id": 1 // will be dynmaic 
+                }
+                props.setDownloadGraderIds(downloadObject)
+                
                 props.showControls(true)
-
             }
         },
         onError: (error, params) => {
@@ -39,7 +44,7 @@ export default function Submissions(props){
     });
 
     /**
-     * Get grades and comments for quick edit 
+     * Get grades and comments for quick edit from canvas
      */
     const singleSubmissionFetch = useRequest( (user_id, net_id) => {
         return {

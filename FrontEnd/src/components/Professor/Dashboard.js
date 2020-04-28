@@ -11,6 +11,7 @@ export default function Dashboard(){
     const alert = useAlert();
     const [graderEditObject, setGraderEditObject] = useState([])
     const currentDropdown = useRef("");
+    const [assignment_id_list, setAssignment_id_list] = useState([])
 
     /**
      * Get the list of assignments from Canvas from which the user can drop down from 
@@ -18,14 +19,30 @@ export default function Dashboard(){
     const fetchAssignmentsList = useRequest(`${process.env.REACT_APP_BASE_URL}/get-published-assignments`, {
         onSuccess: (result, params)=>{
             if(result[0].id != undefined){
-                fetchGradersData.run(result[0].id)
-                currentDropdown.current = result[0].id
+                fetchGradersData.run(result[0].id);
+                currentDropdown.current = result[0].id;
             }
+            let assignment_id_list = result.map(assignment => assignment.id)
+            setAssignment_id_list(assignment_id_list)
+            updateCapsTable.run();
+            //if there are new assignments, add them to the caps table 
+            // updateCapsTable.run()
         },
         onError: (error, params) => {
             alert.error("Something went wrong while fetching assignments, please try refreshing the page");
         },
         initialData: []
+    });
+
+    /**
+     * 
+     */
+    const updateCapsTable = useRequest({
+        manual:false,
+        url:`${process.env.REACT_APP_BASE_URL}/check-for-new-assignments`,
+        method:'post',
+        headers: { 'Content-Type': 'application/json' },
+        body:JSON.stringify({"assignment_ids": assignment_id_list})
     });
 
     /**
@@ -92,7 +109,7 @@ export default function Dashboard(){
         currentDropdown.current=event.target.value
     }
 
-    if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList) return <LoadingIcon />;
+    if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList | updateCapsTable) return <LoadingIcon />;
 
     return (
         <div className="container">
