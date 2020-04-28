@@ -33,18 +33,16 @@ const axios = require('axios');
  * @param {int} grader_id - A unique id for a grader
  * @param {int} submission_id - An id for the submission
  */
-function assignGraderToSubmission(grader_id, submission_id) {
-  let query = "UPDATE submission SET grader_id = ? WHERE id = ?";
-  let data = [grader_id, submission_id]
+// function assignGraderToSubmission(grader_id, submission_id) {
+//   let query = "UPDATE submission SET grader_id = ? WHERE id = ?";
+//   let data = [grader_id, submission_id]
 
-  pool.getConnection(function (err, connection) {
-    if (err) throw err;
-    connection.query(query, data);
-    connection.release();
-  });
-
-
-};
+//   pool.getConnection(function (err, connection) {
+//     if (err) throw err;
+//     connection.query(query, data);
+//     connection.release();
+//   });
+// };
 
 //TESTED :D 
 async function detect_conflicts(graderArray, assignment_id) {
@@ -274,20 +272,19 @@ function update_single_grader_data(grader_id, grader_obj, callback) {
  * @param {object} req 
  * @param {object} res 
  */
-function update_caps(req, res) {
-  let sql_query = "UPDATE assignments_cap SET cap = ?  WHERE grader_id = ? AND assignment_id = ?";
-  pool.query(
-    sql_query, [req.body.cap, req.body.grader_id, req.body.assignment_id],
-    function (err, results) {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send()
-      }
-    }
-  )
-}
-
+// function update_caps(req, res) {
+//   let sql_query = "UPDATE assignments_cap SET cap = ?  WHERE grader_id = ? AND assignment_id = ?";
+//   pool.query(
+//     sql_query, [req.body.cap, req.body.grader_id, req.body.assignment_id],
+//     function (err, results) {
+//       if (err) {
+//         console.log(err);
+//       } else {
+//         res.send()
+//       }
+//     }
+//   )
+// }
 
 /**
    * This function takes in a grader_id and updates the weight for that grader
@@ -308,29 +305,6 @@ function update_grader_weight(req, res) {
   }
   );
 }
-
-
-
-
-//START OF UPDATING ASSIGNMENTS CAP FUNCTIONALITY 
-
-
-
-async function get_graders() {
-  return new Promise((resolve, reject) => {
-    let query = "SELECT * FROM grader";
-    pool.query(query, (err, results) => {
-      if (err) {
-        return reject(err)
-      } else {
-        return resolve(results)
-      }
-    })
-  })
-}
-
-
-
 
 /**
  * @param {*} assignment_id
@@ -574,6 +548,8 @@ function insertAllGraders(json_string) {
   })
 }
 
+// TODO: Evaluate need for this. We only ever update the assignments when new published assignments 
+// are released, and that is already dealt with
 function insert_assignment_cap(id, assigment_id, student_id, cap) {
   let sql_query = "INSERT INTO assignments_cap (id, assignment_id, student_id, cap) VALUES (? ? ? ?)"
   pool.query(sql_query, [id, assignment_id, student_id, cap], (err, _) => {
@@ -581,27 +557,26 @@ function insert_assignment_cap(id, assigment_id, student_id, cap) {
   })
 }
 
-function get_assignment_cap(assignment_id) {
-  return new Promise((resolve, reject) => {
-    let query = `SELECT * from assignments_cap WHERE assignment_id=${assignment_id}`;
+// Migrated
+// function get_assignment_cap(assignment_id) {
+//   return new Promise((resolve, reject) => {
+//     let query = `SELECT * from assignments_cap WHERE assignment_id=${assignment_id}`;
 
-    pool.getConnection(function (err, connection) {
-      if (err) throw err;
-      connection.query(query, (err, results) => {
-        if (err) {
-          console.log(err)
-          reject(err)
-        } else {
-          resolve(results)
-        }
-        connection.release();
-      })
-    });
+//     pool.getConnection(function (err, connection) {
+//       if (err) throw err;
+//       connection.query(query, (err, results) => {
+//         if (err) {
+//           console.log(err)
+//           reject(err)
+//         } else {
+//           resolve(results)
+//         }
+//         connection.release();
+//       })
+//     });
 
-  })
-}
-
-
+//   })
+// }
 
 async function run_distribution_pipeline(req, res) {
   try {
@@ -620,7 +595,7 @@ module.exports = {
 
   insert_assignment_cap: insert_assignment_cap,
 
-  get_assignment_cap: get_assignment_cap,
+  //get_assignment_cap: get_assignment_cap,
 
   insertAllGraders: insertAllGraders,
 
@@ -658,12 +633,9 @@ module.exports = {
 
   run_distribution_pipeline: run_distribution_pipeline,
 
-  update_caps: update_caps,
+  // update_caps: update_caps,
 
   handle_conflicts: handle_conflicts,
 
-  runPipeline: runPipeline,
-
-  // get_existing_assignments: get_existing_assignments,
-
+  runPipeline: runPipeline
 }

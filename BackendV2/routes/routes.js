@@ -95,12 +95,12 @@ router.post('/test_handle', async (req, res) => {
 
 router.post('/check-for-new-assignments', controllers.AssignmentsCapController.populateAssignmentsCapTable)
 
-//Params: assignment_id, [user_ids]
-router.post('/update-gradercap', queries.update_caps)
-
 //NEED TO UPDATEEEEEE!!!
-router.get('/get-assignment-cap', (req, res) => {
+router.get('/get-assignment-cap-test', (req, res) => {
     queries.get_assignment_cap(1234).then(response => res.send(response));
 });
+
+router.get('/get-assignment-cap', controllers.AssignmentsCapController.getAssignmentsCap)
+router.post('/update-assignment-cap', controllers.AssignmentsCapController.updateAssignmentCap)
 
 module.exports = router;
