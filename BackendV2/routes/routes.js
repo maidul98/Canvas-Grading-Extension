@@ -76,7 +76,7 @@ router.post('/update-grader-info', controllers.ProfessorDashboardController.upda
 router.get('/download-submission/assignments/:assignment_id/submissions/:user_id', apiCalls.download_single_submission);
 
 // router.put('/pull-submissions-and-update/:assignment_id', apiCalls.pull_submissions_and_update_for_assignment)
-
+router.get('/get-submissions-for-assignment', apiCalls.get_submissions_for_assignment)
 router.post('/canvas-api', apiCalls.GETcanvas_API_call);
 
 router.put('/canvas-api', apiCalls.PUTcanvas_API_call);
