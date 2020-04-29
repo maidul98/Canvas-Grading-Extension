@@ -81,7 +81,7 @@ function get_surplus_submissions(graderID, surplus, assignment_id) {
 
       let diff_in_graded_assignments = surplus - results.length;
       if (diff_in_graded_assignments > 0)
-        reject(new Error("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignments."))
+        return reject(new Error("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignments."))
 
       // TO DO: max user connection error here
       for (let i = 0; i < surplus; i++) {
@@ -89,13 +89,13 @@ function get_surplus_submissions(graderID, surplus, assignment_id) {
         surplusArr.push(results[i].id)
         await set_surplus_submissions(graderID, results[i].id, assignment_id)
       }
-      resolve(surplusArr)
+      return resolve(surplusArr)
     });
   })
 }
 
 function set_surplus_submissions(graderID, submission_id, assignment_id) {
-  return new Promise(resolve, reject =>{
+  return new Promise(function (resolve, reject) {
     let query = `UPDATE submission SET grader_id = NULL WHERE grader_id =? AND id =? AND assignment_id =?`
     let data = [graderID, submission_id, assignment_id]
     pool.query(function (err, connection) {
@@ -145,7 +145,7 @@ function runPipeline(assignment_id) {
         resolve("There are currently no assignments to distribute or re-distribute.")
       }
     } catch (error) {
-      reject("Something went wrong with run pipeline")
+      reject(error)
     }
   })
 }

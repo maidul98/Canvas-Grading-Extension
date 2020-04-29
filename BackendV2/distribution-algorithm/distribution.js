@@ -16,7 +16,7 @@ function shuffle(a) {
  * Precondition: The minimum offset among all graders must be less than or 
  * equal to 1000000. 
  * Normalizes offsets such that the least offset equals 0; and
- * grader.offset = relative number of assignments that grader [grader] is behind on.
+ * grader.offset = number of assignments that grader [grader] is behind on.
  * @param {Array} graderArray: 1D array of AssignmentGrader objects, which 
  * represent all of the graders. 
  */
@@ -267,6 +267,10 @@ function distribute(num_of_submissions, graderArray) {
             graderArray[randomArr[q]].incrementNumAssigned(1);
             graderArray[randomArr[q]].decrementOffset(1);
         }
+
+
+
+
 
         console.log("after everything is dist:")
         console.log(graderArray)
