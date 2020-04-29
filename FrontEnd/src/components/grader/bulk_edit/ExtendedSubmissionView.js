@@ -1,12 +1,11 @@
 import React from 'react';
 import CommentsModal from '../CommentsModal'
+import DownloadModal from '../DownloadModal'
 
 export default function ExtendedSubmissionView(props){
 
-    // console.log('pass')
     return(
         <div className="quick-edit-submission">
-            {/* {console.log(props.data?.user)} */}
             <div id="name-grade-container">
                 <div id="student_name">
                     {props.data?.user?.login_id}
@@ -32,7 +31,7 @@ export default function ExtendedSubmissionView(props){
             <div className="submission_actions">
                 <ul>
                     <li><CommentsModal comments={props.data?.submission_comments}/></li>
-                    <li><a href="#">View detailed submission</a></li>
+                    <li><DownloadModal attachments={props.data?.attachments}/></li>
                 </ul>
             </div> 
 

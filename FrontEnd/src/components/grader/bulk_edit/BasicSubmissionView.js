@@ -7,9 +7,9 @@ export default function BasicSubmissionView(props){
         <div className="assignment">
             <div className="student-name">
                 {props.data.loading? <Spinner animation="grow" />: <></>}
-                <Link to={"/assignments/"+props.data.data.assignment_id+'/'+props.data.data.user_id}>
+                {/* <Link to={"/assignments/"+props.data.data.assignment_id+'/'+props.data.data.user_id}> */}
                     {props.data.data?.user?.login_id}
-                </Link>
+                {/* </Link> */}
             </div>
             {props.data.data?.score === null | props.data.data?.score === undefined
             ?

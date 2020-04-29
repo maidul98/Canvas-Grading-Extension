@@ -22,11 +22,10 @@ export default function Dashboard(){
                 fetchGradersData.run(result[0].id);
                 currentDropdown.current = result[0].id;
             }
+            // If there are new assignments then add them to caps table
             let assignment_id_list = result.map(assignment => assignment.id)
             setAssignment_id_list(assignment_id_list)
             updateCapsTable.run();
-            //if there are new assignments, add them to the caps table 
-            // updateCapsTable.run()
         },
         onError: (error, params) => {
             alert.error("Something went wrong while fetching assignments, please try refreshing the page");
@@ -109,7 +108,7 @@ export default function Dashboard(){
         currentDropdown.current=event.target.value
     }
 
-    if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList | updateCapsTable) return <LoadingIcon />;
+    if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList.loading | updateCapsTable.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
@@ -159,7 +158,7 @@ export default function Dashboard(){
                     }
                 </tbody>
             </Table>
-                {graderEditObject.length? <Button onClick={updateGraderDetails.run}>Update</Button>: <></>}           
+                {<Button className="float-right" disabled={graderEditObject.length==0} onClick={updateGraderDetails.run}>Update</Button>}           
         </div>
     );
 }

@@ -540,6 +540,10 @@ ol.breadcrumb{
   padding-bottom: 10px;
 }
 
+.vir-center-download-img{
+  line-height: 60px;
+}
+
 #student_name{
   font-size: 1em;
   font-weight: 500;
