@@ -62,7 +62,30 @@ function formMatchingMatrix(grader_array, submissions_array) {
     return matrix;
 }
 
+/*
+TESTING the graders with weights = 0
+array = [
+    new AssignmentGrader(1, 0, 2, 0, 0, 1),
+    new AssignmentGrader(2, 0, 0, 0, 0, 100),
+    new AssignmentGrader(3, 1, 1, 0, 0, 100),
+    new AssignmentGrader(4, 1, 9, 0, 0, 0),
+    new AssignmentGrader(5, 1, 0, 0, 0, 100),
+    new AssignmentGrader(6, 1, 0, 0, 0, 100),
+    new AssignmentGrader(7, 1, 0, 0, 0, 100),
+    new AssignmentGrader(8, 2, 0, 0, 0, 100),
+    new AssignmentGrader(9, 2, 0, 0, 0, 100),
+    new AssignmentGrader(4),
+    new AssignmentGrader(5),
+    new AssignmentGrader(6)
+]
 
+
+console.log("\n\n")
+ans = main_distribute(9, array)
+console.log("\n\n\nFINAL\n");
+console.log(ans)
+
+* /
 
 /**
  * Main function that distributes the submissions for one particular assignment, 
@@ -82,8 +105,8 @@ function main_distribute(num_of_submissions, graderArray) {
     //only offset & num_assigned should be altered 
     graderArray = distribute(num_of_submissions, graderArray);
 
-    // console.log("\n");
-    // console.log(graderArray);
+    console.log("\n\n AFTER initial distribution");
+    console.log(graderArray);
 
 
     let left_to_distribute = 0;
@@ -100,6 +123,9 @@ function main_distribute(num_of_submissions, graderArray) {
         }
     }
 
+
+    graderArray = normalize_offset(graderArray);
+
     //sort graders in order of worst to best offsets 
     graderArray.sort(function (a, b) {
         if (b.offset === a.offset) return 0;
@@ -115,14 +141,28 @@ function main_distribute(num_of_submissions, graderArray) {
             if (left_to_distribute === 0) break;
             let grader = graderArray[i];
 
-            if (grader.num_assigned < grader.cap) {
+            if (grader.num_assigned < grader.cap && grader.weight > 0) {
 
                 grader.incrementNumAssigned(1);
                 grader.decrementOffset(1);
                 left_to_distribute--;
             }
         }
+    }
 
+    //compute the current minimum offset among all graders after re-distribution
+    let min_offset = 1000000;
+    for (let i = 0; i < graderArray.length; i++)
+        min_offset = Math.min(graderArray[i].offset, min_offset);
+
+    //adjusting offsets for all graders with weight = 0 
+    if (min_offset < 0) {
+        graderArray = normalize_offset(graderArray);
+        for (let i = 0; i < graderArray.length; i++) {
+            if (graderArray[i].weight < 1) {
+                graderArray[i].incrementOffset(min_offset);
+            }
+        }
     }
 
     for (let i = 0; i < graderArray.length; i++)
@@ -197,6 +237,11 @@ function distribute(num_of_submissions, graderArray) {
                 num_of_submissions--;
             }
         }
+
+        console.log("\n\n AFTER IF STATEMENT distribution");
+        console.log(graderArray);
+
+
     }
     else {
         /*In this case, assignments will be distirbuted according to offsets first, 
@@ -239,7 +284,6 @@ function distribute(num_of_submissions, graderArray) {
         console.log("num that still need to be distributed: " + leftAssign)
         //At this point in the program, all of the graders have an equal offset of 0.
 
-
         /*distribute remaining assignments evenly at first, if possible*/
         addedAssignments = Math.floor(leftAssign / graderArray.length);
         if (addedAssignments > 0) {
@@ -250,33 +294,39 @@ function distribute(num_of_submissions, graderArray) {
         leftAssign -= (addedAssignments * graderArray.length);
 
         /*randomly distribute [leftAssign] remaining assignments AND update offsets*/
+        //At this point in the program, all of the graders have an equal offset of 0.
 
-        //Random distribution: 
-        //An array is populated with numbers [0] to [graderArray.length-1] (represents graders).
-        //The array is shuffled once.
-        //The first [leftAssign] elements of the resulting array are chosen. 
+        shuffle(graderArray)
 
-        let randomArr = [];
-
-        for (var p = 0; p < graderArray.length; p++)
-            randomArr[p] = p;
-
-        shuffle(randomArr);
-
-        for (var q = 0; q < leftAssign; q++) {
-            graderArray[randomArr[q]].incrementNumAssigned(1);
-            graderArray[randomArr[q]].decrementOffset(1);
+        while (leftAssign !== 0) {
+            for (let i = 0; i < graderArray.length; i++) {
+                if (leftAssign === 0) break;
+                if (graderArray[i].weight > 0) {
+                    graderArray[i].incrementNumAssigned(1);
+                    graderArray[i].decrementOffset(1);
+                    leftAssign--;
+                }
+            }
         }
 
 
+        //All of the assignments have been distributed at this point. 
+        //All offsets are currently <= 0. 
 
+        //Any grader's offset (with weight = 0) should not be increased by any automated means: 
+        graderArray = normalize_offset(graderArray);
 
+        for (let i = 0; i < graderArray.length; i++) {
+            if (graderArray[i].weight < 1) {
+                graderArray[i].updateOffset(0);
+            }
+        }
 
         console.log("after everything is dist:")
         console.log(graderArray)
+        return graderArray;
 
     } //end of else statement
-
 
     return normalize_offset(graderArray);
 }
