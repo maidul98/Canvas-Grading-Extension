@@ -102,7 +102,7 @@ function deleteFile(path) {
     try {
         fs.unlink(path)
     } catch (e) {
-        
+
     }
 }
 
@@ -120,8 +120,14 @@ function computeTimeout(minutes) {
 module.exports.downloadSubmissions = async (req, res) => {
     try {
         let folder_name = `${req.body.assignment_id}-${req.body.grader_id}`
-        let bulkSubmissionsPath = `temp_bulk_downloads/assignemnt-${folder_name}`;
+        let bulkSubmissionsPath = `temp_bulk_downloads/assignment-${folder_name}`;
         let zip_file_path = `${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`
+        console.log(zip_file_path)
+        console.log(bulkSubmissionsPath)
+        if (!fs.existsSync('temp_bulk_downloads')) {
+            await mkdirp('temp_bulk_downloads')
+        }
+
         const timeout = computeTimeout(1) // 2 minutes for now
         if (fs.existsSync(zip_file_path)) {
             deleteFile(zip_file_path)
@@ -135,7 +141,7 @@ module.exports.downloadSubmissions = async (req, res) => {
                     deleteFolder(bulkSubmissionsPath)
                 }, timeout)
             });
-            
+
         } else {
             await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id)
             await zip(`${bulkSubmissionsPath}/`, zip_file_path);
