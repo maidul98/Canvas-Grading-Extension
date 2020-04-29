@@ -11,11 +11,20 @@ const distrbute = require("../controllers/queries");
 module.exports.grader_info = function (assignment_id) {
     return new Promise(function(resolve, reject){
         let sql_query = "SELECT grader.name, grader.id, assignments_cap.cap, grader.offset, assignments_cap.total_assigned_for_assignment, grader.weight FROM grader INNER JOIN assignments_cap ON grader.id=assignments_cap.grader_id WHERE assignments_cap.assignment_id = ?";
-        pool.query(sql_query, [assignment_id], (error, results) => {
+        pool.query(sql_query, [assignment_id], async (error, results) => {
           if (error) {
             reject(error)
           } else {
-            resolve(results);
+            let graderResponse = []
+            for (let i = 0; i < results.length; i++) {
+              let grader = results[i];
+              let tempGraderObj = grader;
+              let progressObj = await getNumGradedRatio(grader.id, assignment_id);
+              tempGraderObj['progress'] = progressObj.ratio;
+              tempGraderObj['num_graded'] = progressObj.num_graded;
+              graderResponse.push(tempGraderObj);
+            }
+            resolve(graderResponse);
           }
         }
         );
@@ -92,5 +101,34 @@ module.exports.getAll = async function() {
         return resolve(results)
       }
     })
+  })
+}
+
+/**
+ * Get the ratio of # done /assigned subs
+ * @param {*} user_id 
+ * @param {*} assignment_id 
+ */
+getNumGradedRatio = function (grader_id, assignment_id){
+  return new Promise((resolve, reject) => {
+    let query = "SELECT * FROM submission WHERE assignment_id =? AND grader_id = ?";
+    pool.query(query, [assignment_id, grader_id], (err, results) => {
+      if (err) {
+        return reject(err)
+      } else {
+
+        if(results.length == null | results.length == undefined | results.length == 0){resolve(0)}
+
+        let total_gradered = 0
+
+        results.map(submission =>{
+          console.log(submission.is_graded)
+          if(submission.is_graded!=0){total_gradered+=1}
+        })
+        
+        let progressObj =  {"num_graded": total_gradered,"ratio": (total_gradered/results.length)*100}
+        resolve(progressObj)
+      }
+    });
   })
 }

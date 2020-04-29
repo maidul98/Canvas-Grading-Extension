@@ -5,7 +5,7 @@ import { useAlert } from 'react-alert'
 import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
-import ProgressBar from 'react-bootstrap/ProgressBar';
+import ProgressBar from 'react-bootstrap/ProgressBar'
 import FormControl from 'react-bootstrap/FormControl';
 export default function Dashboard(){
     const alert = useAlert();
@@ -152,7 +152,7 @@ export default function Dashboard(){
                                 {grader.total_assigned_for_assignment}
                             </td>
                             <td>
-
+                                <ProgressBar animated now={grader.progress} label={grader.num_graded}/>
                             </td>
                         </tr>)
                     }
