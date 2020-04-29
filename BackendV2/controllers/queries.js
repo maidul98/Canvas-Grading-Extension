@@ -95,15 +95,14 @@ function get_surplus_submissions(graderID, surplus, assignment_id) {
 }
 
 function set_surplus_submissions(graderID, submission_id, assignment_id) {
-
-  let query = `UPDATE submission SET grader_id = NULL WHERE grader_id =? AND id =? AND assignment_id =?`
-  let data = [graderID, submission_id, assignment_id]
-
-  pool.getConnection(function (err, connection) {
-    if (err) throw err;
-    connection.query(query, data)
-    connection.release();
-    return true;
+  return new Promise(resolve, reject =>{
+    let query = `UPDATE submission SET grader_id = NULL WHERE grader_id =? AND id =? AND assignment_id =?`
+    let data = [graderID, submission_id, assignment_id]
+    pool.query(function (err, connection) {
+      if (err) reject(err);
+      connection.query(query, data)
+      resolve();
+    });
   });
 }
 
@@ -350,16 +349,18 @@ function get_assigned_submission_for_assigment(req, res) {
   );
 }
 
-function set_assignments_as_graded(submission_ids) {
+function set_assignments_as_graded(submission_ids, assignment_id) {
   return new Promise((resolve, reject) => {
-    queries = []
+    let queries = [];
+    let queriesData = [];
     submission_ids.forEach(id => {
-      queries.push(`UPDATE submission SET is_graded = 1 where id = ${id}`)
+      queries.push(`UPDATE submission SET is_graded = 1 WHERE user_id = ? AND assignment_id=?`)
+      queriesData.push(id)
+      queriesData.push(assignment_id)
     })
-
     pool.getConnection(function (err, connection) {
       if (err) return reject(err)
-      connection.query(queries.join(';'), (con_err) => {
+      connection.query(queries.join(';'), queriesData, (con_err) => {
         if (con_err) return reject(con_err)
         connection.release()
         return resolve()

@@ -127,6 +127,7 @@ getNumGradedRatio = function (grader_id, assignment_id){
         })
         
         let progressObj =  {"num_graded": total_gradered,"ratio": (total_gradered/results.length)*100}
+        // console.log(progressObj)
         resolve(progressObj)
       }
     });

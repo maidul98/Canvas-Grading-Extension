@@ -178,6 +178,7 @@ exports.grade_single_submission = async function (req, res) {
   ]
  */
 exports.grade_batch_submissions = async function (req, res) {
+  console.log(req.body)
   let formData = {};
   let submission_ids = []
   req.body.forEach(j => {
@@ -189,9 +190,10 @@ exports.grade_batch_submissions = async function (req, res) {
   // console.log(formData)
 
   try {
-    await queries.set_assignments_as_graded(submission_ids)
-  } catch (err) {
-    res.status(406).send(error.message)
+    await queries.set_assignments_as_graded(submission_ids, req.params.assignment_id)
+  } catch (error) {
+    console.log(error)
+    return res.status(406).send(error.message)
   }
   //send grades to Canvas
   axios
