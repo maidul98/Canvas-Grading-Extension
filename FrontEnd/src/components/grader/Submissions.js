@@ -91,7 +91,7 @@ export default function Submissions(props){
                 'id':id,
                 'assigned_grade': document.querySelector(`[data-grade='${id}']`).value,
                 'comment': document.querySelector(`[data-comment='${id}']`).value,
-                'is_group_comment': false
+                'is_group_comment': false,
             })
         }
     };

@@ -152,6 +152,7 @@ export default function Dashboard(){
                                 {grader.total_assigned_for_assignment}
                             </td>
                             <td>
+                                {console.log(`${grader.progress} - ${grader.num_graded}`)}
                                 <ProgressBar animated now={grader.progress} label={grader.num_graded}/>
                             </td>
                         </tr>)
