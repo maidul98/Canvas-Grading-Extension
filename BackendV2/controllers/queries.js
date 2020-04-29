@@ -79,7 +79,9 @@ function get_surplus_submissions(graderID, surplus, assignment_id) {
     pool.query(query, data, async function (error, results) {
       if (error) { reject(error) }
 
-      if (results.length < surplus) reject(new Error("The number of ungraded assignments is less than the workload reduction."))
+      let diff_in_graded_assignments = surplus - results.length;
+      if (diff_in_graded_assignments > 0)
+        reject(new Error("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignments."))
 
       // TO DO: max user connection error here
       for (let i = 0; i < surplus; i++) {
