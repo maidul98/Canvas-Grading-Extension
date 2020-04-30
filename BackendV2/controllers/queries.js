@@ -129,45 +129,44 @@ function runPipeline(assignment_id) {
       console.log('BEFORE MAP')
       console.log(mapped)
       console.log("4")
-      let conflicts = await detect_conflicts(grader_array, assignment_id);
-      let grader_Array = conflicts.graderArray
-      mapped = mapped.concat(conflicts.submissionsArray);
-      console.log('AFTER MAP')
-      console.log(mapped)
-      assignmentsLeft = mapped.length > 0 ? true : false;
-      console.log("5")
-
 
       //sum of num_assigned 
-      total_num_assigned = grader_Array.reduce((total, element) => {
+      let total_num_assigned = grader_array.reduce((total, element) => {
         return total + element.num_assigned;
       }, 0);
 
       //sum of caps 
-      total_cap = grader_Array.reduce((total, element) => {
+      let total_cap = grader_array.reduce((total, element) => {
         return total + element.cap;
       }, 0);
 
-      if ((total_cap - total_num_assigned) < mapped.length) {
+      if (total_cap - total_num_assigned < mapped.length) {
         return reject("The sum of the caps of all graders must exceed the total number of submissions.")
       }
+      else {
+        let conflicts = await detect_conflicts(grader_array, assignment_id);
+        mapped = mapped.concat(conflicts.submissionsArray);
+        console.log('AFTER MAP')
+        console.log(mapped)
+        assignmentsLeft = mapped.length > 0 ? true : false;
+        console.log("5")
 
-      console.log('going onnnn')
 
-      if (assignmentsLeft) {
-        console.log("6")
-        let graders_assigned = distribution.main_distribute(mapped.length, grader_Array);
-        let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
+        if (assignmentsLeft) {
+          console.log("6")
+          let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
+          let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
 
-        await update_grader_entries(graders_assigned) //update offsets of graders in DB with output_of_algo
+          await update_grader_entries(graders_assigned) //update offsets of graders in DB with output_of_algo
 
-        await assign_submissions_to_grader(matrix_of_pairs) //updates submissions and graders in DB with matrix_of_pairs
+          await assign_submissions_to_grader(matrix_of_pairs) //updates submissions and graders in DB with matrix_of_pairs
 
-        await update_total_assigned(graders_assigned, assignment_id) //update num_assigned of graders in DB with output_of_algo
+          await update_total_assigned(graders_assigned, assignment_id) //update num_assigned of graders in DB with output_of_algo
 
-        return resolve("Successfully distributed (or re-distributed) assignments.")
-      } else {
-        return resolve("There are currently no assignments to distribute or re-distribute.")
+          return resolve("Successfully distributed (or re-distributed) assignments.")
+        } else {
+          return resolve("There are currently no assignments to distribute or re-distribute.")
+        }
       }
     } catch (error) {
       reject(error)
