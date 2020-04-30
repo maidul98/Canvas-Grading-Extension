@@ -13,7 +13,7 @@ module.exports.grader_info = function (assignment_id) {
         let sql_query = "SELECT grader.name, grader.id, assignments_cap.cap, grader.offset, assignments_cap.total_assigned_for_assignment, grader.weight FROM grader INNER JOIN assignments_cap ON grader.id=assignments_cap.grader_id WHERE assignments_cap.assignment_id = ?";
         pool.query(sql_query, [assignment_id], async (error, results) => {
           if (error) {
-            reject(error)
+            return reject(error)
           } else {
             let graderResponse = []
             for (let i = 0; i < results.length; i++) {
@@ -31,60 +31,25 @@ module.exports.grader_info = function (assignment_id) {
     })
 }
 
-/**
- * Update the set of graders' weight, cap, offset 
- */
+
 module.exports.updateGraderInfo = function (grader_object) {
-  return new Promise(function(resolve, reject){
-    pool.getConnection(function (err, connection) {
-      if (err) {reject(err)}
-      let queries = []
-      let queriesData = []
-      let assigmentsCapChange = []
-      grader_object.map(async function (grader) {
-        for (const property in grader) {
-          switch(property) {
-            case 'weight':
-              queries.push('UPDATE grader SET weight=? WHERE id=?')
-              queriesData.push(grader['weight']);
-              queriesData.push(grader['id']);
-              break;
-            case 'cap':
-              queries.push('UPDATE assignments_cap SET cap=? WHERE grader_id=? AND assignment_id=?');
-              queriesData.push(grader['cap']);
-              queriesData.push(grader['id']);
-              queriesData.push(grader['assignment_id']);
-              assigmentsCapChange.push(grader['assignment_id'])
-              break;
-            case 'offset':
-              queries.push('UPDATE grader SET offset=? WHERE id=?')
-              queriesData.push(grader['offset']);
-              queriesData.push(grader['id']);
-              break;
-            default:
+    return new Promise(async function(resolve, reject){
+      try{
+          for(let i = 0; i<grader_object.length; i++){
+            if(grader_object[i].weight != undefined){
+              await updateWeight(grader_object[i].id, grader_object[i].weight)
+            }
+            if(grader_object[i].offset != undefined){
+              await updateOffset(grader_object[i].id, grader_object[i].offset)
+            }
+            if(grader_object[i].cap != undefined){
+              await updateCaps(grader_object[i].id, grader_object[i].assignment_id, grader_object[i].cap)
+            }
           }
-        }
-      })
-
-      connection.query(queries.join(';'),queriesData, (err, results) => {
-        if (err) {reject(err)}
-      });
-
-      if(!assigmentsCapChange.length){
-        resolve();
+        return resolve()
+      }catch(error){
+        reject(error)
       }
-      // Run algo since caps changed
-      async.forEachOf(assigmentsCapChange, async function (assignment_id) {
-        try{
-          await distrbute.runPipeline(assignment_id);
-          connection.release();
-          resolve();
-        }catch(error){
-          reject(error)
-          //also undo all of the changes done earler
-        }
-      });
-    })
   })
 }
 
@@ -116,20 +81,88 @@ getNumGradedRatio = function (grader_id, assignment_id){
       if (err) {
         return reject(err)
       } else {
-
-        if(results.length == null | results.length == undefined | results.length == 0){resolve(0)}
-
+        if(results.length == null | results.length == undefined | results.length == 0){return resolve(0)}
         let total_gradered = 0
-
         results.map(submission =>{
-          console.log(submission.is_graded)
-          if(submission.is_graded!=0){total_gradered+=1}
+          if(submission.is_graded == 1){
+            total_gradered+=1
+          }
         })
-        
         let progressObj =  {"num_graded": total_gradered,"ratio": (total_gradered/results.length)*100}
-        // console.log(progressObj)
         resolve(progressObj)
       }
+    });
+  })
+}
+
+
+/**
+ * Update grader weight
+ */
+function updateWeight(grader_id, weight) {
+  return new Promise(function(resolve, reject){
+    let sql_query = "UPDATE grader SET weight = ? WHERE id = ?";
+    pool.query(sql_query, [weight, grader_id], (error) => {
+      if (error) {
+        return reject(error)
+      } else {
+        return resolve()
+      }
+    }
+    );
+  })
+}
+
+/**
+ * Update grader offset
+ */
+function updateOffset(grader_id, offset){
+  return new Promise(function(resolve, reject){
+    let sql_query = "UPDATE grader SET offset = ? WHERE id = ?";
+    pool.query(sql_query, [offset, grader_id], (error) => {
+      if (error) {
+        return reject(error)
+      } else {
+        return resolve()
+      }
+    }
+    );
+  })
+}
+
+/**
+ * Update grader caps and run algo 
+ */
+function updateCaps(grader_id, assignment_id, cap) {
+  return new Promise(function(resolve, reject){
+    let sql_query = "UPDATE assignments_cap SET cap=? WHERE grader_id=? AND assignment_id=?";
+    pool.getConnection(function (connectionError, connection) {
+      if(connectionError){return reject(connectionError)}
+      connection.beginTransaction(async function(startTransactionError){
+        if(startTransactionError){return reject(startTransactionError)}
+
+        connection.query(sql_query, [cap, grader_id, assignment_id], (sqlError) => {
+          if (sqlError) {return reject(sqlError)}
+          connection.commit(async function(commitError) {
+            try{
+              if (commitError) {
+                connection.rollback(()=>{
+                  return reject("Something happened when saving caps, please try again") 
+                });
+              }
+              let successMessage = await distrbute.runPipeline(assignment_id);
+              connection.release();
+              return resolve(successMessage);
+            }catch(error){
+              connection.rollback(()=>{
+                console.log('Rolling back')
+                connection.release();
+                return reject(error);
+              });
+            }
+          });
+        });
+      });
     });
   })
 }

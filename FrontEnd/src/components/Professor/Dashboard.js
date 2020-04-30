@@ -80,6 +80,16 @@ export default function Dashboard(){
     /**
      * Sends the grader object to the backend to be be updated in the database 
      */
+
+
+    // {
+    //     manual:true,
+    //     url:`${process.env.REACT_APP_BASE_URL}/update-grader-info`,
+    //     method:'post',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body:JSON.stringify(graderEditObject)
+    // }
+
     const updateGraderDetails = useRequest({
         manual:true,
         url:`${process.env.REACT_APP_BASE_URL}/update-grader-info`,
@@ -94,7 +104,9 @@ export default function Dashboard(){
             alert.success('Updated changes');
         },
         onError: (error, params) => {
-            alert.error('Something went wrong while fetching graders, please try refreshing the page.');
+            fetchGradersData.run(currentDropdown.current)
+            alert.error(error.data);
+            setGraderEditObject([])
         },
         initialData: []
     });

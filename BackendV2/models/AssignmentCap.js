@@ -57,7 +57,6 @@ module.exports.get_assignment_cap = (assignment_id) => {
 
 module.exports.update_caps = function (cap, grader_id, assignment_id) {
   let sql_query = "UPDATE assignments_cap SET cap = ?  WHERE grader_id = ? AND assignment_id = ?";
-
   return new Promise((resolve, reject) => {
     pool.query(
       sql_query, [cap, grader_id, assignment_id],

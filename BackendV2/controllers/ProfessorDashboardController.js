@@ -18,11 +18,10 @@ module.exports.getGraderInfo = async (req, res) => {
  */
 module.exports.updateGraderInfo = async (req, res) => {
     try{
-        await grader.updateGraderInfo(req.body);
-        res.send();
+        let successMessage = await grader.updateGraderInfo(req.body);
+        res.send(successMessage);
     }catch(error){
-        console.log(error)
-        res.status(500).send("Something went wrong")
+        res.status(406).send(error)
     }
 }
 

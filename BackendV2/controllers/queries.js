@@ -81,11 +81,10 @@ function get_surplus_submissions(graderID, surplus, assignment_id) {
 
       let diff_in_graded_assignments = surplus - results.length;
       if (diff_in_graded_assignments > 0)
-        return reject(new Error("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignments."))
+        return reject("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignments.")
 
       // TO DO: max user connection error here
       for (let i = 0; i < surplus; i++) {
-        console.log(results[i])
         surplusArr.push(results[i].id)
         await set_surplus_submissions(graderID, results[i].id, assignment_id)
       }
@@ -98,10 +97,9 @@ function set_surplus_submissions(graderID, submission_id, assignment_id) {
   return new Promise(function (resolve, reject) {
     let query = `UPDATE submission SET grader_id = NULL WHERE grader_id =? AND id =? AND assignment_id =?`
     let data = [graderID, submission_id, assignment_id]
-    pool.query(function (err, connection) {
-      if (err) reject(err);
-      connection.query(query, data)
-      resolve();
+    pool.query(query, data, (err, results) =>{
+      if(err){return reject(err)}
+      return resolve();
     });
   });
 }
@@ -121,16 +119,21 @@ async function handle_conflicts(graderID, surplus, assignment_id) {
 function runPipeline(assignment_id) {
   return new Promise(async function (resolve, reject) {
     try {
+      console.log("1")
       await pull_submissions_from_canvas(assignment_id)
+      console.log("2")
       let grader_array = await get_grader_objects(assignment_id);
+      console.log("3")
       let submission_json = await get_unassigned_submissions(assignment_id);
       let mapped = submission_json.map(v => v.id);
-
+      console.log("4")
       let conflicts = await detect_conflicts(grader_array, assignment_id);
       mapped = mapped.concat(conflicts.submissionsArray);
       assignmentsLeft = mapped.length > 0 ? true : false;
+      console.log("5")
 
       if (assignmentsLeft) {
+        console.log("6")
         let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
         let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
 
@@ -140,9 +143,9 @@ function runPipeline(assignment_id) {
 
         await update_total_assigned(graders_assigned, assignment_id) //update num_assigned of graders in DB with output_of_algo
 
-        resolve("Successfully distributed (or re-distributed) assignments.")
+        return resolve("Successfully distributed (or re-distributed) assignments.")
       } else {
-        resolve("There are currently no assignments to distribute or re-distribute.")
+        return resolve("There are currently no assignments to distribute or re-distribute.")
       }
     } catch (error) {
       reject(error)

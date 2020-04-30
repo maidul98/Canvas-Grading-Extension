@@ -105,7 +105,7 @@ function main_distribute(num_of_submissions, graderArray) {
     //only offset & num_assigned should be altered 
     graderArray = distribute(num_of_submissions, graderArray);
 
-    console.log("\n\n AFTER initial distribution");
+    // console.log("\n\n AFTER initial distribution");
     console.log(graderArray);
 
 
