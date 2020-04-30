@@ -97,8 +97,8 @@ function set_surplus_submissions(graderID, submission_id, assignment_id) {
   return new Promise(function (resolve, reject) {
     let query = `UPDATE submission SET grader_id = NULL WHERE grader_id =? AND id =? AND assignment_id =?`
     let data = [graderID, submission_id, assignment_id]
-    pool.query(query, data, (err, results) =>{
-      if(err){return reject(err)}
+    pool.query(query, data, (err, results) => {
+      if (err) { return reject(err) }
       return resolve();
     });
   });
@@ -128,13 +128,29 @@ function runPipeline(assignment_id) {
       let mapped = submission_json.map(v => v.id);
       console.log("4")
       let conflicts = await detect_conflicts(grader_array, assignment_id);
+      let grader_Array = conflicts.graderArray
       mapped = mapped.concat(conflicts.submissionsArray);
       assignmentsLeft = mapped.length > 0 ? true : false;
       console.log("5")
 
+
+      //sum of num_assigned 
+      total_num_assigned = grader_Array.reduce((total, element) => {
+        return total + element.num_assigned;
+      }, 0);
+
+      //sum of caps 
+      total_cap = grader_Array.reduce((total, element) => {
+        return total + element.cap;
+      }, 0);
+
+      if ((total_cap - total_num_assigned) < mapped.length) {
+        return reject("The sum of the caps of all graders must exceed the total number of submissions.")
+      }
+
       if (assignmentsLeft) {
         console.log("6")
-        let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
+        let graders_assigned = distribution.main_distribute(mapped.length, grader_Array);
         let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
 
         await update_grader_entries(graders_assigned) //update offsets of graders in DB with output_of_algo
