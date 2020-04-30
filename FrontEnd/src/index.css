@@ -620,6 +620,15 @@ ol.breadcrumb{
   height:25px;
 }
 
+#selectAssigmnetForDis {
+  width: 100%;
+  padding: 6px 0;
+}
+
+hr.analytics-hr {
+  margin: 50px 0;
+}
+
 
 /*===================ALERTS===============================*/
 #__react-alert__ div div div{

@@ -82,7 +82,7 @@ router.post('/canvas-api', apiCalls.GETcanvas_API_call);
 router.put('/canvas-api', apiCalls.PUTcanvas_API_call);
 
 /** Runs the entire assignments-distribution pipeline & updates the database. */
-router.post('/distribute', queries.run_distribution_pipeline)
+router.post('/distribute', controllers.ProfessorDashboardController.runDisturbation);
 
 //Params: assignment_id, [user_ids]
 router.post('/download-submission', download.downloadSubmissions)
