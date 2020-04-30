@@ -12,6 +12,7 @@ export default function Dashboard(){
     const [graderEditObject, setGraderEditObject] = useState([])
     const currentDropdown = useRef("");
     const [assignment_id_list, setAssignment_id_list] = useState([])
+    const [assignmentIdForDistrubte, setAssignmentForDistrubte] = useState(true)
 
     /**
      * Get the list of assignments from Canvas from which the user can drop down from 
@@ -80,16 +81,6 @@ export default function Dashboard(){
     /**
      * Sends the grader object to the backend to be be updated in the database 
      */
-
-
-    // {
-    //     manual:true,
-    //     url:`${process.env.REACT_APP_BASE_URL}/update-grader-info`,
-    //     method:'post',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body:JSON.stringify(graderEditObject)
-    // }
-
     const updateGraderDetails = useRequest({
         manual:true,
         url:`${process.env.REACT_APP_BASE_URL}/update-grader-info`,
@@ -112,6 +103,30 @@ export default function Dashboard(){
     });
 
     /**
+     * 
+     * @param {*} event 
+     */
+    const runDisturbation = useRequest({
+            manual:true,
+            url:`${process.env.REACT_APP_BASE_URL}/distribute`,
+            method:'post',
+            headers: { 'Content-Type': 'application/json' },
+            body:JSON.stringify({assignment_id: assignmentIdForDistrubte})
+        }, {
+        manual: true,
+        onSuccess: (result, params)=>{
+            fetchGradersData.run(assignmentIdForDistrubte)
+            alert.success('Assignment distributed');
+        },
+        onError: (error, params) => {
+            fetchGradersData.run(assignmentIdForDistrubte)
+            alert.error(error.data);
+        },
+        initialData: []
+    });
+     
+
+    /**
      * Sets current selected assignment and repulls updates from DB
      * @param {*} event 
      */
@@ -120,7 +135,7 @@ export default function Dashboard(){
         currentDropdown.current=event.target.value
     }
 
-    if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList.loading | updateCapsTable.loading) return <LoadingIcon />;
+    if(fetchGradersData.loading | updateGraderDetails.loading | runDisturbation.loading| fetchAssignmentsList.loading | updateCapsTable.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
@@ -171,7 +186,25 @@ export default function Dashboard(){
                     }
                 </tbody>
             </Table>
-                {<Button className="float-right" disabled={graderEditObject.length==0} onClick={updateGraderDetails.run}>Update</Button>}           
+            
+            {<Button className="float-right" disabled={graderEditObject.length==0} onClick={updateGraderDetails.run}>Update</Button>}   
+            
+            <div className="clearfix"></div>
+            <hr className="analytics-hr"></hr>
+            <div className="row">
+                <div className="col-sm-4">
+                    {<Button disabled={assignmentIdForDistrubte == true?true: false} onClick={(event)=>window.confirm('Are you sure you want to distribute this assignment?')?runDisturbation.run():false}>Distribute selected assignment</Button>}
+                </div>
+                <div className="col-sm-8">
+                    <select id="selectAssigmnetForDis" value={assignmentIdForDistrubte} onChange={event=>setAssignmentForDistrubte(event.target.value)}>
+                    <option value={true}>Select assignment to distribute</option>
+                            {
+                            fetchAssignmentsList.data.map(assignment=>
+                            <option value={assignment.id} key={assignment.id}>Progress for {assignment.name}</option>)
+                            }
+                    </select>
+                </div>
+            </div>   
         </div>
     );
 }
