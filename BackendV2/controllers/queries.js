@@ -126,10 +126,14 @@ function runPipeline(assignment_id) {
       console.log("3")
       let submission_json = await get_unassigned_submissions(assignment_id);
       let mapped = submission_json.map(v => v.id);
+      console.log('BEFORE MAP')
+      console.log(mapped)
       console.log("4")
       let conflicts = await detect_conflicts(grader_array, assignment_id);
       let grader_Array = conflicts.graderArray
       mapped = mapped.concat(conflicts.submissionsArray);
+      console.log('AFTER MAP')
+      console.log(mapped)
       assignmentsLeft = mapped.length > 0 ? true : false;
       console.log("5")
 
@@ -147,6 +151,8 @@ function runPipeline(assignment_id) {
       if ((total_cap - total_num_assigned) < mapped.length) {
         return reject("The sum of the caps of all graders must exceed the total number of submissions.")
       }
+
+      console.log('going onnnn')
 
       if (assignmentsLeft) {
         console.log("6")

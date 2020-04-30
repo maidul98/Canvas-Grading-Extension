@@ -34,6 +34,7 @@ module.exports.grader_info = function (assignment_id) {
 
 module.exports.updateGraderInfo = function (grader_object) {
     return new Promise(async function(resolve, reject){
+      let capAssignment_id = null
       try{
           for(let i = 0; i<grader_object.length; i++){
             if(grader_object[i].weight != undefined){
@@ -44,9 +45,13 @@ module.exports.updateGraderInfo = function (grader_object) {
             }
             if(grader_object[i].cap != undefined){
               await updateCaps(grader_object[i].id, grader_object[i].assignment_id, grader_object[i].cap)
+              capAssignment_id=grader_object[i].assignment_id
             }
           }
-        return resolve()
+          if(capAssignment_id){
+            await distrbute.runPipeline(capAssignment_id); 
+          }
+          return resolve();
       }catch(error){
         reject(error)
       }
@@ -136,33 +141,9 @@ function updateOffset(grader_id, offset){
 function updateCaps(grader_id, assignment_id, cap) {
   return new Promise(function(resolve, reject){
     let sql_query = "UPDATE assignments_cap SET cap=? WHERE grader_id=? AND assignment_id=?";
-    pool.getConnection(function (connectionError, connection) {
-      if(connectionError){return reject(connectionError)}
-      connection.beginTransaction(async function(startTransactionError){
-        if(startTransactionError){return reject(startTransactionError)}
-
-        connection.query(sql_query, [cap, grader_id, assignment_id], (sqlError) => {
-          if (sqlError) {return reject(sqlError)}
-          connection.commit(async function(commitError) {
-            try{
-              if (commitError) {
-                connection.rollback(()=>{
-                  return reject("Something happened when saving caps, please try again") 
-                });
-              }
-              let successMessage = await distrbute.runPipeline(assignment_id);
-              connection.release();
-              return resolve(successMessage);
-            }catch(error){
-              connection.rollback(()=>{
-                console.log('Rolling back')
-                connection.release();
-                return reject(error);
-              });
-            }
-          });
-        });
-      });
+    pool.query(sql_query, [cap, grader_id, assignment_id], (sqlError) => {
+      if (sqlError) {return reject(sqlError)}
+      return resolve();
     });
   })
 }
