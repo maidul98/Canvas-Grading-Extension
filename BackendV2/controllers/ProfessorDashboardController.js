@@ -1,5 +1,5 @@
 const grader = require("../models/Grader");
-const distrbute = require("./queries");
+const distrbute = require("../distribution-algorithm/distributionPipeline");
 
 /**
  * Get weights, net_id, and offset, cap, total assigned for all graders. 

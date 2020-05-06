@@ -82,6 +82,18 @@ select {
   }
 }
 
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 /*
 ==============Global CSS=============
 */
@@ -613,7 +625,15 @@ ol.breadcrumb{
 }
 
 .width-10{
-  width: 10%;
+  width: 6%;
+}
+
+.width-1{
+  width: 1%;
+}
+
+.width-30{
+  width: 30%;
 }
 
 #dashboardTable .form-control{
@@ -629,6 +649,13 @@ hr.analytics-hr {
   margin: 50px 0;
 }
 
+#selectAssignmentDropdown{
+  margin-bottom: 20px;
+}
+
+#distribute-btn{
+  margin-left: 10px;
+}
 
 /*===================ALERTS===============================*/
 #__react-alert__ div div div{

@@ -7,21 +7,26 @@ import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import FormControl from 'react-bootstrap/FormControl';
+import WorkLoadModal from './WorkLoadModal';
 export default function Dashboard(){
     const alert = useAlert();
     const [graderEditObject, setGraderEditObject] = useState([])
     const currentDropdown = useRef("");
     const [assignment_id_list, setAssignment_id_list] = useState([])
-    const [assignmentIdForDistrubte, setAssignmentForDistrubte] = useState(true)
+    const [assignment_id, setAssignment_id] = useState(null)
 
     /**
      * Get the list of assignments from Canvas from which the user can drop down from 
      */
-    const fetchAssignmentsList = useRequest(`${process.env.REACT_APP_BASE_URL}/get-published-assignments`, {
+    const fetchAssignmentsList = useRequest({
+        url: "/canvas-api",
+        method:"post",
+        data:{ "endpoint": "assignments?per_page=100" }
+    }, {
         onSuccess: (result, params)=>{
             if(result[0].id != undefined){
                 fetchGradersData.run(result[0].id);
-                currentDropdown.current = result[0].id;
+                setAssignment_id(result[0].id); // set current assignment id 
             }
             // If there are new assignments then add them to caps table
             let assignment_id_list = result.map(assignment => assignment.id)
@@ -103,7 +108,7 @@ export default function Dashboard(){
     });
 
     /**
-     * 
+     * Run the distrubaion algo
      * @param {*} event 
      */
     const runDisturbation = useRequest({
@@ -111,15 +116,15 @@ export default function Dashboard(){
             url:`${process.env.REACT_APP_BASE_URL}/distribute`,
             method:'post',
             headers: { 'Content-Type': 'application/json' },
-            body:JSON.stringify({assignment_id: assignmentIdForDistrubte})
+            body:JSON.stringify({assignment_id: assignment_id})
         }, {
         manual: true,
         onSuccess: (result, params)=>{
-            fetchGradersData.run(assignmentIdForDistrubte)
+            fetchGradersData.run(assignment_id);
             alert.success('Assignment distributed');
         },
         onError: (error, params) => {
-            fetchGradersData.run(assignmentIdForDistrubte)
+            fetchGradersData.run(assignment_id);
             alert.error(error.data);
         },
         initialData: []
@@ -131,36 +136,42 @@ export default function Dashboard(){
      * @param {*} event 
      */
     function handleDropdown(event){
-        fetchGradersData.run(event.target.value)
-        currentDropdown.current=event.target.value
+        if(event.target.value != null){
+            fetchGradersData.run(event.target.value)
+            currentDropdown.current=event.target.value
+            setAssignment_id(event.target.value);
+        }
     }
 
-    if(fetchGradersData.loading | updateGraderDetails.loading | runDisturbation.loading| fetchAssignmentsList.loading | updateCapsTable.loading) return <LoadingIcon />;
+    if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList.loading | updateCapsTable.loading | runDisturbation.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
+            <select className="float-right" id="selectAssignmentDropdown" value={assignment_id} onChange={event=>handleDropdown(event)}>
+                <option >Select assignment to distribute</option>
+                    {
+                    fetchAssignmentsList.data.map(assignment=>
+                    <option value={assignment.id} key={assignment.id}>Progress for {assignment.name}</option>)
+                    }
+            </select>
+            <div className="clearfix"></div> 
+
             <Table bordered hover  id="dashboardTable">
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>NetId</th>
                         <th>Weights</th>
                         <th>Offsets</th>
                         <th>Cap</th>
                         <th>Assigned</th>
-                        <th>
-                        <select id="selectAssignments" value={currentDropdown.current} onChange={event=>handleDropdown(event)}>
-                            {
-                            fetchAssignmentsList.data.map(assignment=>
-                            <option value={assignment.id} key={assignment.id}>Progress for {assignment.name}</option>)
-                            }
-                        </select>
-                        </th>
+                        <th>Workload</th>
+                        <th>Progress</th>
                     </tr>
                 </thead>
                 <tbody>
                     {fetchGradersData.data.map(grader=>
                         <tr key={grader.id}>
-                            <td>{grader?.name}</td>
+                            <td className="width-1">{grader?.name}</td>
                             <td className="width-10">
                                 <FormControl defaultValue={grader.weight} 
                                 onChange={event=>handleUpdate(event, "weight", grader.id)}
@@ -175,36 +186,21 @@ export default function Dashboard(){
                                 onChange={event=>handleUpdate(event, "cap", grader.id)}
                                 placeholder="None"  type="number" min="0" pattern="[0-9]*" />
                             </td>
-                            <td className="width-10">
+                            <td className="width-1">
                                 {grader.total_assigned_for_assignment}
                             </td>
-                            <td>
-                                {console.log(`${grader.progress} - ${grader.num_graded}`)}
+                            <td className="width-1">
+                                <WorkLoadModal user_id={1} assignment_id={2}/>
+                            </td>
+                            <td className="width-30">
                                 <ProgressBar animated now={grader.progress} label={grader.num_graded}/>
                             </td>
                         </tr>)
                     }
                 </tbody>
             </Table>
-            
-            {<Button className="float-right" disabled={graderEditObject.length==0} onClick={updateGraderDetails.run}>Update</Button>}   
-            
-            <div className="clearfix"></div>
-            <hr className="analytics-hr"></hr>
-            <div className="row">
-                <div className="col-sm-4">
-                    {<Button disabled={assignmentIdForDistrubte == true?true: false} onClick={(event)=>window.confirm('Are you sure you want to distribute this assignment?')?runDisturbation.run():false}>Distribute selected assignment</Button>}
-                </div>
-                <div className="col-sm-8">
-                    <select id="selectAssigmnetForDis" value={assignmentIdForDistrubte} onChange={event=>setAssignmentForDistrubte(event.target.value)}>
-                    <option value={true}>Select assignment to distribute</option>
-                            {
-                            fetchAssignmentsList.data.map(assignment=>
-                            <option value={assignment.id} key={assignment.id}>Progress for {assignment.name}</option>)
-                            }
-                    </select>
-                </div>
-            </div>   
+            {<Button className="float-right" disabled={graderEditObject.length!=0} id="distribute-btn" onClick={runDisturbation.run}>Distribute</Button>}   
+            {<Button className="float-right" disabled={graderEditObject.length==0} onClick={updateGraderDetails.run}>Update</Button>}
         </div>
     );
 }

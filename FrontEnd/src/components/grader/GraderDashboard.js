@@ -16,7 +16,11 @@ export default function AssignmentList(props) {
     /**
      * Get the list of assignments from Canvas  
      */
-    const fetchAssignments = useRequest(url => url, {
+    const fetchAssignments = useRequest({
+        url: "/canvas-api",
+        method:"post",
+        data:{ "endpoint": "assignments?per_page=100" }
+    }, {
         manual: true,
         onSuccess: (result, params) => {
             let reOrdered = result.sort(function compare(a, b) {

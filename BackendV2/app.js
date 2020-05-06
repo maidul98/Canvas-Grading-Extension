@@ -4,7 +4,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var logger = require('morgan');
-var queries = require('./controllers/queries');
 var indexRouter = require('./routes/routes');
 //var usersRouter = require('./routes/users');
 //Middleware

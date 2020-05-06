@@ -1,6 +1,4 @@
 const pool = require('../pool');
-var async = require('async');
-const distrbute = require("../controllers/queries");
 
 /**
  * Get weights, net_id, and offset, cap, total assigned for all graders given a assignment_id. 
@@ -45,11 +43,7 @@ module.exports.updateGraderInfo = function (grader_object) {
             }
             if(grader_object[i].cap != undefined){
               await updateCaps(grader_object[i].id, grader_object[i].assignment_id, grader_object[i].cap)
-              capAssignment_id=grader_object[i].assignment_id
             }
-          }
-          if(capAssignment_id){
-            await distrbute.runPipeline(capAssignment_id); 
           }
           return resolve();
       }catch(error){
