@@ -9,7 +9,7 @@ router.get('/', function (req, res, next) {
 });
 
 /** ASSIGNED SUBMISSION BY ASSIGMNET ID*/
-router.get('/get-assigned-submissions-for-assigment', controllers.SubmissionsController.assigned); // use 
+router.get('/get-assigned-submissions-for-assigment', controllers.SubmissionsController.assigned);
 
 
 /** Get grading progress for a specific assignment */
