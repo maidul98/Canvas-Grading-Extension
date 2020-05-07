@@ -1,7 +1,7 @@
 var AssignmentGrader = require('./grader-model');
 
 /**
- * Shuffles the array a, in place
+ * Shuffles the input array [a], in place
  * @param {Array} a: The array to be shuffled
  */
 function shuffle(a) {
@@ -17,6 +17,7 @@ function shuffle(a) {
  * equal to 1000000. 
  * Normalizes offsets such that the least offset equals 0; and
  * grader.offset = number of assignments that grader [grader] is behind on.
+ * Returns the updated [graderArray] with updated offset values. 
  * @param {Array} graderArray: 1D array of AssignmentGrader objects, which 
  * represent all of the graders. 
  */
@@ -33,11 +34,13 @@ function normalize_offset(graderArray) {
 }
 
 /**
+ * Precondition: The sum of each grader's [dist_num_assigned] value must equal  
+ * the length of [submission_array]. 
  * Randomly assigns each grader from [grader_array] exactly [dist_num_assigned] 
  * submissions from [submission_array] to grade. 
  * Returns a mapping from grader ID to submission ID. 
- * @param {Array} grader_array: 2D Array of graders containing the [dist_num_assigned]
- * value for each grader
+ * @param {Array} grader_array: 1D array of AssignmentGrader objects, which 
+ * represent all of the graders. 
  * @param {Array} submissions_array: 1D Array of submission ID's
  */
 function formMatchingMatrix(grader_array, submissions_array) {
@@ -64,16 +67,18 @@ function formMatchingMatrix(grader_array, submissions_array) {
 
 
 /**
- * Main function that distributes the submissions for one particular assignment, 
- * also taking into account of each graders' caps. 
- * @param {*} num_of_submissions: total number of submissions required to be distributed
- * @param {*} graderArray: 1D array containing AssignmentGrader objects, with appropriate 
- * num_assigned values. 
+ * Main function that assigns each grader in [graderArray]  the number of submissions 
+ * they should grade for a particular assignment, while ensuring no grader is assigned 
+ * more than their cap. 
+ * Returns [graderArray] with normalized [offset] values, [num_assigned] representing
+ * their updated total number of assigned submissions for this assignment, and 
+ * [dist_num_assigned] representing the number of newly assigned submissions in 
+ * this round of distribution. 
+ * @param {Number} num_of_submissions: Number of submissions that need to be distributed
+ * @param {Array} graderArray: 1D array containing AssignmentGrader objects
  */
 function main_distribute(num_of_submissions, graderArray) {
 
-    // console.log("num of subs" + num_of_submissions);
-    // console.log(graderArray);
     console.log("\n\nINITIAL PULLED FROM DB")
     console.log(graderArray)
 
@@ -150,11 +155,10 @@ function main_distribute(num_of_submissions, graderArray) {
 
 
 /**
- * Fairly distributes [num_of_submissions] assignments among [graders] 
- * according to the graders' weights and offsets. 
- * @param {int} num_of_submissions: Total number of assignments that need to be distributed
- * @param {Array} graderArray: An array of AssignmentGrader objects for each grader,
- * where each grader's num_assigned value equals 0. 
+ * Fairly distributes [num_of_submissions] submissions among all graders in 
+ * [graderArray] according to their respective weights and offsets. 
+ * @param {Number} num_of_submissions: Number of unassigned submissions that need to be distributed for a particular assignment
+ * @param {Array} graderArray: An array of AssignmentGrader objects representing the set of all graders 
  */
 function distribute(num_of_submissions, graderArray) {
 
@@ -312,64 +316,3 @@ function distribute(num_of_submissions, graderArray) {
 module.exports.shuffle = shuffle
 module.exports.formMatchingMatrix = formMatchingMatrix
 module.exports.main_distribute = main_distribute
-
-//TESTING
-//grader_id, weight, offset, num_assigned, dist_num_assigned, cap
-
-//mango1
-/*
-arr = [
-    new AssignmentGrader(1, 1, 0, 0, 0, 100),
-    new AssignmentGrader(2, 2, 0, 0, 0, 100),
-    new AssignmentGrader(3, 2, 0, 0, 0, 100),
-    new AssignmentGrader(4, 3, 0, 0, 0, 100)];
-
-console.log(arr);
-console.log("\n\n");
-
-arr = main_distribute(50, arr);
-console.log(arr);
-console.log("\n\n");
-
-arr[0].update_cap(3);
-
-arr = main_distribute(50, arr);
-console.log(arr);
-console.log("\n\n");
-
-*/
-
-//result = formMatchingMatrix(arr, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-//* /
-
-/*
-for (let i = 0; i < 5; i++) {
-    arr[i].update_dist_num_assigned(arr[i].num_assigned);
-    if (arr[i].grader_id === 4)
-        arr[i].update_cap(4);
-}
-
-arr = main_distribute(6, arr);
-console.log(arr);
-console.log("\n\n");
-
-for (let i = 0; i < 5; i++)
-    arr[i].update_dist_num_assigned(arr[i].num_assigned);
-
-arr = main_distribute(50, arr);
-console.log(arr);
-console.log("\n\n");
-
-for (let i = 0; i < 5; i++) {
-    arr[i].update_dist_num_assigned(arr[i].num_assigned);
-    if (arr[i].grader_id === 2)
-        arr[i].update_cap(10);
-}
-
-arr = main_distribute(70, arr);
-console.log(arr);
-console.log("\n\n");
-
-* /
-//total distributed = 220
-*/
