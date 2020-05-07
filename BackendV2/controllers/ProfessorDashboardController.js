@@ -15,7 +15,7 @@ module.exports.getGraderInfo = async (req, res) => {
 }
 
 /**
- * 
+ * TODO
  */
 module.exports.updateGraderInfo = async (req, res) => {
     try{
@@ -27,7 +27,7 @@ module.exports.updateGraderInfo = async (req, res) => {
 }
 
 /**
- * distribute assigments 
+ * TODO
  */
 module.exports.runDisturbation = async (req, res) => {
     try{

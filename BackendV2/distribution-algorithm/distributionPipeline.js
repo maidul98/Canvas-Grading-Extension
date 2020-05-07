@@ -32,7 +32,7 @@ async function detect_conflicts(graderArray, assignment_id) {
       graderArray[i].update_dist_num_assigned(graderArray[i].cap);
       graderArray[i].update_num_assigned(graderArray[i].cap);
       graderArray[i].incrementOffset(surplus);
-      let conflict_array = await handle_conflicts(graderArray[i].grader_id, surplus, assignment_id)
+      let conflict_array = await get_surplus_submissions(graderArray[i].grader_id, surplus, assignment_id);
       extra_submissions = extra_submissions.concat(conflict_array);
     }
   }
@@ -93,27 +93,14 @@ function set_surplus_submissions(graderID, submission_id, assignment_id) {
   });
 }
 
-
-/**
- * WHATS THE POINT OF THIS FUNCTINO??!?!!!!
- * @param {Number} graderID The grader ID
- * @param {Number} surplus Number of ungraded submissions that need to be removed and 
- * re-distributed from grader [graderID]'s workload
- * @param {Number} assignment_id The assignment ID
- */
-async function handle_conflicts(graderID, surplus, assignment_id) {
-  const submissionArr = await get_surplus_submissions(graderID, surplus, assignment_id)
-  return submissionArr
-}
-
-/** 
-   * Returns a list of AssignmentGrader objects, which will be used as input 
-   * to the distribution algorithm. 
+/** returns a list of AssignmentGrader objects, which will be input in the 
+   * algorithm. 
+   * 
    * This method will query a list of all the graders, and create 
    * AssignmentGrader instances for each with their respective ID, offset, and cap. 
    * @param {Number} assignment_id The assignment ID
    * @returns A new Promise object
-   */
+**/
 function get_grader_objects(assignment_id) {
   return new Promise(function (resolve, reject) {
     let query = "SELECT grader.id, assignments_cap.cap, grader.offset, assignments_cap.total_assigned_for_assignment, grader.weight FROM grader INNER JOIN assignments_cap ON grader.id=assignments_cap.grader_id WHERE assignments_cap.assignment_id = ?"
