@@ -62,30 +62,6 @@ function formMatchingMatrix(grader_array, submissions_array) {
     return matrix;
 }
 
-/*
-TESTING the graders with weights = 0
-array = [
-    new AssignmentGrader(1, 0, 2, 0, 0, 1),
-    new AssignmentGrader(2, 0, 0, 0, 0, 100),
-    new AssignmentGrader(3, 1, 1, 0, 0, 100),
-    new AssignmentGrader(4, 1, 9, 0, 0, 0),
-    new AssignmentGrader(5, 1, 0, 0, 0, 100),
-    new AssignmentGrader(6, 1, 0, 0, 0, 100),
-    new AssignmentGrader(7, 1, 0, 0, 0, 100),
-    new AssignmentGrader(8, 2, 0, 0, 0, 100),
-    new AssignmentGrader(9, 2, 0, 0, 0, 100),
-    new AssignmentGrader(4),
-    new AssignmentGrader(5),
-    new AssignmentGrader(6)
-]
-
-
-console.log("\n\n")
-ans = main_distribute(9, array)
-console.log("\n\n\nFINAL\n");
-console.log(ans)
-
-* /
 
 /**
  * Main function that distributes the submissions for one particular assignment, 

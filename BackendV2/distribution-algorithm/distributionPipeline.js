@@ -11,9 +11,15 @@ const pool = require('../pool');
 const axios = require('axios');
 
 /**
- * TODO FUNCTION description
- * @param {*} graderArray 
- * @param {*} assignment_id 
+ * Detects which graders have been assigned a greater number of submissions for 
+ * assignment [assignment_id] than their cap values allow. In that case, the helper
+ * function [handle_conflicts] unassigns the surplus number of submissions
+ * from the appropriate grader. 
+ * Returns [graderArray] with the updated values of graders' offsets and the 
+ * updated number of submissions that they now have assigned & a set of 
+ * submission ID's representing all submissions that now need to be distributed. 
+ * @param {*} graderArray The complete set of graders 
+ * @param {*} assignment_id The assignment ID 
  */
 async function detect_conflicts(graderArray, assignment_id) {
 
@@ -34,10 +40,16 @@ async function detect_conflicts(graderArray, assignment_id) {
 }
 
 /**
- * TODO FUNCTION description
- * @param {*} graderID 
- * @param {*} surplus 
- * @param {*} assignment_id 
+ * Retrives the set of grader [graderID]'s ungraded submissions for [assignment_id],
+ * selects the first [surplus] submissions, and unassigns the grader [grdaerID] so 
+ * those can be re-distributed. 
+ * Returns the submission IDs of the [surplus] submissions that need re-distribution. 
+ * If [surplus] exceeds the set of grader [graderID]'s ungraded submissions, then an 
+ * error will be thrown. 
+ * @param {*} graderID The grader ID 
+ * @param {*} surplus Number of ungraded submissions that need to be removed and 
+ * re-distributed from grader [graderID]'s workload 
+ * @param {*} assignment_id The assignment ID 
  */
 function get_surplus_submissions(graderID, surplus, assignment_id) {
   return new Promise(function (resolve, reject) {
@@ -62,11 +74,13 @@ function get_surplus_submissions(graderID, surplus, assignment_id) {
   })
 }
 
+
 /**
- * TODO FUNCTION description
- * @param {*} graderID 
- * @param {*} submission_id 
- * @param {*} assignment_id 
+ * Unassigns the submission [submission_id] for assignment [assignment_id]
+ * from the grader [graderID], so it can be re-distributed. 
+ * @param {*} graderID The complete set of graders 
+ * @param {*} submission_id The submission ID 
+ * @param {*} assignment_id The assignment ID 
  */
 function set_surplus_submissions(graderID, submission_id, assignment_id) {
   return new Promise(function (resolve, reject) {
@@ -81,46 +95,57 @@ function set_surplus_submissions(graderID, submission_id, assignment_id) {
 
 
 /**
- * TODO FUNCTION description
- * @param {*} graderID 
- * @param {*} surplus 
- * @param {*} assignment_id 
+ * WHATS THE POINT OF THIS FUNCTINO??!?!!!!
+ * @param {*} graderID The grader ID
+ * @param {*} surplus Number of ungraded submissions that need to be removed and 
+ * re-distributed from grader [graderID]'s workload
+ * @param {*} assignment_id The assignment ID
  */
 async function handle_conflicts(graderID, surplus, assignment_id) {
   const submissionArr = await get_surplus_submissions(graderID, surplus, assignment_id)
   return submissionArr
 }
 
-/** returns a list of AssignmentGrader objects, which will be input in the 
-   * algorithm. 
+/** Returns a list of AssignmentGrader objects, which will be used as input 
+   * to the distribution algorithm. 
    * 
    * This method will query a list of all the graders, and create 
-   * AssignmentGrader instances for each of those graders with their respective
-   * id, current weight and offset, and the curr_assigned initialized to 0. 
+   * AssignmentGrader instances for each with their respective ID, offset, and cap. 
    * 
    * @returns A new Promise object
    */
-  function get_grader_objects(assignment_id) {
-    return new Promise(function (resolve, reject) {
-      let query = "SELECT grader.id, assignments_cap.cap, grader.offset, assignments_cap.total_assigned_for_assignment, grader.weight FROM grader INNER JOIN assignments_cap ON grader.id=assignments_cap.grader_id WHERE assignments_cap.assignment_id = ?"
-      pool.query(query, [assignment_id], function (error, results) {
-        if (error) { reject(error) }
-        grader_array = []
-        results.forEach(grader => {
-          let id = grader.id
-          let offset = grader.offset
-          let cap = grader.cap
-          let weight = grader.weight
-          let total_assigned = grader.total_assigned_for_assignment
-          let graderObj = new AssignmentGrader(id, weight, offset, total_assigned, total_assigned, cap)
-          grader_array.push(graderObj)
-        })
-        resolve(grader_array)
+function get_grader_objects(assignment_id) {
+  return new Promise(function (resolve, reject) {
+    let query = "SELECT grader.id, assignments_cap.cap, grader.offset, assignments_cap.total_assigned_for_assignment, grader.weight FROM grader INNER JOIN assignments_cap ON grader.id=assignments_cap.grader_id WHERE assignments_cap.assignment_id = ?"
+    pool.query(query, [assignment_id], function (error, results) {
+      if (error) { reject(error) }
+      grader_array = []
+      results.forEach(grader => {
+        let id = grader.id
+        let offset = grader.offset
+        let cap = grader.cap
+        let weight = grader.weight
+        let total_assigned = grader.total_assigned_for_assignment
+        let graderObj = new AssignmentGrader(id, weight, offset, total_assigned, total_assigned, cap)
+        grader_array.push(graderObj)
       })
-    });
-  }
+      resolve(grader_array)
+    })
+  });
+}
 
 
+/**
+ * Executes the entire distribution pipeline, including pulling unassigned
+ * submissions for [assignment_id] & all graders from the DB, detecting any 
+ * conflicts, running the distribution algorithm which assigns each grader the 
+ * number of submissions they must grade, and assigns the appropriate number of
+ * submissions to each grader. The DB is updated. 
+ * An error will be thrown if the total number of submissions exceeds the sum 
+ * of the caps of all graders.
+ * @param {*} grader_array 
+ * @param {*} assignment_id 
+ */
 function runPipeline(assignment_id) {
   return new Promise(async function (resolve, reject) {
     try {
@@ -143,14 +168,14 @@ function runPipeline(assignment_id) {
         return reject("The sum of the caps of all graders must exceed the total number of submissions.")
       }
       else {
-        let conflicts = await detect_conflicts(grader_array, assignment_id);
+        let conflicts = await detect_conflicts(grader_array, assignment_id); //detects conflicts: if any grader's num_assigned exceeds their cap
         mapped = mapped.concat(conflicts.submissionsArray);
         assignmentsLeft = mapped.length > 0 ? true : false;
 
 
         if (assignmentsLeft) {
-          let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray);
-          let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped);
+          let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray); //runs distribution algorithm 
+          let matrix_of_pairs = distribution.formMatchingMatrix(graders_assigned, mapped); //assigns the appropriate number of submissions to each grader
 
           await update_grader_entries(graders_assigned) //update offsets of graders in DB with output_of_algo
 
@@ -197,9 +222,10 @@ function get_unassigned_submissions(assignment_id) {
 
 
 /**
- * TODO 
- * @param {*} grader_array 
- * @param {*} assignment_id 
+ * Updates the assignments_cap SET in the DB, by updating each grader's 
+ * total_assigned_for_assignment value for the assignment [assignment_id].
+ * @param {*} grader_array The complete set of graders 
+ * @param {*} assignment_id The assignment ID
  */
 function update_total_assigned(grader_array, assignment_id) {
   return new Promise(function (resolve, reject) {
@@ -219,8 +245,8 @@ function update_total_assigned(grader_array, assignment_id) {
 }
 
 /**
- * TODO
- * @param {*} grader_array 
+ * Updates each grader's offset in the DB. 
+ * @param {*} grader_array The complete set of graders including their offsets. 
  */
 function update_grader_entries(grader_array) {
   return new Promise(function (resolve, reject) {
@@ -240,8 +266,12 @@ function update_grader_entries(grader_array) {
 }
 
 /**
- * TODO
- * @param {*} assignment_matrix 
+ * Precondition: All submission IDs must be unique - even across different 
+ * assignments. 
+ * Updates the submission SET in the DB, by setting the appropriate grader ID 
+ * to the appropriate submission ID. 
+ * @param {*} assignment_matrix An array of pairs (grader ID, submission ID), 
+ * representing which grader is assigned to which submission. 
  */
 function assign_submissions_to_grader(assignment_matrix) {
   return new Promise(function (resolve, reject) {
@@ -264,7 +294,7 @@ function assign_submissions_to_grader(assignment_matrix) {
 
 /**
  * Adds new submissions from Canvas by assignment_id into DB
- * @param {int} assignment_id 
+ * @param {int} assignment_id The assignment ID
  */
 function pull_submissions_from_canvas(assignment_id) {
   return new Promise(async function (resolve, reject) {
