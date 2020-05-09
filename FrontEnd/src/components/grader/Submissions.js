@@ -18,14 +18,15 @@ export default function Submissions(props){
         manual: true,
         initialData: [],
         onSuccess: (result, params) => {
+            console.log(result)
             if(result.length == 0){
                 alert.show('You have no assigned submissions for this assignment yet')
                 props.showControls(false)
             }else{
                 alert.removeAll()
-                let user_ids = []
+                let user_ids = [] // [user_id, net_id]
                 result.map((submission) =>{//concurrently pull all submission for quick edit
-                    user_ids.push(submission['user_id'])
+                    user_ids.push([submission['user_id'], submission['name']])
                     singleSubmissionFetch.run(submission['user_id'], submission['name'])
                 });
                 let downloadObject = {
@@ -81,6 +82,12 @@ export default function Submissions(props){
     }, [props.assignment_id]);
     
     
+    /**
+     * 
+     * @param {*} id 
+     * @param {*} event 
+     * @param {*} type 
+     */
     const handleCommentGrade = (id, event, type) => {
         let found = gradesAndComments.current.some(submissionInArray=> submissionInArray.id == id)
         if(found){
@@ -126,7 +133,7 @@ export default function Submissions(props){
                         handleCommentGrade={handleCommentGrade}
                     />
                     :
-                    <BasicSubmissionView data={res} />
+                    <BasicSubmissionView user_id={res?.data?.user?.login_id} assignment_id={res?.data.id} is_graded={res?.data?.grade} loading={res.loading} />
                     }
                 </div>)
             }

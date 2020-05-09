@@ -20,6 +20,7 @@ module.exports.grader_info = function (assignment_id) {
               let progressObj = await getNumGradedRatio(grader.id, assignment_id);
               tempGraderObj['progress'] = progressObj.ratio;
               tempGraderObj['num_graded'] = progressObj.num_graded;
+              tempGraderObj['assignment_id'] = assignment_id;
               graderResponse.push(tempGraderObj);
             }
             resolve(graderResponse);
@@ -32,20 +33,23 @@ module.exports.grader_info = function (assignment_id) {
 
 module.exports.updateGraderInfo = function (grader_object) {
     return new Promise(async function(resolve, reject){
-      let capAssignment_id = null
       try{
-          for(let i = 0; i<grader_object.length; i++){
-            if(grader_object[i].weight != undefined){
-              await updateWeight(grader_object[i].id, grader_object[i].weight)
-            }
-            if(grader_object[i].offset != undefined){
-              await updateOffset(grader_object[i].id, grader_object[i].offset)
-            }
-            if(grader_object[i].cap != undefined){
-              await updateCaps(grader_object[i].id, grader_object[i].assignment_id, grader_object[i].cap)
-            }
+        const promisePool = pool.promise();
+        for(let i = 0; i<grader_object.length; i++){
+          if(grader_object[i].weight != undefined){
+            let sql_query = "UPDATE grader SET weight = ? WHERE id = ?";
+            await promisePool.query(sql_query, [grader_object[i].weight, grader_object[i].id]);
           }
-          return resolve();
+          if(grader_object[i].offset != undefined){
+            let sql_query = "UPDATE grader SET offset = ? WHERE id = ?";
+            await promisePool.query(sql_query, [grader_object[i].offset, grader_object[i].id]);
+          }
+          if(grader_object[i].cap != undefined){
+            let sql_query = "UPDATE assignments_cap SET cap=? WHERE grader_id=? AND assignment_id=?";
+            await promisePool.query(sql_query, [grader_object[i].cap, grader_object[i].id, grader_object[i].assignment_id]);
+          }
+        }
+        return resolve();
       }catch(error){
         reject(error)
       }
@@ -90,54 +94,6 @@ getNumGradedRatio = function (grader_id, assignment_id){
         let progressObj =  {"num_graded": total_gradered,"ratio": (total_gradered/results.length)*100}
         resolve(progressObj)
       }
-    });
-  })
-}
-
-
-/**
- * Update grader weight
- */
-function updateWeight(grader_id, weight) {
-  return new Promise(function(resolve, reject){
-    let sql_query = "UPDATE grader SET weight = ? WHERE id = ?";
-    pool.query(sql_query, [weight, grader_id], (error) => {
-      if (error) {
-        return reject(error)
-      } else {
-        return resolve()
-      }
-    }
-    );
-  })
-}
-
-/**
- * Update grader offset
- */
-function updateOffset(grader_id, offset){
-  return new Promise(function(resolve, reject){
-    let sql_query = "UPDATE grader SET offset = ? WHERE id = ?";
-    pool.query(sql_query, [offset, grader_id], (error) => {
-      if (error) {
-        return reject(error)
-      } else {
-        return resolve()
-      }
-    }
-    );
-  })
-}
-
-/**
- * Update grader caps and run algo 
- */
-function updateCaps(grader_id, assignment_id, cap) {
-  return new Promise(function(resolve, reject){
-    let sql_query = "UPDATE assignments_cap SET cap=? WHERE grader_id=? AND assignment_id=?";
-    pool.query(sql_query, [cap, grader_id, assignment_id], (sqlError) => {
-      if (sqlError) {return reject(sqlError)}
-      return resolve();
     });
   })
 }

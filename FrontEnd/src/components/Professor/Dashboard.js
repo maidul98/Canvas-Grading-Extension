@@ -11,7 +11,7 @@ import WorkLoadModal from './WorkLoadModal';
 export default function Dashboard(){
     const alert = useAlert();
     const [graderEditObject, setGraderEditObject] = useState([])
-    const currentDropdown = useRef("");
+    // const currentDropdown = useRef("");
     const [assignment_id_list, setAssignment_id_list] = useState([])
     const [assignment_id, setAssignment_id] = useState(null)
 
@@ -40,7 +40,7 @@ export default function Dashboard(){
     });
 
     /**
-     * 
+     * If there are
      */
     const updateCapsTable = useRequest({
         manual:false,
@@ -77,7 +77,7 @@ export default function Dashboard(){
         }else{
             let new_grader = {id:grader_id};
             new_grader[type]=parseInt(event.target.value);
-            new_grader['assignment_id']=currentDropdown.current;
+            new_grader['assignment_id']=assignment_id;
             oldGraderEditObject.push(new_grader);
         }
         setGraderEditObject([...oldGraderEditObject]);
@@ -95,12 +95,12 @@ export default function Dashboard(){
     }, {
         manual: true,
         onSuccess: (result, params)=>{
-            fetchGradersData.run(currentDropdown.current)
+            fetchGradersData.run(assignment_id)
             setGraderEditObject([])
             alert.success('Updated changes');
         },
         onError: (error, params) => {
-            fetchGradersData.run(currentDropdown.current)
+            fetchGradersData.run(assignment_id)
             alert.error(error.data);
             setGraderEditObject([])
         },
@@ -138,7 +138,6 @@ export default function Dashboard(){
     function handleDropdown(event){
         if(event.target.value != null){
             fetchGradersData.run(event.target.value)
-            currentDropdown.current=event.target.value
             setAssignment_id(event.target.value);
         }
     }
@@ -190,7 +189,7 @@ export default function Dashboard(){
                                 {grader.total_assigned_for_assignment}
                             </td>
                             <td className="width-1">
-                                <WorkLoadModal user_id={1} assignment_id={2}/>
+                                <WorkLoadModal user_id={grader.id} assignment_id={grader.assignment_id}/>
                             </td>
                             <td className="width-30">
                                 <ProgressBar animated now={grader.progress} label={grader.num_graded}/>
@@ -199,7 +198,7 @@ export default function Dashboard(){
                     }
                 </tbody>
             </Table>
-            {<Button className="float-right" disabled={graderEditObject.length!=0} id="distribute-btn" onClick={runDisturbation.run}>Distribute</Button>}   
+            {<Button className="float-right" disabled={graderEditObject.length!=0} id="distribute-btn" onClick={(runDisturbation.run)}>Distribute</Button>}   
             {<Button className="float-right" disabled={graderEditObject.length==0} onClick={updateGraderDetails.run}>Update</Button>}
         </div>
     );

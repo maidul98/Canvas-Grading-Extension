@@ -1,8 +1,11 @@
 /**
+ * ===============================================================================
  * This file will store the logic behind all the database queries. All functions
  * defined here will deal with retrieving or pushing data from the 
  * MySQL database. 
+ * ===============================================================================
  */
+
 var AssignmentGrader = require('./grader-model');
 var DetectConflictOutput = require('./detectConflictsResult');
 var async = require('async')
@@ -302,7 +305,7 @@ function pull_submissions_from_canvas(assignment_id) {
           assignment_id: element.assignment_id,
           is_graded: element.graded_at !== null,
           updated_at: element.submitted_at,
-          name: element.user.name,
+          name: element.user.login_id,
           user_id: element.user.id
         };
 

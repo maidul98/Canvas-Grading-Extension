@@ -2,16 +2,19 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner'
 
-export default function BasicSubmissionView(props){
+export default function BasicSubmissionView({user_id, is_graded, loading, assignment_id}){
     return(
         <div className="assignment">
             <div className="student-name">
-                {props.data.loading? <Spinner animation="grow" />: <></>}
-                {/* <Link to={"/assignments/"+props.data.data.assignment_id+'/'+props.data.data.user_id}> */}
-                    {props.data.data?.user?.login_id}
-                {/* </Link> */}
+                {loading? <Spinner animation="grow" />: <></>}
+                {
+                    assignment_id?
+                    <Link to={"/assignments/"+assignment_id+'/'+user_id}>{user_id}</Link>
+                    :
+                    <>{user_id}</>
+                }
             </div>
-            {props.data.data?.score === null | props.data.data?.score === undefined
+            {is_graded === null | is_graded === undefined | is_graded == 0
             ?
             <div className="grade-status">
                 <div className="grade-icon-red"></div>

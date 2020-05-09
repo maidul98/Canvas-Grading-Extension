@@ -45,9 +45,9 @@ function downloadAttachment(attachment, user_folder_path) {
  * @param {int} assignment_id 
  * @param {string} parentPath 
  */
-async function getAllUserAttachments(user_id, assignment_id, parentPath) {
+async function getAllUserAttachments(user_id, net_id, assignment_id, parentPath) {
     try {
-        const user_folder_path = mkdirp.sync(`${parentPath}/${user_id}`);
+        const user_folder_path = mkdirp.sync(`${parentPath}/${net_id}`);
         const submission = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${assignment_id}/submissions/${user_id}`, config)
         if (submission.data.attachments) {
             return await Promise.all(submission.data.attachments.map(attachment =>
@@ -70,8 +70,9 @@ async function getAllUserAttachments(user_id, assignment_id, parentPath) {
 async function downloadAllAttachmentsForAllUser(batchDownloadPath, user_ids, assignment_id) {
     try {
         let parentPath = await mkdirp(batchDownloadPath)
-        return await Promise.all(user_ids.map(user_id =>
-            getAllUserAttachments(user_id, assignment_id, parentPath)
+        return await Promise.all(user_ids.map((user)  =>{
+            return getAllUserAttachments(user[0], user[1], assignment_id, parentPath)
+        }
         ))
     } catch (error) {
         throw error
@@ -122,8 +123,6 @@ module.exports.downloadSubmissions = async (req, res) => {
         let folder_name = `${req.body.assignment_id}-${req.body.grader_id}`
         let bulkSubmissionsPath = `temp_bulk_downloads/assignment-${folder_name}`;
         let zip_file_path = `${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`
-        console.log(zip_file_path)
-        console.log(bulkSubmissionsPath)
         if (!fs.existsSync('temp_bulk_downloads')) {
             await mkdirp('temp_bulk_downloads')
         }
