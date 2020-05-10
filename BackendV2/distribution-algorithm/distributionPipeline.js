@@ -139,7 +139,7 @@ function get_grader_objects(assignment_id) {
 function runPipeline(assignment_id) {
   return new Promise(async function (resolve, reject) {
     try {
-      await pull_submissions_from_canvas(assignment_id)
+      //await pull_submissions_from_canvas(assignment_id)
       let grader_array = await get_grader_objects(assignment_id);
       let submission_json = await get_unassigned_submissions(assignment_id);
       let mapped = submission_json.map(v => v.id);
