@@ -16,19 +16,10 @@ export default function AssignmentList(props) {
     /**
      * Get the list of assignments from Canvas  
      */
-    const fetchAssignments = useRequest({
-        url: "/canvas-api",
-        method:"post",
-        data:{ "endpoint": "assignments?per_page=100" }
-    }, {
+    const fetchAssignments = useRequest(`${process.env.REACT_APP_BASE_URL}/get-all-assignments`, {
         manual: true,
         onSuccess: (result, params) => {
-            let reOrdered = result.sort(function compare(a, b) {
-                var dateA = new Date(a.due_at);
-                var dateB = new Date(b.due_at);
-                return dateB-dateA;
-            });
-            setAssignments(reOrdered);
+            setAssignments(result);
         },
         formatResult: []
     });
@@ -86,7 +77,7 @@ export default function AssignmentList(props) {
                 <div className="clear-fix"></div>
                 <div id="select-assignment">
                     <select id="dropdown-assignment-selector" onChange={ e => setCurrent_assignment_id(e.target.value)}>
-                        {assignments.map((res)=> <option key={res.id} value={res.id}>{res.name}</option>)}
+                        {assignments.map((res)=> <option key={res.assignment_id} value={res.assignment_id}>{res.assignment_name}</option>)}
                     </select>
                 </div>
                 <div className="assignments-container">

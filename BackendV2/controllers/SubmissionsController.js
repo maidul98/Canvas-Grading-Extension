@@ -12,3 +12,15 @@ module.exports.assigned = async (req, res) => {
         res.status(406).send(error)
     }
 }
+
+/**
+ * Get all assignment_ids and their name
+ */
+module.exports.getAllAssignments = async (req, res) => {
+    try{
+        let assignments = await submission.getAllAssignments();
+        res.send(assignments);
+    }catch(error){
+        res.status(406).send(error)
+    }
+}
