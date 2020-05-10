@@ -124,9 +124,6 @@ export default function Dashboard(){
         initialData: []
     });
      
-    // useEffect(()=>{
-    //     syncWithCanvas.run();
-    // }, [])
 
     /**
      * Sets current selected assignment and repulls updates from DB
@@ -146,7 +143,7 @@ export default function Dashboard(){
         syncWithCanvas.run();
 
         //refetch list of assigments in case there name chages 
-        fetchAssignmentsList.run()
+        fetchAssignmentsList.run();
         // refetch grades data
         fetchGradersData.run(assignment_id)
 
