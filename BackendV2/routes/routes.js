@@ -24,9 +24,11 @@ router.post('/update-grader-info', controllers.ProfessorDashboardController.upda
 router.post('/canvas-api', controllers.CanvasAPIController.GET_all);
 
 
-/*POPULATE ASSIGNMENT CAPS TABLE*/
-router.post('/check-for-new-assignments', controllers.AssignmentsCapController.populateAssignmentsCapTable)
+/*SYNC APP DATA WITH CANVAS*/
+router.get('/sync-with-canvas', controllers.SyncWithCanvasController.syncWithCanvas)
 
+/*GET ALL ASSIGMENTS */
+router.get('/get-all-assignments', controllers.SubmissionsController.getAllAssignments)
 
 /*DOWNLOAD SUBMISSIONS*/
 router.post('/download-submission', controllers.DownloadController.downloadSubmissions)

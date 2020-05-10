@@ -1,5 +1,5 @@
   
-import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import { useRequest } from '@umijs/hooks';
 import { useAlert } from 'react-alert'
 import LoadingIcon from '../LoadingIcon';
@@ -18,36 +18,30 @@ export default function Dashboard(){
     /**
      * Get the list of assignments from Canvas from which the user can drop down from 
      */
-    const fetchAssignmentsList = useRequest({
-        url: "/canvas-api",
-        method:"post",
-        data:{ "endpoint": "assignments?per_page=100" }
-    }, {
+    const fetchAssignmentsList = useRequest(`${process.env.REACT_APP_BASE_URL}/get-all-assignments`, {
         onSuccess: (result, params)=>{
-            if(result[0].id != undefined){
-                fetchGradersData.run(result[0].id);
-                setAssignment_id(result[0].id); // set current assignment id 
+            if(result[0].assignment_id != undefined){
+                fetchGradersData.run(result[0].assignment_id);
+                setAssignment_id(result[0].assignment_id); // set current assignment id 
             }
+
             // If there are new assignments then add them to caps table
-            let assignment_id_list = result.map(assignment => assignment.id)
+            let assignment_id_list = result.map(assignment => assignment.assignment_id)
             setAssignment_id_list(assignment_id_list)
-            updateCapsTable.run();
         },
         onError: (error, params) => {
             alert.error("Something went wrong while fetching assignments, please try refreshing the page");
         },
-        initialData: []
+        initialData:Array
     });
 
+
     /**
-     * If there are
+     * Sync submissions, assigment caps table and assigments with Canvas
      */
-    const updateCapsTable = useRequest({
-        manual:false,
-        url:`${process.env.REACT_APP_BASE_URL}/check-for-new-assignments`,
-        method:'post',
-        headers: { 'Content-Type': 'application/json' },
-        body:JSON.stringify({"assignment_ids": assignment_id_list})
+    const syncWithCanvas = useRequest(`${process.env.REACT_APP_BASE_URL}/sync-with-canvas`,{
+        manual:true,
+        headers: { 'Content-Type': 'application/json' }
     });
 
     /**
@@ -130,6 +124,9 @@ export default function Dashboard(){
         initialData: []
     });
      
+    // useEffect(()=>{
+    //     syncWithCanvas.run();
+    // }, [])
 
     /**
      * Sets current selected assignment and repulls updates from DB
@@ -142,15 +139,29 @@ export default function Dashboard(){
         }
     }
 
-    if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList.loading | updateCapsTable.loading | runDisturbation.loading) return <LoadingIcon />;
+    /**
+     * 
+     */
+    function handleCanvasSync(){
+        syncWithCanvas.run();
+
+        //refetch list of assigments in case there name chages 
+        fetchAssignmentsList.run()
+        // refetch grades data
+        fetchGradersData.run(assignment_id)
+
+    }
+
+    if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList.loading | syncWithCanvas.loading | runDisturbation.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
+            <Button onClick={handleCanvasSync}>Sync with Canvas</Button>
             <select className="float-right" id="selectAssignmentDropdown" value={assignment_id} onChange={event=>handleDropdown(event)}>
                 <option >Select assignment to distribute</option>
                     {
                     fetchAssignmentsList.data.map(assignment=>
-                    <option value={assignment.id} key={assignment.id}>Progress for {assignment.name}</option>)
+                    <option value={assignment.assignment_id} key={assignment.assignment_id}>Progress for {assignment.assignment_name}</option>)
                     }
             </select>
             <div className="clearfix"></div> 
