@@ -148,8 +148,10 @@ function runPipeline(assignment_id) {
         return total + element.num_assigned;
       }, 0);
 
-      //sum of caps 
+      //sum of caps *** for graders w/ weight = 0, we add min(cap, offset) *****
+      //grader_array must be pulled from DB and normalized 
       let total_cap = grader_array.reduce((total, element) => {
+        if (element.weight === 0) return total + (Math.min(element.cap, element.offset));
         return total + element.cap;
       }, 0);
 
