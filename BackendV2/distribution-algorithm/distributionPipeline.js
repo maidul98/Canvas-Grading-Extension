@@ -148,11 +148,9 @@ function runPipeline(assignment_id) {
         return total + element.num_assigned;
       }, 0);
 
-      //sum of max number of submissions that each grader can grade - 
-      //for graders with weight = 0, this is represented by minimum(offset, cap) & 
-      //for graders with weight > 0, this is simply their cap
+      //sum of max number of submissions that each grader can grade 
       let total_cap = grader_array.reduce((total, element) => {
-        if (element.weight === 0) return total + (Math.min(element.cap, element.offset));
+        if (element.weight === 0) return total + (Math.min(element.cap, element.offset + element.num_assigned));
         return total + element.cap;
       }, 0);
 
