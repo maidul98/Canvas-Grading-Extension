@@ -34,7 +34,7 @@ async function createDummyData(assignment_id) {
   try {
     let promisePool = pool.promise();
 
-    for (let i = 130; i < 138; i++) {
+    for (let i = 180; i < 186; i++) {
       let id = i;
       let grader_id = null;
       let is_graded = null;
@@ -85,6 +85,6 @@ async function createDummyData(assignment_id) {
 
 
 
-//createDummyData('1');
+createDummyData('1');
 
-reset('1')
+//reset('1')

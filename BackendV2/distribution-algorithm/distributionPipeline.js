@@ -148,21 +148,21 @@ function runPipeline(assignment_id) {
         return total + element.num_assigned;
       }, 0);
 
-      //sum of caps *** for graders w/ weight = 0, we add min(cap, offset) *****
-      //grader_array must be pulled from DB and normalized 
+      //sum of max number of submissions that each grader can grade - 
+      //for graders with weight = 0, this is represented by minimum(offset, cap) & 
+      //for graders with weight > 0, this is simply their cap
       let total_cap = grader_array.reduce((total, element) => {
         if (element.weight === 0) return total + (Math.min(element.cap, element.offset));
         return total + element.cap;
       }, 0);
 
       if (total_cap - total_num_assigned < mapped.length) {
-        return reject("The sum of the caps of all graders must exceed the total number of submissions.")
+        return reject("There are more submissions to be distributed than the graders can grade. Please increase the caps.")
       }
       else {
         let conflicts = await detect_conflicts(grader_array, assignment_id); //detects conflicts: if any grader's num_assigned exceeds their cap
         mapped = mapped.concat(conflicts.submissionsArray);
         assignmentsLeft = mapped.length > 0 ? true : false;
-
 
         if (assignmentsLeft) {
           let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray); //runs distribution algorithm 
