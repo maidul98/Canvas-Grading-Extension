@@ -67,97 +67,6 @@ function formMatchingMatrix(grader_array, submissions_array) {
 
 
 
-/*
-
-//////TESTING START ==========================================================
-
-let graderArray =
-    [new AssignmentGrader(12, 3, 0, 23, 0, 0),
-    new AssignmentGrader(11, 3, 0, 23, 0, 0),
-    new AssignmentGrader(10, 2, 1, 15, 0, 0),
-    new AssignmentGrader(9, 2, 1, 15, 0, 0),
-    new AssignmentGrader(8, 2, 1, 15, 0, 0),
-    new AssignmentGrader(7, 2, 1, 15, 1, 1),
-    new AssignmentGrader(6, 1, 1, 8, 0, 0),
-    new AssignmentGrader(5, 1, 1, 8, 0, 0),
-    new AssignmentGrader(4, 1, 1, 8, 0, 0),
-    new AssignmentGrader(2, 0, 2, 3, 0, 100),
-    new AssignmentGrader(3, 1, 0, 9, 9, 137),
-    new AssignmentGrader(1, 0, 0, 0, 0, 100)];
-
-console.log(test_purposes(graderArray));
-
-function test_purposes(graderArray) {
-
-    let left_to_distribute = 0;
-
-    //checking if the any grader's num_assigned value exceeds their cap 
-    for (let i = 0; i < graderArray.length; i++) {
-
-        surplus = graderArray[i].num_assigned - graderArray[i].cap;
-
-        if (surplus > 0) {
-            graderArray[i].decrementNumAssigned(surplus);
-            graderArray[i].incrementOffset(surplus);
-            left_to_distribute += surplus;
-        }
-    }
-
-
-    graderArray = normalize_offset(graderArray);
-
-    //sort graders in order of worst to best offsets 
-    graderArray.sort(function (a, b) {
-        if (b.offset === a.offset) return 0;
-        return b.offset > a.offset ? 1 : -1;
-    });
-
-    //[left_to_distribute] represents the total number of submissions that now 
-    //need to be distributed among available graders
-
-
-
-    while (left_to_distribute !== 0) {
-
-        for (let i = 0; i < graderArray.length; i++) {
-            if (left_to_distribute === 0) break;
-            let grader = graderArray[i];
-
-           
-        }
-    }
-
-    //compute the current minimum offset among all graders after re-distribution
-    let min_offset = 1000000;
-    for (let i = 0; i < graderArray.length; i++)
-        min_offset = Math.min(graderArray[i].offset, min_offset);
-
-    //adjusting offsets for all graders with weight = 0 
-    if (min_offset < 0) {
-        graderArray = normalize_offset(graderArray);
-        for (let i = 0; i < graderArray.length; i++) {
-            if (graderArray[i].weight < 1) {
-                graderArray[i].incrementOffset(min_offset);
-            }
-        }
-    }
-
-    for (let i = 0; i < graderArray.length; i++)
-        graderArray[i].update_dist_num_assigned(graderArray[i].num_assigned - graderArray[i].dist_num_assigned);
-
-
-    return normalize_offset(graderArray);
-}
-
-
-//============================TESTING END ==========================================
-
-*/
-
-
-
-
-
 
 /**
  * Main function that assigns each grader in [graderArray]  the number of submissions 
@@ -172,16 +81,9 @@ function test_purposes(graderArray) {
  */
 function main_distribute(num_of_submissions, graderArray) {
 
-    console.log("\n\nINITIAL PULLED FROM DB")
-    console.log(graderArray)
-
     //initial distribution 
     //only offset & num_assigned should be altered 
     graderArray = distribute(num_of_submissions, graderArray);
-
-    // console.log("\n\n AFTER initial distribution");
-    console.log(graderArray);
-
 
     let left_to_distribute = 0;
 
@@ -312,10 +214,6 @@ function distribute(num_of_submissions, graderArray) {
             }
         }
 
-        console.log("\n\n AFTER IF STATEMENT distribution");
-        console.log(graderArray);
-
-
     }
     else {
         /*In this case, assignments will be distirbuted according to offsets first, 
@@ -326,8 +224,7 @@ function distribute(num_of_submissions, graderArray) {
             graderArray[i].incrementNumAssigned(graderArray[i].offset);
             graderArray[i].updateOffset(0);
         }
-        console.log("Distrubuted assigmnets according to offsets only")
-        console.log(graderArray)
+
         //number of assignments to be distributed according to weights
         distBasedWeights = num_of_submissions - totalOffset;
 
@@ -342,8 +239,7 @@ function distribute(num_of_submissions, graderArray) {
             assigned = Math.floor(graderArray[i].weight * distBasedWeights / total_weight);
             graderArray[i].incrementNumAssigned(assigned);
         }
-        console.log("\ndist by weights ")
-        console.log(graderArray)
+
         //sum of each grader's num_assigned AFTER distribution 
         now_distributed = graderArray.reduce((total, element) => {
             return total + element.num_assigned;
@@ -355,7 +251,6 @@ function distribute(num_of_submissions, graderArray) {
         //number of assignments that still need to be distributed due to rounding
         leftAssign = num_of_submissions - assigned_dist;
 
-        console.log("num that still need to be distributed: " + leftAssign)
         //At this point in the program, all of the graders have an equal offset of 0.
 
         /*distribute remaining assignments evenly at first, if possible*/
@@ -396,8 +291,6 @@ function distribute(num_of_submissions, graderArray) {
             }
         }
 
-        console.log("after everything is dist:")
-        console.log(graderArray)
         return graderArray;
 
     } //end of else statement

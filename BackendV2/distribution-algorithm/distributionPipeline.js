@@ -65,7 +65,7 @@ function get_surplus_submissions(graderID, surplus, assignment_id) {
 
       let diff_in_graded_assignments = surplus - results.length;
       if (diff_in_graded_assignments > 0)
-        return reject("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignments.")
+        return reject("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignment(s).")
 
       // TO DO: max user connection error here
       for (let i = 0; i < surplus; i++) {
