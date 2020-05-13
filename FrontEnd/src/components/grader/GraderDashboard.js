@@ -80,7 +80,7 @@ export default function AssignmentList(props) {
 
     return (
         <div className="container">
-            <div className="content-container">
+            <div>
                 {
                     showControls
                     ?

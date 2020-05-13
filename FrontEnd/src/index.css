@@ -333,11 +333,13 @@ h1{
 /**
 ==========Main Navigation Bar===========
 **/
+
 #navigation-container{
   /* display:flex;
   justify-content: space-between; */
   padding: 10px 0;
   background-color: #b31b1b;
+  margin-bottom: 20px;
 }
 
 #navigation-content{

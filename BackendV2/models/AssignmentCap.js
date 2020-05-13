@@ -9,7 +9,7 @@ const pool = require("../pool")
 module.exports.insertForAssignmentsForUsers = async function (assignments, graders) {
   return new Promise((resolve, reject) => {
     if (assignments === null || graders === null || assignments.length === 0 || graders.length === 0) {
-      reject("Graders or Assignments are empty")
+      return resolve();
     }
     pool.getConnection(function (err, connection) {
       let queries = []

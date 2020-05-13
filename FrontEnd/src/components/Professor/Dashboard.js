@@ -1,5 +1,5 @@
   
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 import { useRequest } from '@umijs/hooks';
 import { useAlert } from 'react-alert'
 import LoadingIcon from '../LoadingIcon';
@@ -8,80 +8,75 @@ import Table from 'react-bootstrap/Table';
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import FormControl from 'react-bootstrap/FormControl';
 import WorkLoadModal from './WorkLoadModal';
-import config from '../../config'
+import {UserContext} from '../../userContext';
+import config from '../../config';
+import axios from 'axios';
 
 export default function Dashboard(){
+    let user = useContext(UserContext)
     const alert = useAlert();
     const [graderEditObject, setGraderEditObject] = useState([])
     const [assignment_id_list, setAssignment_id_list] = useState([])
     const [assignment_id, setAssignment_id] = useState(null)
-
-    /**START OF USER AUTH**/
-    const [user, setUser] = useState({});
-    useEffect(async ()=>{
-        let response = await fetch(`${config.backend.url}/user`, config.header);
-        if(response.status == 200){
-            let userFetched = await response.json();
-            setUser(userFetched.user)
-        }else{
-            if(window.location.pathname != '/'){
-                window.location = '/';
-            }
-        }
-    }, [])
-    /**END OF USER AUTH**/
-
+    
     /**
      * Get the list of assignments from Canvas from which the user can drop down from 
      */
-    const fetchAssignmentsList = useRequest(async ()=>{
-        return (await fetch(`${config.backend.url}/get-all-assignments`,config.header)).json();
+    const fetchAssignmentsList = useRequest(()=>{
+        return axios.get(`${config.backend.url}/get-all-assignments`)
     }, {
-        onSuccess: async (result, params)=>{
+        onSuccess: (result, params)=>{
             if(result[0]?.assignment_id != undefined){
                 fetchGradersData.run(result[0].assignment_id);
-                setAssignment_id(result[0].assignment_id); // set current assignment id 
+                setAssignment_id(result[0].assignment_id); 
+                // If there are new assignments then add them to caps table
+                let assignment_id_list = result.map(assignment => assignment.assignment_id)
+                setAssignment_id_list(assignment_id_list)
             }
-
-            // If there are new assignments then add them to caps table
-            let assignment_id_list = result.map(assignment => assignment.assignment_id)
-            setAssignment_id_list(assignment_id_list)
         },
         onError: (error, params) => {
             alert.error("Something went wrong while fetching assignments, please try refreshing the page");
         },
-        formatResult: [],
+        formatResult: (response)=>{
+            return [...response.data]
+        },
+        initialData:[]
     });
 
+
     /**
-     * Sync submissions, assigment caps table and assigments with Canvas
+     * Sync submissions, assigment caps table and assigments with Canvas ------------
      */
     const syncWithCanvas = useRequest(async ()=>{
-        return (await fetch(`${config.backend.url}/sync-with-canvas`,config.header)).json();
+        return axios(`${config.backend.url}/sync-with-canvas`)
     },{
         manual:true,
-        onSuccess: (result, params) => {
-            alert.success("Synced with Canvas");
+        onSuccess: (message, params) => {
+            alert.success(message);
         },
         onError: (error, params) => {
-            alert.error("Something went wrong while while syncing with Canvas");
+            alert.error(error.response.data);
         },
+        formatResult: (response)=>{
+            return response.data
+        },
+        
     });
 
     /**
      * Get grader detials from DB
      */
     const fetchGradersData = useRequest(async (assignment_id) =>{
-        return (await fetch(`${config.backend.url}/get-grader-info?assignment_id=${assignment_id}`,config.header)).json();
+        return axios(`${config.backend.url}/get-grader-info?assignment_id=${assignment_id}`)
     }, {
         manual: true,
         onError: (error, params) => {
             alert.error('Something went wrong while fetching graders, please try refreshing the page.');
         },
         formatResult: (response)=>{
-            return [...response]
+            return [...response.data]
         },
-        initialData:[]
+        initialData:[],
     });
 
     /**
@@ -141,7 +136,7 @@ export default function Dashboard(){
      * @param {*} event 
      */
     const runDisturbation = useRequest(()=>{
-        return fetch(`${config.backend.url}/distribute`, {
+        return axios(`${config.backend.url}/distribute`, {
             method: 'POST', 
             credentials: "include",
             headers: {
@@ -166,7 +161,7 @@ export default function Dashboard(){
      
 
     /**
-     * Sets current selected assignment and repulls updates from DB
+     * Sets current selected assignment and repulls grader data from DB
      * @param {*} event 
      */
     function handleDropdown(event){
@@ -177,7 +172,7 @@ export default function Dashboard(){
     }
 
     /**
-     * 
+     * Sync graders, assignmets, submissions with Canvas 
      */
     function handleCanvasSync(){
         syncWithCanvas.run();
