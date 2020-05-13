@@ -11,8 +11,6 @@ module.exports.syncWithCanvas = async (req, res) => {
     // get token 
     let configForCanvasReq = await grader.getCanvasReqConfig(req.user.id)
 
-    /*
-
     //get the list of assigments 
     let assignments = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments?per_page=200`, configForCanvasReq);
     assignments = assignments.data.filter(assignment => {
@@ -25,27 +23,20 @@ module.exports.syncWithCanvas = async (req, res) => {
       return assignment[0]
     })
 
-    */
 
     //get the list of all graders from Canvas 
     let list_of_graders = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/enrollments?per_page=1000`, configForCanvasReq);
 
     list_of_graders = list_of_graders.data.filter(enrollment => {
-      console.log(" hello  " + enrollment.role)
-      return enrollment.role == 'TeacherEnrollment';
+      return enrollment.role == 'TeacherEnrollment' || enrollment.role == 'TaEnrollment';
     });
-
-    //console.log(list_of_graders)
-
 
     list_of_graders = list_of_graders.map(enrollment => {
       return enrollment.user;
     });
 
-    /*
-    //for (let i = 0; i < list_of_graders.length; i++)
-    //console.log(list_of_graders[i].user_id.login_ig)
-    //await grader.addNewGraders(list_of_graders);
+
+    await grader.addNewGraders(list_of_graders);
 
 
     //populate assignment caps table with graders
@@ -56,7 +47,7 @@ module.exports.syncWithCanvas = async (req, res) => {
     for (let i = 0; i < assignment_ids.length; i++) {
       await submissions.pull_submissions_from_canvas(assignment_ids[i], configForCanvasReq)
     }
-    */
+
     //check if names of assigments updated
     res.send("Synced with Canvas");
   } catch (error) {
