@@ -20,7 +20,7 @@ router.get('/delete-data-base', controllers.DataBaseController.deleteDB);
 
 
 /* GET course number. */
-router.get('/get-course-number', controllers.CourseNumberController.getCourseNumber);
+router.get('/get-course-number', controllers.CanvasController.getCourseNumber);
 
 
 /* GET home page. */
