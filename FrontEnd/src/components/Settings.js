@@ -22,14 +22,8 @@ export default function Settings(props){
         return axios({
         url:`${config.backend.url}/update-canvas-token`,
         method:'post',
-        data:{'token': bearToken},
-        withCredentials: true,
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Credentials": true
-        }})
-    }, {
+        data:{'token': bearToken}
+        })}, {
         manual: true,
         onSuccess: (response, params)=>{
             alert.success(response.data);

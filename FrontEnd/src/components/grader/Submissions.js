@@ -140,9 +140,9 @@ export default function Submissions(props){
     return (
         <div>
             {submitGrades?.loading | assignedSubmissions?.loading ? <LoadingIcon />:null}
-            {console.log(singleSubmissionFetch?.fetches)}
             {Object.values(singleSubmissionFetch?.fetches).map(res => 
                 <div key={res.data.id}>
+                    {console.log(res)}
                     {
                     (props.bulk_edit)
                     ?
@@ -152,7 +152,7 @@ export default function Submissions(props){
                         handleCommentGrade={handleCommentGrade}
                     />
                     :
-                    <BasicSubmissionView user_id={res?.data?.user?.login_id} assignment_id={res?.data.id} is_graded={res?.data?.grade} loading={res.loading} />
+                    <BasicSubmissionView user_id={res?.data?.user?.id} displayName={res?.data?.user?.login_id} assignment_id={res?.data.assignment_id} is_graded={res?.data?.grade} loading={res.loading} />
                     }
                 </div>)
             }

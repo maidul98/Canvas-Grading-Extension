@@ -2,14 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner'
 
-export default function BasicSubmissionView({user_id, is_graded, loading, assignment_id}){
+export default function BasicSubmissionView({displayName, user_id, is_graded, loading, assignment_id}){
     return(
         <div className="assignment">
             <div className="student-name">
                 {loading? <Spinner animation="grow" />: <></>}
                 {
                     assignment_id?
-                    <Link to={"/assignments/"+assignment_id+'/'+user_id}>{user_id}</Link>
+                    <a href={"/assignments/"+assignment_id+'/'+user_id}>{displayName}</a>
                     :
                     <>{user_id}</>
                 }
