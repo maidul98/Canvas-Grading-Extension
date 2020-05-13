@@ -13,7 +13,7 @@ import config from '../../config';
 import axios from 'axios';
 
 export default function Dashboard(){
-    let user = useContext(UserContext)
+    // let user = useContext(UserContext)
     const alert = useAlert();
     const [graderEditObject, setGraderEditObject] = useState([])
     const [assignment_id_list, setAssignment_id_list] = useState([])
@@ -23,7 +23,7 @@ export default function Dashboard(){
      * Get the list of assignments from Canvas from which the user can drop down from 
      */
     const fetchAssignmentsList = useRequest(()=>{
-        return axios.get(`${config.backend.url}/get-all-assignments`)
+        return axios(`${config.backend.url}/get-all-assignments`)
     }, {
         onSuccess: (result, params)=>{
             if(result[0]?.assignment_id != undefined){
@@ -52,10 +52,10 @@ export default function Dashboard(){
     },{
         manual:true,
         onSuccess: (message, params) => {
-            alert.success(message);
+            alert.success("Synced with canvas");
         },
         onError: (error, params) => {
-            alert.error(error.response.data);
+            alert.error("Something went wrong when syncing with Canvas");
         },
         formatResult: (response)=>{
             return response.data
@@ -101,51 +101,12 @@ export default function Dashboard(){
         setGraderEditObject([...oldGraderEditObject]);
     }
 
-
-    /**
-     * Sends the grader object to the backend to be be updated in the database 
-     */
-    const updateGraderDetails = useRequest(()=>{
-        return fetch(`${config.backend.url}/update-grader-info`, {
-            method: 'POST', 
-            credentials: "include",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Credentials": true
-            }, 
-            body: JSON.stringify(graderEditObject)
-        })
-    }, {
-        manual: true,
-        onSuccess: (result, params)=>{
-            fetchGradersData.run(assignment_id)
-            setGraderEditObject([])
-            alert.success('Updated changes');
-        },
-        onError: (error, params) => {
-            fetchGradersData.run(assignment_id)
-            alert.error(error.data);
-            setGraderEditObject([])
-        },
-        initialData: []
-    });
-
     /**
      * Run the distrubaion algo
      * @param {*} event 
      */
     const runDisturbation = useRequest(()=>{
-        return axios(`${config.backend.url}/distribute`, {
-            method: 'POST', 
-            credentials: "include",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Credentials": true
-            }, 
-            body: JSON.stringify({assignment_id: assignment_id})
-        })
+        return axios({url:`${config.backend.url}/distribute`, method:'POST', data: {assignment_id: assignment_id}})
     }, {
         manual: true,
         onSuccess: (result, params)=>{
@@ -154,9 +115,26 @@ export default function Dashboard(){
         },
         onError: (error, params) => {
             fetchGradersData.run(assignment_id);
-            alert.error(error.data);
+            alert.error(error.response.data);
         },
         initialData: []
+    });
+
+    /**
+     * Sends the grader object to the backend to be be updated in the database 
+     */
+    const updateGraderDetails = useRequest(()=>{
+        return axios({url:`${config.backend.url}/update-grader-info`, method:'post', data: graderEditObject})
+    }, {
+        manual: true,
+        onSuccess: (data)=>{
+            fetchGradersData.run(assignment_id)
+            setGraderEditObject([])
+            alert.success('Updated changes');
+        },
+        onError: (error, params) => {
+            alert.error("Something happened when saving chages, please try again");
+        }
     });
      
 
