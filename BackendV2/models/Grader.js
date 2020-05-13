@@ -165,7 +165,7 @@ module.exports.updateCanvasToken = async function (user_id, token){
     var encryptoredToken = encryptor.encrypt(token);
     await promisePool.query("UPDATE grader SET c_token =? WHERE id=?", [encryptoredToken, user_id])
   }catch(error){
-    throw new Error('The token is invalid, please try again')
+    throw new Error('Your canvas token may have expired, please try adding a new token in settings and try again')
   }
 }
 

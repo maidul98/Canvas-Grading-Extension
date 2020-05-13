@@ -11,7 +11,20 @@ const options = {
     timeout: 5000,
     transition: transitions.FADE
 };
- 
+
+// add the cookies to every request going out 
+axios.interceptors.request.use((config) => {
+    config.withCredentials = true;
+    config.header = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Credentials": true
+    }
+    return config;
+  }, (error) => {
+    return Promise.reject(error);
+  });
+
 
 // Add a response interceptor
 axios.interceptors.response.use((response) => {

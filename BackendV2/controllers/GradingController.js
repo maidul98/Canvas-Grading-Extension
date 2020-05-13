@@ -11,7 +11,7 @@ exports.batchGrade = async function (req, res) {
         let canvasReqConfig = await grader.getCanvasReqConfig(req.user.id)
         let formData = {};
         let submission_ids = []
-        
+
         req.body.forEach(j => {
         formData[`grade_data[${j.id}][text_comment]`] = j.comment;
         formData[`grade_data[${j.id}][group_comment]`] = j.is_group_comment;
@@ -19,9 +19,15 @@ exports.batchGrade = async function (req, res) {
         submission_ids.push(j.id)
         });
 
-        await grade.set_assignments_as_graded(submission_ids, req.params.assignment_id)
-        await axios.post(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), canvasReqConfig)
-        res.send();
+        try{
+          await axios.post(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), canvasReqConfig)
+          await grade.set_assignments_as_graded(submission_ids, req.params.assignment_id)
+        }catch(error){
+          throw new Error('Your Canvas token has expired, please update the token in settings and try again')
+        }
+        
+        res.send("Grades have been saved to Canvas");
+        
     } catch (error) {
       return res.status(500).send(error.message)
     }

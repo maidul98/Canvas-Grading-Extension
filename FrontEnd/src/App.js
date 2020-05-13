@@ -16,14 +16,7 @@ import './index.css';
 function App () {
   const [user, setUser] = useState(null);
   useEffect(()=>{
-      axios({
-          url:`${config.backend.url}/user`,
-          withCredentials: true,
-          headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Credentials": true
-      }}).then((response)=>{
+      axios({url:`${config.backend.url}/user`}).then((response)=>{
         if(response != undefined){
           setUser(response.data.user)
         }
