@@ -15,15 +15,12 @@
     "debug": "~2.6.9",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "folder-zip-sync": "^1.0.5",
     "form-data": "^3.0.0",
     "fs-extra": "^9.0.0",
     "heroku": "^7.38.2",
     "http-errors": "~1.6.3",
     "https": "^1.0.0",
     "jade": "~1.11.0",
-    "jsonwebtoken": "^8.5.1",
-    "jszip": "^3.3.0",
     "mkdirp": "^1.0.3",
     "morgan": "~1.9.1",
     "ms": "^2.1.2",
@@ -39,8 +36,7 @@
     "rimraf": "^3.0.2",
     "sequelize": "^5.21.5",
     "simple-encryptor": "^3.0.0",
-    "zip-a-folder": "0.0.12",
-    "zip-dir": "^1.0.2"
+    "zip-a-folder": "0.0.12"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
