@@ -14,7 +14,6 @@
     "express": "^4.17.1",
     "folder-zip-sync": "^1.0.5",
     "form-data": "^3.0.0",
-    "fs-extra": "^9.0.0",
     "heroku": "^7.38.2",
     "http-errors": "~1.6.3",
     "https": "^1.0.0",
