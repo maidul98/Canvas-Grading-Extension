@@ -15,7 +15,11 @@ router.get('/user', function (req, res, next) {
 });
 
 
-/*GET course number*/
+/* DELETE all entires of all tables in the DB. */
+router.get('/delete-data-base', controllers.DataBaseController.deleteDB);
+
+
+/* GET course number. */
 router.get('/get-course-number', controllers.CourseNumberController.getCourseNumber);
 
 
