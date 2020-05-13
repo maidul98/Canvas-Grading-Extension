@@ -6,7 +6,7 @@ const submission = require('../models/Submission')
  */
 module.exports.assigned = async (req, res) => {
     try{
-        let submissions = await submission.get_assigned(req.query.assigment_id, req.query.user_id)
+        let submissions = await submission.get_assigned(req.query.assigment_id, req.user.id)
         res.send(submissions);
     }catch(error){
         res.status(406).send(error)
