@@ -32,6 +32,24 @@ module.exports.grader_info = function (assignment_id) {
   })
 }
 
+/**
+ * Adds [graders] into Canvas. 
+ */
+module.exports.addNewGraders = async function (graders) {
+  try {
+    const promisePool = pool.promise();
+    for (let i = 0; i < graders.length; i++) {
+      let sql_query = "INSERT IGNORE INTO grader (id, name, last_updated, email) VALUES (?, ?, ?, ?)";
+      await promisePool.query(sql_query, [graders[i].id, graders[i].login_id, Date.now(), `${graders[i].login_id}@cornell.edu`]);
+    }
+    return resolve();
+  } catch (error) {
+    return new Error("There was an error in syncing graders.");
+  }
+}
+
+
+
 
 module.exports.updateGraderInfo = function (grader_object) {
   return new Promise(async function (resolve, reject) {
