@@ -13,10 +13,9 @@ import config from '../../config';
 import axios from 'axios';
 
 export default function Dashboard(){
-    // let user = useContext(UserContext)
+    let user = useContext(UserContext)
     const alert = useAlert();
     const [graderEditObject, setGraderEditObject] = useState([])
-    const [assignment_id_list, setAssignment_id_list] = useState([])
     const [assignment_id, setAssignment_id] = useState(null)
     
     /**
@@ -29,9 +28,6 @@ export default function Dashboard(){
             if(result[0]?.assignment_id != undefined){
                 fetchGradersData.run(result[0].assignment_id);
                 setAssignment_id(result[0].assignment_id); 
-                // If there are new assignments then add them to caps table
-                let assignment_id_list = result.map(assignment => assignment.assignment_id)
-                setAssignment_id_list(assignment_id_list)
             }
         },
         onError: (error, params) => {
@@ -155,7 +151,7 @@ export default function Dashboard(){
     function handleCanvasSync(){
         syncWithCanvas.run();
         fetchAssignmentsList.run();
-        fetchGradersData.run(assignment_id)
+        fetchGradersData.run(assignment_id);
     }
 
     if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList.loading | syncWithCanvas.loading | runDisturbation.loading) return <LoadingIcon />;
