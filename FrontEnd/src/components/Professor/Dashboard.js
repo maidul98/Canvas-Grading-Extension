@@ -176,7 +176,7 @@ export default function Dashboard(){
                         <th>Offsets</th>
                         <th>Cap</th>
                         <th>Assigned</th>
-                        <th>Workload</th>
+                        {user?.role == "PROFESSOR"?<th>Workload</th>:''}
                         <th>Progress</th>
                     </tr>
                 </thead>
@@ -201,9 +201,14 @@ export default function Dashboard(){
                             <td className="width-1">
                                 {grader.total_assigned_for_assignment}
                             </td>
+                            {user?.role == "PROFESSOR"
+                            ?
                             <td className="width-1">
                                 <WorkLoadModal user_id={grader.id} assignment_id={grader.assignment_id}/>
                             </td>
+                            :
+                            ''
+                            }
                             <td className="width-30">
                                 <ProgressBar animated now={grader.progress} label={grader.num_graded}/>
                             </td>

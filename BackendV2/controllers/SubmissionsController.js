@@ -6,7 +6,15 @@ const submission = require('../models/Submission')
  */
 module.exports.assigned = async (req, res) => {
     try{
-        let submissions = await submission.get_assigned(req.query.assigment_id, req.query.user_id)
+        let user;
+        if(req.user.role == "PROFESSOR"){
+            user = req.query.user_id
+        }else{
+            user = req.user.id
+        }
+
+        let submissions = await submission.get_assigned(req.query.assigment_id, user)
+
         res.send(submissions);
     }catch(error){
         res.status(406).send(error)
