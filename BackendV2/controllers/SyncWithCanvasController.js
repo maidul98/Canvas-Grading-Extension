@@ -29,14 +29,13 @@ module.exports.syncWithCanvas = async (req, res) => {
 
     //get the list of all graders from Canvas 
     let list_of_graders = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/enrollments?per_page=1000`, configForCanvasReq);
-    list_of_graders = Object.values(list_of_graders)
 
-
-    list_of_graders = list_of_graders.filter(enrollment => {
+    list_of_graders = list_of_graders.data.filter(enrollment => {
+      console.log(" hello  " + enrollment.role)
       return enrollment.role == 'TeacherEnrollment';
     });
 
-    console.log(list_of_graders)
+    //console.log(list_of_graders)
 
 
     list_of_graders = list_of_graders.map(enrollment => {
