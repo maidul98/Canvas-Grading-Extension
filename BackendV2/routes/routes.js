@@ -15,6 +15,14 @@ router.get('/user', function (req, res, next) {
 });
 
 
+/* DELETE all entires of all tables in the DB. */
+router.get('/delete-data-base', controllers.DataBaseController.deleteDB);
+
+
+/* GET course number. */
+router.get('/get-course-number', controllers.CourseNumberController.getCourseNumber);
+
+
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', { title: 'Backend' });
@@ -52,7 +60,7 @@ router.post('/distribute', controllers.ProfessorDashboardController.runDisturbat
 
 /*GRADE PASS BACK*/
 router.post('/upload-submission-grades/assignments/:assignment_id/submissions/batch-update-grades', controllers.GradingController.batchGrade);
-  
+
 
 router.post('/update-canvas-token', (controllers.OnboardController.addCanvasToken));
 
