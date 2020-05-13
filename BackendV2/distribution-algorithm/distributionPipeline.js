@@ -65,7 +65,7 @@ function get_surplus_submissions(graderID, surplus, assignment_id) {
 
       let diff_in_graded_assignments = surplus - results.length;
       if (diff_in_graded_assignments > 0)
-        return reject("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignments.")
+        return reject("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignment(s).")
 
       // TO DO: max user connection error here
       for (let i = 0; i < surplus; i++) {
@@ -148,19 +148,19 @@ function runPipeline(assignment_id) {
         return total + element.num_assigned;
       }, 0);
 
-      //sum of caps 
+      //sum of max number of submissions that each grader can grade 
       let total_cap = grader_array.reduce((total, element) => {
+        if (element.weight === 0) return total + (Math.min(element.cap, element.offset + element.num_assigned));
         return total + element.cap;
       }, 0);
 
       if (total_cap - total_num_assigned < mapped.length) {
-        return reject("The sum of the caps of all graders must exceed the total number of submissions.")
+        return reject("There are more submissions to be distributed than the graders can grade. Please increase the caps.")
       }
       else {
         let conflicts = await detect_conflicts(grader_array, assignment_id); //detects conflicts: if any grader's num_assigned exceeds their cap
         mapped = mapped.concat(conflicts.submissionsArray);
         assignmentsLeft = mapped.length > 0 ? true : false;
-
 
         if (assignmentsLeft) {
           let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray); //runs distribution algorithm 
