@@ -8,19 +8,37 @@ import Table from 'react-bootstrap/Table';
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import FormControl from 'react-bootstrap/FormControl';
 import WorkLoadModal from './WorkLoadModal';
+import config from '../../config'
+
 export default function Dashboard(){
     const alert = useAlert();
     const [graderEditObject, setGraderEditObject] = useState([])
-    // const currentDropdown = useRef("");
     const [assignment_id_list, setAssignment_id_list] = useState([])
     const [assignment_id, setAssignment_id] = useState(null)
+
+    /**START OF USER AUTH**/
+    const [user, setUser] = useState({});
+    useEffect(async ()=>{
+        let response = await fetch(`${config.backend.url}/user`, config.header);
+        if(response.status == 200){
+            let userFetched = await response.json();
+            setUser(userFetched.user)
+        }else{
+            if(window.location.pathname != '/'){
+                window.location = '/';
+            }
+        }
+    }, [])
+    /**END OF USER AUTH**/
 
     /**
      * Get the list of assignments from Canvas from which the user can drop down from 
      */
-    const fetchAssignmentsList = useRequest(`${process.env.REACT_APP_BASE_URL}/get-all-assignments`, {
-        onSuccess: (result, params)=>{
-            if(result[0].assignment_id != undefined){
+    const fetchAssignmentsList = useRequest(async ()=>{
+        return (await fetch(`${config.backend.url}/get-all-assignments`,config.header)).json();
+    }, {
+        onSuccess: async (result, params)=>{
+            if(result[0]?.assignment_id != undefined){
                 fetchGradersData.run(result[0].assignment_id);
                 setAssignment_id(result[0].assignment_id); // set current assignment id 
             }
@@ -32,27 +50,38 @@ export default function Dashboard(){
         onError: (error, params) => {
             alert.error("Something went wrong while fetching assignments, please try refreshing the page");
         },
-        initialData:Array
+        formatResult: [],
     });
-
 
     /**
      * Sync submissions, assigment caps table and assigments with Canvas
      */
-    const syncWithCanvas = useRequest(`${process.env.REACT_APP_BASE_URL}/sync-with-canvas`,{
+    const syncWithCanvas = useRequest(async ()=>{
+        return (await fetch(`${config.backend.url}/sync-with-canvas`,config.header)).json();
+    },{
         manual:true,
-        headers: { 'Content-Type': 'application/json' }
+        onSuccess: (result, params) => {
+            alert.success("Synced with Canvas");
+        },
+        onError: (error, params) => {
+            alert.error("Something went wrong while while syncing with Canvas");
+        },
     });
 
     /**
      * Get grader detials from DB
      */
-    const fetchGradersData = useRequest((assignment_id) =>`${process.env.REACT_APP_BASE_URL}/get-grader-info?assignment_id=${assignment_id}`, {
+    const fetchGradersData = useRequest(async (assignment_id) =>{
+        return (await fetch(`${config.backend.url}/get-grader-info?assignment_id=${assignment_id}`,config.header)).json();
+    }, {
         manual: true,
         onError: (error, params) => {
             alert.error('Something went wrong while fetching graders, please try refreshing the page.');
         },
-        initialData: []
+        formatResult: (response)=>{
+            return [...response]
+        },
+        initialData:[]
     });
 
     /**
@@ -77,15 +106,21 @@ export default function Dashboard(){
         setGraderEditObject([...oldGraderEditObject]);
     }
 
+
     /**
      * Sends the grader object to the backend to be be updated in the database 
      */
-    const updateGraderDetails = useRequest({
-        manual:true,
-        url:`${process.env.REACT_APP_BASE_URL}/update-grader-info`,
-        method:'post',
-        headers: { 'Content-Type': 'application/json' },
-        body:JSON.stringify(graderEditObject)
+    const updateGraderDetails = useRequest(()=>{
+        return fetch(`${config.backend.url}/update-grader-info`, {
+            method: 'POST', 
+            credentials: "include",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Credentials": true
+            }, 
+            body: JSON.stringify(graderEditObject)
+        })
     }, {
         manual: true,
         onSuccess: (result, params)=>{
@@ -105,13 +140,18 @@ export default function Dashboard(){
      * Run the distrubaion algo
      * @param {*} event 
      */
-    const runDisturbation = useRequest({
-            manual:true,
-            url:`${process.env.REACT_APP_BASE_URL}/distribute`,
-            method:'post',
-            headers: { 'Content-Type': 'application/json' },
-            body:JSON.stringify({assignment_id: assignment_id})
-        }, {
+    const runDisturbation = useRequest(()=>{
+        return fetch(`${config.backend.url}/distribute`, {
+            method: 'POST', 
+            credentials: "include",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Credentials": true
+            }, 
+            body: JSON.stringify({assignment_id: assignment_id})
+        })
+    }, {
         manual: true,
         onSuccess: (result, params)=>{
             fetchGradersData.run(assignment_id);
@@ -141,19 +181,15 @@ export default function Dashboard(){
      */
     function handleCanvasSync(){
         syncWithCanvas.run();
-
-        //refetch list of assigments in case there name chages 
         fetchAssignmentsList.run();
-        // refetch grades data
         fetchGradersData.run(assignment_id)
-
     }
 
     if(fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList.loading | syncWithCanvas.loading | runDisturbation.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
-            <Button onClick={handleCanvasSync}>Sync with Canvas</Button>
+            <Button onClick={handleCanvasSync} variant="secondary">Sync with Canvas</Button>
             <select className="float-right" id="selectAssignmentDropdown" value={assignment_id} onChange={event=>handleDropdown(event)}>
                 <option >Select assignment to distribute</option>
                     {

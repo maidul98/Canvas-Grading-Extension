@@ -1,4 +1,6 @@
 const pool = require('../pool');
+var encryptor = require('simple-encryptor')(process.env.APP_SECRET_KEY);
+const axios = require('axios');
 
 /**
  * Get weights, net_id, and offset, cap, total assigned for all graders given a assignment_id. 
@@ -97,3 +99,74 @@ getNumGradedRatio = function (grader_id, assignment_id){
     });
   })
 }
+
+/**
+ * Returns a boolean on whether user with email exists in DB
+ */
+module.exports.userWithEmailExists = async function (email){
+  try{
+    let promisePool = pool.promise();
+    const [user,fields] = await promisePool.query("SELECT * from grader where email=?", [email])
+    if(user ==[] | user == undefined | user.length == 0){
+      return false
+    }
+    return user[0]
+  }catch(error){
+    throw error
+  }
+}
+
+
+/*
+Give the users bear token for Canvas requests.
+ */
+module.exports.getCanvasReqConfig = async function (userId){
+  try{
+    let promisePool = pool.promise();
+    const [bearToken,fields] = await promisePool.query("SELECT c_token from grader where id=?", [userId]);
+
+    if(bearToken == []){
+      throw new Error("Please add a Canvas Token");
+    }
+    var decryptedToken = encryptor.decrypt(bearToken[0].c_token);
+
+    let configConstruct = {
+      headers: {
+        Authorization: `Bearer ${decryptedToken}`,
+        'Accept': 'application/json',
+      },
+    }
+
+    return configConstruct;
+
+  }catch(error){
+    throw error
+  }
+}
+
+
+/**
+ * Validates and updates token
+ */
+module.exports.updateCanvasToken = async function (user_id, token){
+  try{
+    let promisePool = pool.promise();
+    let canvasReqConfig = {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+    }
+
+    // check if token works
+    await axios(`https://canvas.cornell.edu/api/v1/courses/${15037}/assignments`, canvasReqConfig)
+
+    //encryptor
+    var encryptoredToken = encryptor.encrypt(token);
+    await promisePool.query("UPDATE grader SET c_token =? WHERE id=?", [encryptoredToken, user_id])
+  }catch(error){
+    throw new Error('The token is invalid, please try again')
+  }
+}
+
+

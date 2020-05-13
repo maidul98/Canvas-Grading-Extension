@@ -4,7 +4,9 @@ import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import Submissions from './Submissions';
 import Spinner from 'react-bootstrap/Spinner'
+import config from '../../config'
 let FileSaver = require('file-saver');
+
 
 export default function AssignmentList(props) {
     const [assignments, setAssignments] = useState([]);
@@ -13,13 +15,34 @@ export default function AssignmentList(props) {
     const [showControls, setShowControls] = useState(false);
     const [downloadGraderIds, setDownloadGraderIds] = useState({});
 
+    /**START OF USER AUTH**/
+    const [user, setUser] = useState({});
+    useEffect(async ()=>{
+        let response = await fetch(`${config.backend.url}/user`, config.header);
+        if(response.status == 200){
+            let userFetched = await response.json();
+            setUser(userFetched.user)
+        }else{
+            if(window.location.pathname != '/'){
+                window.location = '/';
+            }
+        }
+    }, [])
+    /**END OF USER AUTH**/
+
     /**
      * Get the list of assignments from Canvas  
      */
-    const fetchAssignments = useRequest(`${process.env.REACT_APP_BASE_URL}/get-all-assignments`, {
+    const fetchAssignments = useRequest(()=>{
+        return fetch(`${process.env.REACT_APP_BASE_URL}/get-all-assignments`,config.header);
+    }, {
         manual: true,
-        onSuccess: (result, params) => {
-            setAssignments(result);
+        onSuccess: async (response, params) => {
+            let data = await response.json();
+            setAssignments(data);
+            if(data != []){
+                setCurrent_assignment_id(data[0].assignment_id)
+            }
         },
         formatResult: []
     });
@@ -32,21 +55,25 @@ export default function AssignmentList(props) {
         return fetch(`${process.env.REACT_APP_BASE_URL}/download-submission`, {
             method: 'POST', 
             responseType: 'arraybuffer', 
+            credentials: "include",
             headers: {
-              'Content-Type': 'application/json'
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Credentials": true
             }, 
             body: JSON.stringify(downloadGraderIds)
         })
     },{
         manual: true,
         onSuccess: async (response, params) => {
+            console.log(response)
             let zip = await response.blob();
             FileSaver.saveAs(zip, "Submissions.zip");
         },
     });
 
     useEffect(()=>{
-        fetchAssignments.run(`${process.env.REACT_APP_BASE_URL}/get-published-assignments`);
+        fetchAssignments.run();
     },[]);
 
     if(fetchAssignments.loading) return <LoadingIcon />;
