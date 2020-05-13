@@ -31,7 +31,8 @@ module.exports.syncWithCanvas = async (req, res) => {
     let list_of_graders = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/enrollments?per_page=1000`, configForCanvasReq);
     list_of_graders = Object.values(list_of_graders)
 
-
+    console.log(list_of_graders)
+    
     list_of_graders = list_of_graders.filter(enrollment => {
       return enrollment.role == 'TeacherEnrollment';
     });

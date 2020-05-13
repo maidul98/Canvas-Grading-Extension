@@ -17,6 +17,7 @@ export default function Dashboard(){
     const alert = useAlert();
     const [graderEditObject, setGraderEditObject] = useState([])
     const [assignment_id, setAssignment_id] = useState(null)
+    const [assignments, setAssignments] = useState([])
     
     /**
      * Get the list of assignments from Canvas from which the user can drop down from 
@@ -40,6 +41,8 @@ export default function Dashboard(){
     });
 
 
+    console.log(fetchAssignmentsList.data)
+
     /**
      * Sync submissions, assigment caps table and assigments with Canvas ------------
      */
@@ -62,7 +65,7 @@ export default function Dashboard(){
     /**
      * Get grader detials from DB
      */
-    const fetchGradersData = useRequest(async (assignment_id) =>{
+    const fetchGradersData = useRequest((assignment_id) =>{
         return axios(`${config.backend.url}/get-grader-info?assignment_id=${assignment_id}`)
     }, {
         manual: true,
