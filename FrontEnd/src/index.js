@@ -34,7 +34,7 @@ axios.interceptors.response.use((response) => {
     if(error.response != undefined){
         if(error.response.status == 401){
             if(window.location.pathname != '/'){
-                window.location = '/?message=you are not logged in'
+                window.location = '/?message=Either your session has ended or you are not logged in'
             }
         }
     }
