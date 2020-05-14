@@ -14,7 +14,7 @@ module.exports.get_unassigned_submissions = async function (assignment_id) {
     const [row, fields] = await promisePool.query(sql_query, [assignment_id]);
     return row.length;
   } catch (error) {
-    return new Error("There was an error in syncing graders.");
+    return new Error("There was an error in fetching the number of unassigned submissions.");
   }
 }
 
@@ -28,19 +28,19 @@ module.exports.get_unassigned_submissions = async function (assignment_id) {
  * @param {*} res 
  */
 module.exports.get_assigned = function (assigment_id, user_id) {
-    return new Promise(function(reslove, reject){
-        let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
-        pool.query(
-            sql_query, [assigment_id, user_id],
-            function (err, results) {
-            if (err) {
-                reject(err)
-            } else {
-                reslove(results)
-            }
-            }
-        );
-    });
+  return new Promise(function (reslove, reject) {
+    let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
+    pool.query(
+      sql_query, [assigment_id, user_id],
+      function (err, results) {
+        if (err) {
+          reject(err)
+        } else {
+          reslove(results)
+        }
+      }
+    );
+  });
 }
 
 
