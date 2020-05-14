@@ -73,6 +73,8 @@ export default function Submissions(props){
         fetchKey: id => id,
         formatResult: [],
         onError: (error, params) => {
+            console.log(error.message)
+            console.log(Object.getOwnPropertyNames(error));
             alert.error(`Please add or update your Canvas token first`)
         }
     });
@@ -144,6 +146,7 @@ export default function Submissions(props){
         }
     }
 
+    console.log(singleSubmissionFetch?.fetches)
     return (
         <div>
             {submitGrades?.loading | assignedSubmissions?.loading ? <LoadingIcon />:null}

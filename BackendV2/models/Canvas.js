@@ -8,16 +8,15 @@ const axios = require('axios');
 getCourseNumber = async function () {
     try {
         let promisePool = pool.promise();
-        let query = 'SELECT course_id FROM course_info';
-        const course_num = await promisePool.query(query);
-        if (course_num[0][0].course_id == undefined | course_num[0][0].course_id == ''){
+        let query = 'SELECT course_id FROM course_info WHERE id =1';
+        const [courseId, fields] = await promisePool.query(query);
+        if (courseId[0].course_id == null){
             throw{
                 type: 'CGE', 
-                message: 'Please add the ID of the course then try again', 
+                message: 'Please add the canvas course ID then try again', 
             };
         }
-
-        return course_num[0][0].course_id;
+        return courseId[0].course_id
 
     } catch (error) {
         throw error;
@@ -93,10 +92,12 @@ module.exports.updateCanvasToken = async function (user_id, token) {
  * Updates course ID
  */
 module.exports.updateCourseID = async function (course_id) {
+    console.log(course_id)
     try {
         let promisePool = pool.promise();
         await promisePool.query('UPDATE course_info SET course_id=? WHERE id = 1', [course_id]);
     } catch (error) {
+        console.log(error)
         throw{
             type: "CGE", 
             message: "Failed to update course id, please try again" 

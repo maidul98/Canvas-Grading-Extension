@@ -1,20 +1,20 @@
 import React, {useEffect, useCallback, useState} from 'react';
 import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
-
-import {useContext} from 'react'
+import {useContext} from 'react';
 import { useRequest } from '@umijs/hooks';
 import { useAlert } from 'react-alert';
-import config from '../config'
+import config from '../config';
 import {UserContext} from '../userContext';
 import axios from 'axios';
 import LoadingIcon from './LoadingIcon';
+
 export default function Settings(props){
     const [bearToken, setBearToken] = useState(null);
     const [deleteCourseConfirm, setDeleteCourseConfirm] = useState();
+    const [courseId, setCourseId] = useState(null);
     const alert = useAlert();
-    let user = useContext(UserContext)
-
+    let user = useContext(UserContext);
 
     /**
      * Make request update the token
@@ -47,6 +47,24 @@ export default function Settings(props){
         },
         onError: (error, params) => {
             alert.error("Something went wrong when deleting the course")
+        },
+    });
+
+    /**
+     * Update course id 
+     */
+    const updateCourse = useRequest(()=>{
+        return axios({
+        url:`${config.backend.url}/update-course-id`,
+        method:'post',
+        data: {"course_id":courseId}
+        })}, {
+        manual: true,
+        onSuccess: (response, params)=>{
+            alert.success(response.data);
+        },
+        onError: (error, params) => {
+            alert.error(error.response.data)
         },
     });
 
@@ -100,10 +118,10 @@ export default function Settings(props){
                 </div>
                 <div className="row">
                     <div className="col-sm-8">
-                        <FormControl  />
+                        <FormControl onChange={(event)=>setCourseId(event.target.value)} />
                     </div>
                     <div className="col-sm-4">
-                        <Button variant="primary" onClick={handleCourseReset}>Link course</Button>
+                        <Button variant="primary" onClick={updateCourse.run}>Link course</Button>
                     </div>
                 </div>
             </section>

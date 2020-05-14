@@ -51,12 +51,10 @@ module.exports.syncWithCanvas = async (req, res) => {
 
         res.send('Synced with Canvas');
     } catch (error) {
-        console.log(error);
         if (error.type == 'CGE') {
             res.status(400).send(error.message);
         } else {
             res.status(500).send('Something went wrong, please try again later');
         }
-    // console.log(error)
     }
 };
