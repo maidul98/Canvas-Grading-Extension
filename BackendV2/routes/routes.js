@@ -19,6 +19,12 @@ router.get('/user', function (req, res, next) {
 router.get('/delete-data-base', controllers.DataBaseController.deleteDB);
 
 
+/**
+ * GET the number of submissions that have no grader for an assignment. 
+ */
+router.get('/unassigned-submissions/:assignment_id', controllers.ProfessorDashboardController.getUnassignedSubmissions)
+
+
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', { title: 'Backend' });
