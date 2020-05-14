@@ -29,7 +29,7 @@ function App () {
         <BrowserRouter>
           <NavigationMenu/>
           <Switch>
-            <Route  path = "/" component={Welcome} exact/>
+            <Route  path = "/" component={Welcome}/>
             <Route  exact path="/assignments" component={GraderDashboard}/>
             <Route  path="/assignments/:assignment_id/:student_id" component={DetailedAssignmentView} />
             <Route  path = "/dashboard" component={Dashboard}/>
