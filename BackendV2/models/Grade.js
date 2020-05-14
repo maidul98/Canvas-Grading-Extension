@@ -3,7 +3,7 @@ const pool = require('../pool');
 /**
  * TODO
  */
-module.exports.set_assignments_as_graded  = function (submission_ids, assignment_id) {
+module.exports.set_assignments_as_graded = function (submission_ids, assignment_id) {
     return new Promise((resolve, reject) => {
         let queries = [];
         let queriesData = [];
@@ -12,13 +12,14 @@ module.exports.set_assignments_as_graded  = function (submission_ids, assignment
             queriesData.push(id)
             queriesData.push(assignment_id)
         });
-        if(queriesData != []){
+        if (queriesData != []) {
             pool.query(queries.join(';'), queriesData, (error) => {
                 if (error) return reject(error)
                 return resolve();
             })
-        }else{
+        } else {
             return resolve();
         }
     })
-  }
+}
+

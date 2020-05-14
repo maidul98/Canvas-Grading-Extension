@@ -13,12 +13,12 @@ const config = {
  */
 exports.GET_all = async function (req, res) {
   console.log(req.body.endpoint)
-  try{
+  try {
     console.log(req.body.endpoint)
-    
+
     let result = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/${req.body.endpoint}`, config)
     res.json(result.data);
-  }catch(error){
+  } catch (error) {
     res.status(406).send("Request to Canvas was unsuccessful");
   }
 };
