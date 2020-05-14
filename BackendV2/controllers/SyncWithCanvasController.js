@@ -26,6 +26,7 @@ module.exports.syncWithCanvas = async (req, res) => {
     let list_of_graders = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${configForCanvasReq.course_id}/enrollments?per_page=1000`, configForCanvasReq.token);
 
     list_of_graders = list_of_graders.data.filter(enrollment => {
+      // TODO: modify for undegrad ta, course admin.
       return enrollment.role == 'TeacherEnrollment' || enrollment.role == 'TaEnrollment';
     });
 
@@ -49,9 +50,9 @@ module.exports.syncWithCanvas = async (req, res) => {
     //check if names of assigments updated
     res.send("Synced with Canvas");
   } catch (error) {
-    if(error.type == "CGE"){
+    if (error.type == "CGE") {
       res.status(400).send(error.message)
-    }else{
+    } else {
       res.status(500).send("Something went wrong, please try again later")
     }
 
