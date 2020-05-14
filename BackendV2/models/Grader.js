@@ -174,6 +174,8 @@ module.exports.getCanvasReqConfig = async function (userId) {
  * Validates and updates token
  */
 module.exports.updateCanvasToken = async function (user_id, token) {
+
+  // to do if they are trying to update their token without there being a course id, throw an error 
   try {
     let promisePool = pool.promise();
     let canvasReqConfig = {

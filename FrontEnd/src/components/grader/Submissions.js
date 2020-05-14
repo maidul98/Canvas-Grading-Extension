@@ -69,7 +69,6 @@ export default function Submissions(props){
         })).json()
     }, {
         manual: true,
-        cacheKey: 'loadMoreDemoCacheId',
         initialData: [],
         fetchKey: id => id,
         formatResult: [],
