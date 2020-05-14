@@ -1,4 +1,4 @@
-var mysql = require('mysql');
+var mysql = require('mysql2');
 
 const pool = mysql.createPool({
     host: "us-cdbr-iron-east-04.cleardb.net",

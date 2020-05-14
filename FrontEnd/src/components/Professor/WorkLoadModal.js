@@ -1,35 +1,45 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useRequest } from '@umijs/hooks';
+import LoadingIcon from '../LoadingIcon';
+import { useAlert } from 'react-alert'
 import BasicSubmissionView from '../grader/bulk_edit/BasicSubmissionView';
+import config from '../../config'
 
-export default function CommentsModal(props){
+export default function CommentsModal({user_id, assignment_id}){
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const alert = useAlert();
+    const [submissions, setSubmissions] = useState([]);
 
     /**
-     * Get grades and comments for quick edit from canvas
+     * Get all of the submissions that are tasked for this grader from distribution algo 
      */
-    const singleSubmissionFetch = useRequest( (user_id) => {
-        return {
-            url:`${process.env.REACT_APP_BASE_URL}/canvas-api`, 
-            method:"post", 
-            data:{endpoint:`assignments/${props.assignment_id}/submissions/${user_id}?include[]=user&include[]=submission_comments`}
-        }
+    const assignedSubmissions = useRequest(async ()=>{
+        return fetch(`${config.backend.url}/get-assigned-submissions-for-assigment?user_id=${user_id}&assigment_id=`+assignment_id, config.header)
     }, {
         manual: true,
         initialData: [],
-        fetchKey: id => id,
+        onSuccess: async (response, params) => {
+            let data = await response.json();
+            setSubmissions(data)
+        },
         onError: (error, params) => {
-            alert.error(`Something went wrong when fetching ${params[1]}'s submission`)
+            alert.error('Something went wrong when pulling your submissions, please try refreshing the page.')
         }
     });
 
-    useEffect(()=>{
-        // singleSubmissionFetch.run(props.user_id)
-    }, [])
+
+    /**
+     * When the view link is clicked, pull the submissions 
+     */
+    const handleShow = () => {
+        setShow(true)
+        assignedSubmissions.run();
+    }
+
+    if(assignedSubmissions.loading) return <LoadingIcon />;
 
     return(
         <>
@@ -40,18 +50,10 @@ export default function CommentsModal(props){
                 <Modal.Header closeButton>
                 </Modal.Header>
                 <Modal.Body>
-                    {/* {props.attachments?.map((attachment)=>
-                        <div className="row">
-                            <div className="col-sm-2">
-                                <a href={attachment.url}>
-                                    <img src="https://img.icons8.com/ios/50/000000/download.png" alt=""/>
-                                </a>
-                            </div>
-                            <div className="col-sm-10">
-                                <p className="vir-center-download-img" ><a href={attachment.url}>{attachment.filename}</a></p>
-                            </div>
-                        </div>
-                    )} */}
+                    {submissions.length == 0 ? "This grader has no submissions assigned yet": ""}
+                    {submissions.map((submission) =>
+                        <BasicSubmissionView user_id={submission['name']} is_graded={submission['is_graded']} />
+                    )}
                 </Modal.Body>
                 <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>

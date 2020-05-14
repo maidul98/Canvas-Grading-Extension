@@ -66,6 +66,8 @@ function formMatchingMatrix(grader_array, submissions_array) {
 }
 
 
+
+
 /**
  * Main function that assigns each grader in [graderArray]  the number of submissions 
  * they should grade for a particular assignment, while ensuring no grader is assigned 
@@ -79,16 +81,9 @@ function formMatchingMatrix(grader_array, submissions_array) {
  */
 function main_distribute(num_of_submissions, graderArray) {
 
-    console.log("\n\nINITIAL PULLED FROM DB")
-    console.log(graderArray)
-
     //initial distribution 
     //only offset & num_assigned should be altered 
     graderArray = distribute(num_of_submissions, graderArray);
-
-    // console.log("\n\n AFTER initial distribution");
-    console.log(graderArray);
-
 
     let left_to_distribute = 0;
 
@@ -122,11 +117,12 @@ function main_distribute(num_of_submissions, graderArray) {
             if (left_to_distribute === 0) break;
             let grader = graderArray[i];
 
-            if (grader.num_assigned < grader.cap && grader.weight > 0) {
-
-                grader.incrementNumAssigned(1);
-                grader.decrementOffset(1);
-                left_to_distribute--;
+            if (grader.num_assigned < grader.cap) {
+                if (grader.weight > 0 || (grader.weight === 0 && grader.offset > 0)) {
+                    grader.incrementNumAssigned(1);
+                    grader.decrementOffset(1);
+                    left_to_distribute--;
+                }
             }
         }
     }
@@ -218,10 +214,6 @@ function distribute(num_of_submissions, graderArray) {
             }
         }
 
-        console.log("\n\n AFTER IF STATEMENT distribution");
-        console.log(graderArray);
-
-
     }
     else {
         /*In this case, assignments will be distirbuted according to offsets first, 
@@ -232,8 +224,7 @@ function distribute(num_of_submissions, graderArray) {
             graderArray[i].incrementNumAssigned(graderArray[i].offset);
             graderArray[i].updateOffset(0);
         }
-        console.log("Distrubuted assigmnets according to offsets only")
-        console.log(graderArray)
+
         //number of assignments to be distributed according to weights
         distBasedWeights = num_of_submissions - totalOffset;
 
@@ -248,8 +239,7 @@ function distribute(num_of_submissions, graderArray) {
             assigned = Math.floor(graderArray[i].weight * distBasedWeights / total_weight);
             graderArray[i].incrementNumAssigned(assigned);
         }
-        console.log("\ndist by weights ")
-        console.log(graderArray)
+
         //sum of each grader's num_assigned AFTER distribution 
         now_distributed = graderArray.reduce((total, element) => {
             return total + element.num_assigned;
@@ -261,7 +251,6 @@ function distribute(num_of_submissions, graderArray) {
         //number of assignments that still need to be distributed due to rounding
         leftAssign = num_of_submissions - assigned_dist;
 
-        console.log("num that still need to be distributed: " + leftAssign)
         //At this point in the program, all of the graders have an equal offset of 0.
 
         /*distribute remaining assignments evenly at first, if possible*/
@@ -302,8 +291,6 @@ function distribute(num_of_submissions, graderArray) {
             }
         }
 
-        console.log("after everything is dist:")
-        console.log(graderArray)
         return graderArray;
 
     } //end of else statement

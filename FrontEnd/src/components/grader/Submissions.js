@@ -4,7 +4,8 @@ import Button from 'react-bootstrap/Button';
 import { useRequest } from '@umijs/hooks';
 import { useAlert } from 'react-alert'
 import ExtendedSubmissionView from './bulk_edit/ExtendedSubmissionView'
-import BasicSubmissionView from './bulk_edit/BasicSubmissionView'
+import BasicSubmissionView from './bulk_edit/BasicSubmissionView';
+import config from '../../config'
 
 export default function Submissions(props){
     const alert = useAlert();
@@ -14,18 +15,20 @@ export default function Submissions(props){
     /**
      * Get all of the submissions that are tasked for this grader from distribution algo 
      */
-    const assignedSubmissions = useRequest(url => url, {
+    const assignedSubmissions = useRequest(async ()=>{
+        return (await fetch(`${config.backend.url}/get-assigned-submissions-for-assigment?user_id=1&assigment_id=${props.assignment_id}`,config.header)).json();
+        }, {
         manual: true,
-        initialData: [],
-        onSuccess: (result, params) => {
+        onSuccess:  async (result, params) => {
+            console.log(result)
             if(result.length == 0){
                 alert.show('You have no assigned submissions for this assignment yet')
                 props.showControls(false)
             }else{
                 alert.removeAll()
-                let user_ids = []
+                let user_ids = [] // [user_id, net_id]
                 result.map((submission) =>{//concurrently pull all submission for quick edit
-                    user_ids.push(submission['user_id'])
+                    user_ids.push([submission['user_id'], submission['name']])
                     singleSubmissionFetch.run(submission['user_id'], submission['name'])
                 });
                 let downloadObject = {
@@ -45,17 +48,23 @@ export default function Submissions(props){
 
     /**
      * Get grades and comments for quick edit from canvas
-     */
-    const singleSubmissionFetch = useRequest( (user_id, net_id) => {
-        return {
-            url:`${process.env.REACT_APP_BASE_URL}/canvas-api`, 
-            method:"post", 
-            data:{endpoint:`assignments/${props.assignment_id}/submissions/${user_id}?include[]=user&include[]=submission_comments`}
-        }
+    */
+    const singleSubmissionFetch = useRequest(async(user_id, net_id)=>{
+        return (await fetch(`${config.backend.url}/canvas-api`,{
+            method:"POST",
+            credentials: "include",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Credentials": true
+            },
+            body: JSON.stringify({endpoint:`assignments/${props.assignment_id}/submissions/${user_id}?include[]=user&include[]=submission_comments`})
+        })).json()
     }, {
         manual: true,
         initialData: [],
         fetchKey: id => id,
+        formatResult: [],
         onError: (error, params) => {
             alert.error(`Something went wrong when fetching ${params[1]}'s submission`)
         }
@@ -64,14 +73,31 @@ export default function Submissions(props){
     /**
      * Submit all of the submission edits changed their values 
      */
-    const submitGrades = useRequest(url => url, {
+
+     
+    const submitGrades = useRequest(async(user_id, net_id)=>{
+        return fetch(`${config.backend.url}/upload-submission-grades/assignments/${props.assignment_id}/submissions/batch-update-grades`,{
+            method:"POST",
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                "Access-Control-Allow-Credentials": true
+            },
+            body: JSON.stringify(gradesAndComments.current)
+        })
+    }, {
         manual: true,
-        onSuccess: (result, params) => {
-            gradesAndComments.current = []
-            alert.success('Your feedback has been submitted successfully')
+        onSuccess: async (response, params) => {
+            if(response.status == 200){
+                gradesAndComments.current = []
+                alert.success('Your feedback has been submitted successfully')
+            }else{
+                alert.error('Grades were not saved. Please try again or update your Canvas token')
+            }
         },
         onError: (error, params) => {
-            alert.error('Something went wrong, your feedback ws not submitted, please try again in 40 seconds')
+            alert.error('Something went wrong, while processing your request. Please try again in a few minutes')
         }
     });
 
@@ -81,6 +107,12 @@ export default function Submissions(props){
     }, [props.assignment_id]);
     
     
+    /**
+     * 
+     * @param {*} id 
+     * @param {*} event 
+     * @param {*} type 
+     */
     const handleCommentGrade = (id, event, type) => {
         let found = gradesAndComments.current.some(submissionInArray=> submissionInArray.id == id)
         if(found){
@@ -101,14 +133,7 @@ export default function Submissions(props){
      */
     const submitForms = () => {
         if(Object.keys(gradesAndComments)){
-            submitGrades.run(
-                {
-                    url: `${process.env.REACT_APP_BASE_URL}/upload-submission-grades/assignments/`+props.assignment_id+'/submissions/batch-update-grades',
-                    method: 'post',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(gradesAndComments.current),
-                }
-            )
+            submitGrades.run()
         }
     }
 
@@ -117,6 +142,7 @@ export default function Submissions(props){
             {submitGrades?.loading | assignedSubmissions?.loading ? <LoadingIcon />:null}
             {Object.values(singleSubmissionFetch?.fetches).map(res => 
                 <div key={res.data.id}>
+                    {console.log(res)}
                     {
                     (props.bulk_edit)
                     ?
@@ -126,7 +152,7 @@ export default function Submissions(props){
                         handleCommentGrade={handleCommentGrade}
                     />
                     :
-                    <BasicSubmissionView data={res} />
+                    <BasicSubmissionView user_id={res?.data?.user?.id} displayName={res?.data?.user?.login_id} assignment_id={res?.data.assignment_id} is_graded={res?.data?.grade} loading={res.loading} />
                     }
                 </div>)
             }

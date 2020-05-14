@@ -1,46 +1,41 @@
-import React, { Component } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { login, isLoggedIn, logout } from '../Auth/LoginActions';
-
+import React, {useEffect, useState} from 'react';
+import {useContext} from 'react'
+import {UserContext} from '../userContext';
 /*
     Creates a navigation bar for users. Allows them access to their dashboard,
     settings, and logout options.
 */
-class NavigationMenu extends Component {
-    render() {
-        const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-            <div id="user-profile-icon" ref={ref} onClick={e => { e.preventDefault(); onClick(e); }}>{children}</div>
-        ));
-
-        return (
+export default function NavigationMenu(props){
+    let user = useContext(UserContext)
+    return (
+        <div>
             <header id="navigation-container">
                 <div className="container">
                     <div id="navigation-content">
-                        <a href="/assignments">
-                            <div id="logo">
-                                <h1>Canvas grading extension</h1>
-                            </div>
-                        </a>
-                        {isLoggedIn()
-                            ?
-                            <div id="user-profile-icon">
-                                <Dropdown>
-                                    <Dropdown.Toggle as={CustomToggle}></Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item href="/dashboard">Dashboard</Dropdown.Item>
-                                        <Dropdown.Item href="#/action-2">Setting</Dropdown.Item>
-                                        <Dropdown.Item onClick={() => logout()} href="/">Logout</Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                            </div>
-                            :
-                            <a href="/assignments" onClick={() => login()} id="login-btn">Login</a>
-                        }
+                    <a href="/assignments">
+                        <div id="logo">
+                            <h1>Canvas grading extension</h1>
+                        </div>
+                    </a>
+                    <div id="user-profile-icon" className={user?.name == undefined?'hide':''}>
+                        <Dropdown>
+                            <Dropdown.Toggle variant="link" id="dropdown-basic">
+                            {`Hello, ${user?.name}`}
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                <Dropdown.Item href="/assignments">My workload</Dropdown.Item>
+                                <Dropdown.Item href="/dashboard">Dashboard</Dropdown.Item>
+                                <Dropdown.Item href="/settings">Setting</Dropdown.Item>
+                                <Dropdown.Item href="http://localhost:5000/auth/logout">Logout</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     </div>
                 </div>
+                </div>
             </header>
-        );
-    }
+            }
+        </div>
+    );
 }
 
-export default NavigationMenu;

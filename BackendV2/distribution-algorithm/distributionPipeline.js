@@ -1,8 +1,11 @@
 /**
+ * ===============================================================================
  * This file will store the logic behind all the database queries. All functions
  * defined here will deal with retrieving or pushing data from the 
  * MySQL database. 
+ * ===============================================================================
  */
+
 var AssignmentGrader = require('./grader-model');
 var DetectConflictOutput = require('./detectConflictsResult');
 var async = require('async')
@@ -32,7 +35,7 @@ async function detect_conflicts(graderArray, assignment_id) {
       graderArray[i].update_dist_num_assigned(graderArray[i].cap);
       graderArray[i].update_num_assigned(graderArray[i].cap);
       graderArray[i].incrementOffset(surplus);
-      let conflict_array = await handle_conflicts(graderArray[i].grader_id, surplus, assignment_id)
+      let conflict_array = await get_surplus_submissions(graderArray[i].grader_id, surplus, assignment_id);
       extra_submissions = extra_submissions.concat(conflict_array);
     }
   }
@@ -62,7 +65,7 @@ function get_surplus_submissions(graderID, surplus, assignment_id) {
 
       let diff_in_graded_assignments = surplus - results.length;
       if (diff_in_graded_assignments > 0)
-        return reject("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignments.")
+        return reject("The number of graded assignments exceeds the cap. Please raise the cap by at least " + diff_in_graded_assignments + " assignment(s).")
 
       // TO DO: max user connection error here
       for (let i = 0; i < surplus; i++) {
@@ -93,27 +96,14 @@ function set_surplus_submissions(graderID, submission_id, assignment_id) {
   });
 }
 
-
-/**
- * WHATS THE POINT OF THIS FUNCTINO??!?!!!!
- * @param {Number} graderID The grader ID
- * @param {Number} surplus Number of ungraded submissions that need to be removed and 
- * re-distributed from grader [graderID]'s workload
- * @param {Number} assignment_id The assignment ID
- */
-async function handle_conflicts(graderID, surplus, assignment_id) {
-  const submissionArr = await get_surplus_submissions(graderID, surplus, assignment_id)
-  return submissionArr
-}
-
-/** 
-   * Returns a list of AssignmentGrader objects, which will be used as input 
-   * to the distribution algorithm. 
+/** returns a list of AssignmentGrader objects, which will be input in the 
+   * algorithm. 
+   * 
    * This method will query a list of all the graders, and create 
    * AssignmentGrader instances for each with their respective ID, offset, and cap. 
    * @param {Number} assignment_id The assignment ID
    * @returns A new Promise object
-   */
+**/
 function get_grader_objects(assignment_id) {
   return new Promise(function (resolve, reject) {
     let query = "SELECT grader.id, assignments_cap.cap, grader.offset, assignments_cap.total_assigned_for_assignment, grader.weight FROM grader INNER JOIN assignments_cap ON grader.id=assignments_cap.grader_id WHERE assignments_cap.assignment_id = ?"
@@ -149,7 +139,6 @@ function get_grader_objects(assignment_id) {
 function runPipeline(assignment_id) {
   return new Promise(async function (resolve, reject) {
     try {
-      await pull_submissions_from_canvas(assignment_id)
       let grader_array = await get_grader_objects(assignment_id);
       let submission_json = await get_unassigned_submissions(assignment_id);
       let mapped = submission_json.map(v => v.id);
@@ -159,19 +148,19 @@ function runPipeline(assignment_id) {
         return total + element.num_assigned;
       }, 0);
 
-      //sum of caps 
+      //sum of max number of submissions that each grader can grade 
       let total_cap = grader_array.reduce((total, element) => {
+        if (element.weight === 0) return total + (Math.min(element.cap, element.offset + element.num_assigned));
         return total + element.cap;
       }, 0);
 
       if (total_cap - total_num_assigned < mapped.length) {
-        return reject("The sum of the caps of all graders must exceed the total number of submissions.")
+        return reject("There are more submissions to be distributed than the graders can grade. Please increase the caps.")
       }
       else {
         let conflicts = await detect_conflicts(grader_array, assignment_id); //detects conflicts: if any grader's num_assigned exceeds their cap
         mapped = mapped.concat(conflicts.submissionsArray);
         assignmentsLeft = mapped.length > 0 ? true : false;
-
 
         if (assignmentsLeft) {
           let graders_assigned = distribution.main_distribute(mapped.length, conflicts.graderArray); //runs distribution algorithm 
@@ -292,61 +281,6 @@ function assign_submissions_to_grader(assignment_matrix) {
   })
 }
 
-/**
- * Adds new submissions from Canvas by assignment_id into DB
- * @param {Number} assignment_id The assignment ID
- */
-function pull_submissions_from_canvas(assignment_id) {
-  return new Promise(async function (resolve, reject) {
-    const config = {
-      headers: {
-        Authorization: 'Bearer 9713~8gLsbC5WwTWOwqv8U3RPK4KK0wcgFThoufCz7fsCwXKsM00w9jKRcqFsbAo8HvJJ',
-        'Accept': 'application/json',
-      },
-    };
-    let response = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user&per_page=3000`, config)
-    dbJSON = [];
-    visitedGroups = new Set();
-    response.data.forEach(element => {
-      if (element.workflow_state === 'submitted') {
-        json = {
-          id: element.id,
-          grader_id: element.grader_id,
-          assignment_id: element.assignment_id,
-          is_graded: element.graded_at !== null,
-          updated_at: element.submitted_at,
-          name: element.user.name,
-          user_id: element.user.id
-        };
-
-        if (element.group.id !== null && !visitedGroups.has(element.group.id)) {
-          visitedGroups.add(element.group.id);
-          dbJSON.push(json);
-        } else if (element.group.id === null) {
-          dbJSON.push(json);
-        }
-      }
-    });
-
-    pool.getConnection(function (err, connection) {//add the pulled submissions to the DB
-      if (err) throw reject(err);
-      dbJSON.forEach(e => {
-        let id = e.id;
-        let grader_id = e.grader_id;
-        let assignment_id = e.assignment_id;
-        let is_graded = e.is_graded;
-        let last_updated = e.updated_at.replace("T", " ").replace("Z", "");
-        let name = e.name;
-        let user_id = e.user_id
-        let query = "INSERT IGNORE INTO submission (id, grader_id, assignment_id, is_graded, last_updated, name, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        let data = [id, grader_id, assignment_id, is_graded, last_updated, name, user_id]
-        connection.query(query, data);
-      });
-      connection.release();
-      resolve()
-    })
-  })
-};
 
 module.exports = {
   runPipeline: runPipeline
