@@ -23,21 +23,12 @@ module.exports.syncWithCanvas = async (req, res) => {
 
       let assignment_ids = (await submissions.getAllAssignments()).map((assignment)=>assignment.assignment_id);
       await grader.addNewGraders(list_of_graders);
-
-      let graders = await grader.getAll();
-      graders = graders.map(grader => grader.id);
-      await assignmentsCap.insertForAssignmentsForUsers(assignment_ids, graders);
+      grader_ids = list_of_graders.map(grader => grader.id);
+      await assignmentsCap.insertForAssignmentsForUsers(assignment_ids, grader_ids);
       
     }
 
-    if(type == "submissions"){
-      let assignment_ids = (await submissions.getAllAssignments()).map((assignment)=>assignment.assignment_id);
-      for (let i = 0; i < assignment_ids.length; i++) {
-        await submissions.pull_submissions_from_canvas(assignment_ids[i], configForCanvasReq)
-      }
-    }
-
-    if(type == "assignments"){
+    if(type == "submissions and assignments"){
       let assignments = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${configForCanvasReq.course_id}/assignments?per_page=200`, configForCanvasReq.token);
       assignments = assignments.data.filter(assignment => {
         return assignment.workflow_state == "published";
@@ -49,10 +40,12 @@ module.exports.syncWithCanvas = async (req, res) => {
         return assignment[0]
       })
 
-      let graders = await grader.getAll();
-      graders = graders.map(grader => grader.id);
+      let graders = (await grader.getAll()).map(grader => grader.id);
       await assignmentsCap.insertForAssignmentsForUsers(assignment_ids, graders);
 
+      for (let i = 0; i < assignment_ids.length; i++) {
+        await submissions.pull_submissions_from_canvas(assignment_ids[i], configForCanvasReq)
+      }
     }
 
     res.send("Synced with Canvas");

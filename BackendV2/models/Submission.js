@@ -29,9 +29,11 @@ module.exports.get_unassigned_submissions = async function (assignment_id) {
  */
 module.exports.get_assigned = async function (assignment_id, user_id) {
   try {
+    console.log('getting subs for this user')
     const promisePool = pool.promise()
     let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
     let [submissions, _] = await promisePool.query(sql_query, [assignment_id, user_id]);
+    console.log(submissions)
     return submissions
   } catch (e) {
     throw{

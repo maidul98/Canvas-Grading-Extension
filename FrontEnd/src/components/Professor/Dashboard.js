@@ -72,6 +72,7 @@ export default function Dashboard() {
         manual: true,
         onSuccess: (message, params) => {
             alert.success("Synced with canvas complete");
+            fetchGradersData.run(assignment_id);
         },
         onError: (error, params) => {
             alert.error(error.response.data);
@@ -171,34 +172,17 @@ export default function Dashboard() {
         }
     }
 
-    /**
-     * Sync graders, assignmets, submissions with Canvas 
-     */
-    function handleCanvasSync(type) {
-        syncWithCanvas.run(type);
-
-        if(type == "submissions" | type == "graders"){
-            fetchGradersData.run(assignment_id);
-        }
-
-        if(type == "assignments"){
-            fetchAssignmentsList.run();
-        }
-
-    }
-
     if (fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList.loading | syncWithCanvas.loading | runDisturbation.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
-            <DropdownButton id="dropdown-basic-button" variant="secondary" className="float-left" title="Sync with Canvas" onSelect={function(evt){handleCanvasSync(evt)}}>
-                <Dropdown.Item eventKey={'assignments'}>Sync Assignments</Dropdown.Item>
-                <Dropdown.Item eventKey={'submissions'} >Sync Submissions</Dropdown.Item>
+            <DropdownButton id="dropdown-basic-button" variant="secondary" className="float-left" title="Sync with Canvas" onSelect={function(evt){syncWithCanvas.run(evt)}}>
+                <Dropdown.Item eventKey={'submissions and assignments'} >Sync assignments and submissions</Dropdown.Item>
                 <Dropdown.Item eventKey={'graders'}>Sync Graders</Dropdown.Item>
             </DropdownButton>
             {/* <Button onClick={handleCanvasSync} variant="secondary">Sync with Canvas</Button> */}
             <select className="float-right" id="selectAssignmentDropdown" value={assignment_id} onChange={event => handleDropdown(event)}>
-                <option >Select assignment to distribute</option>
+                <option >Select assignment</option>
                 {
                     assignments.map(assignment =>
                         <option value={assignment.assignment_id} key={assignment.assignment_id}>Progress for {assignment.assignment_name}</option>)

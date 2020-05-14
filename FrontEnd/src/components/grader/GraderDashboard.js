@@ -26,6 +26,8 @@ export default function AssignmentList(props) {
         manual: true,
         onSuccess: (data, params) => {
             setAssignments(data);
+            console.log('fetching assigments')
+            console.log(data)
             if(data.length!=0){
                 setCurrent_assignment_id(data[0].assignment_id)
             }
