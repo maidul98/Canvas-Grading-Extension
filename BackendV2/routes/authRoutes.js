@@ -12,7 +12,7 @@ router.get('/google/callback',
 });
 
 router.get('/login-failed', (req,res)=>{
-    res.redirect('http://localhost:3000/?message=You are not listed are a listed grader. You are, please contact that course admin.');
+    res.redirect('http://localhost:3000/?message=You are not listed are as grader. If you are, please contact that course admin.');
 });
 
 
