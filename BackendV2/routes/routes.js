@@ -66,5 +66,6 @@ router.post('/upload-submission-grades/assignments/:assignment_id/submissions/ba
 
 router.post('/update-canvas-token', (controllers.OnboardController.addCanvasToken));
 
+router.post('/update-course-id', (controllers.OnboardController.addCourseID));
 
 module.exports = router;

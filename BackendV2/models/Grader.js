@@ -175,6 +175,8 @@ module.exports.getCanvasReqConfig = async function (userId) {
  */
 module.exports.updateCanvasToken = async function (user_id, token) {
     try {
+        let courseId = await canvas.getCourseNumber();
+
         let promisePool = pool.promise();
         let canvasReqConfig = {
             headers: {
@@ -184,14 +186,27 @@ module.exports.updateCanvasToken = async function (user_id, token) {
         };
 
         // check if token works
-        await axios(`https://canvas.cornell.edu/api/v1/courses/${15037}/assignments`, canvasReqConfig);
+        await axios(`https://canvas.cornell.edu/api/v1/courses/${courseId}/assignments`, canvasReqConfig);
 
         //encryptor
         var encryptoredToken = encryptor.encrypt(token);
         await promisePool.query('UPDATE grader SET c_token =? WHERE id=?', [encryptoredToken, user_id]);
     } catch (error) {
-        throw new Error('Your canvas token may have expired, please try adding a new token and try again');
+        if (error.response) {
+        throw new Error('Your canvas token may have expired, please try adding a new token and try again');}
+        else {throw error};
     }
 };
 
-
+/**
+ * Updates course ID
+ */
+module.exports.updateCourseID = async function (course_id) {
+    try {
+        let promisePool = pool.promise();
+        
+        await promisePool.query('UPDATE course_info SET course_id=? WHERE id = 1', [course_id]);
+    } catch (error) {
+        throw error;
+    }
+}
