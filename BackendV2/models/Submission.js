@@ -14,7 +14,7 @@ module.exports.get_unassigned_submissions = async function (assignment_id) {
     const [row, fields] = await promisePool.query(sql_query, [assignment_id]);
     return row.length;
   } catch (error) {
-    return new Error("There was an error in syncing graders.");
+    return new Error("There was an error in fetching the number of unassigned submissions.");
   }
 }
 

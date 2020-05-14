@@ -8,7 +8,7 @@ import { useAlert } from 'react-alert';
 import config from '../config'
 import {UserContext} from '../userContext';
 import axios from 'axios';
-
+import LoadingIcon from './LoadingIcon';
 export default function Settings(props){
     const [bearToken, setBearToken] = useState();
     const alert = useAlert();
@@ -33,6 +33,8 @@ export default function Settings(props){
         },
     });
 
+    if (updateCanvasToken.loading) return <LoadingIcon />;
+    
     return(
         <div className="container">
             <p>Your canvas token</p>
