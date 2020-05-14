@@ -5,7 +5,7 @@ const path = require('path');
 const fetch = require('node-fetch');
 var rimraf = require('rimraf');
 const { zip } = require('zip-a-folder');
-const grader = require('../models/Grader');
+const canvas = require('../models/Canvas');
 
 /**
  * This function downloads a single attachment and savesit to its users folder. 
@@ -114,7 +114,7 @@ function computeTimeout(minutes) {
  */
 module.exports.downloadSubmissions = async (req, res) => {
     try {
-        let canvasReqConfig = await grader.getCanvasReqConfig(req.user.id);
+        let canvasReqConfig = await canvas.getCanvasReqConfig(req.user.id);
 
         let folder_name = `${req.body.assignment_id}-${req.user.id}`;
         let bulkSubmissionsPath = `temp_bulk_downloads/assignment-${folder_name}`;

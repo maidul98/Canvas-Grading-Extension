@@ -1,7 +1,4 @@
 const pool = require('../pool');
-var encryptor = require('simple-encryptor')(process.env.APP_SECRET_KEY);
-const axios = require('axios');
-const canvas = require('./Canvas');
 
 /**
  * Get weights, net_id, and offset, cap, total assigned for all graders given a assignment_id. 
@@ -136,79 +133,3 @@ module.exports.userWithEmailExists = async function (email) {
 };
 
 
-/*
-Give the users bear token and canvas course id for Canvas requests.
- */
-module.exports.getCanvasReqConfig = async function (userId) {
-    try {
-        let courseId = await canvas.getCourseNumber();
-    
-        let promisePool = pool.promise();
-        const [bearToken, fields] = await promisePool.query('SELECT c_token from grader where id=?', [userId]);
-
-        if (bearToken[0].c_token == '' | bearToken[0].c_token == null) {
-            throw{
-                type: 'CGE', 
-                message: 'Please add a Canvas Token then try again' 
-            };
-        }
-    
-        var decryptedToken = encryptor.decrypt(bearToken[0].c_token);
-
-        let configConstruct = {
-            headers: {
-                Authorization: `Bearer ${decryptedToken}`,
-                'Accept': 'application/json',
-            },
-        };
-
-        return {'token':configConstruct, 'course_id':courseId};
-
-    } catch (error) {
-        throw error;
-    }
-};
-
-
-//TODO if the grader is trying to update a token and there is no course id in the DB, then throw error.
-
-/**
- * Validates and updates token
- */
-module.exports.updateCanvasToken = async function (user_id, token) {
-    try {
-        let courseId = await canvas.getCourseNumber();
-
-        let promisePool = pool.promise();
-        let canvasReqConfig = {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json',
-            },
-        };
-
-        // check if token works
-        await axios(`https://canvas.cornell.edu/api/v1/courses/${courseId}/assignments`, canvasReqConfig);
-
-        //encryptor
-        var encryptoredToken = encryptor.encrypt(token);
-        await promisePool.query('UPDATE grader SET c_token =? WHERE id=?', [encryptoredToken, user_id]);
-    } catch (error) {
-        if (error.response) {
-        throw new Error('Your canvas token may have expired, please try adding a new token and try again');}
-        else {throw error};
-    }
-};
-
-/**
- * Updates course ID
- */
-module.exports.updateCourseID = async function (course_id) {
-    try {
-        let promisePool = pool.promise();
-        
-        await promisePool.query('UPDATE course_info SET course_id=? WHERE id = 1', [course_id]);
-    } catch (error) {
-        throw error;
-    }
-}

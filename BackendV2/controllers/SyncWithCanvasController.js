@@ -2,12 +2,13 @@ const grader = require('../models/Grader');
 const assignmentsCap = require('../models/AssignmentCap');
 const axios = require('axios');
 const submissions = require('../models/Submission');
+const canvas = require('../models/Canvas');
 /**
  * Pull submissions, assigments, and graders
  */
 module.exports.syncWithCanvas = async (req, res) => {
     try {
-        let configForCanvasReq = await grader.getCanvasReqConfig(req.user.id);
+        let configForCanvasReq = await canvas.getCanvasReqConfig(req.user.id);
         let type = req.params.type;
 
         if(type == 'graders'){

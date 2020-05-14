@@ -1,5 +1,5 @@
 const axios = require('axios');
-const grader = require('../models/Grader');
+const canvas = require('../models/Canvas');
 
 /**
  * Takes in a API call for Canvas API and returns the result
@@ -7,11 +7,11 @@ const grader = require('../models/Grader');
  */
 exports.GET_all = async function (req, res) {
     try{
-        let configForCanvasReq = await grader.getCanvasReqConfig(req.user.id);
+        let configForCanvasReq = await canvas.getCanvasReqConfig(req.user.id);
         let result = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${configForCanvasReq.course_id}/${req.body.endpoint}`, configForCanvasReq.token);
         res.json(result.data);
     }catch(error){
-    // console.log(error)
+    console.log(error)
         if(error.type == 'CGE'){
             res.status(400).send(error.message);
         }else{

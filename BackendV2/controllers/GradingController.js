@@ -1,14 +1,14 @@
 const axios = require('axios');
 const grade = require('../models/Grade');
 const qs = require('qs');
-const grader = require('../models/Grader');
+const canvas = require('../models/Canvas');
 
 /**
  * Marks submissions as graded and sends them to Canvas 
  */
 exports.batchGrade = async function (req, res) {
     try {
-        let canvasReqConfig = await grader.getCanvasReqConfig(req.user.id);
+        let canvasReqConfig = await canvas.getCanvasReqConfig(req.user.id);
         let formData = {};
         let submission_ids = [];
 
