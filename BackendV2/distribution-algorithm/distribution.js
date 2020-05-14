@@ -265,7 +265,7 @@ function distribute(num_of_submissions, graderArray) {
         /*randomly distribute [leftAssign] remaining assignments AND update offsets*/
         //At this point in the program, all of the graders have an equal offset of 0.
 
-        shuffle(graderArray)
+        shuffle(graderArray);
 
         while (leftAssign !== 0) {
             for (let i = 0; i < graderArray.length; i++) {
@@ -300,6 +300,6 @@ function distribute(num_of_submissions, graderArray) {
 
 
 
-module.exports.shuffle = shuffle
-module.exports.formMatchingMatrix = formMatchingMatrix
-module.exports.main_distribute = main_distribute
+module.exports.shuffle = shuffle;
+module.exports.formMatchingMatrix = formMatchingMatrix;
+module.exports.main_distribute = main_distribute;

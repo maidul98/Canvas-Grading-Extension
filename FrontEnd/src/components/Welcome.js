@@ -1,5 +1,5 @@
-import React, {useEffect, useCallback } from 'react';
-import { useAlert } from 'react-alert'
+import React, {useEffect} from 'react';
+import { useAlert } from 'react-alert';
 export default function Welcome(props){
     const alert = useAlert();
 
@@ -12,20 +12,20 @@ export default function Welcome(props){
             tmp = [];
         props.location.search
             .substr(1)
-            .split("&")
+            .split('&')
             .forEach(function (item) {
-              tmp = item.split("=");
-              if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                tmp = item.split('=');
+                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
             });
         return result;
     }
     useEffect(()=>{
         let message = findGetParameter('message');
-        console.log(message)
+        console.log(message);
         if(message != null){
-            alert.info(message)
+            alert.info(message);
         }
-    }, [])
+    }, []);
     return(
         <div>
             <div className="container">

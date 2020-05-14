@@ -10,7 +10,7 @@ router.get('/user', function (req, res, next) {
     res.status(200).json({
         user: req.user,
         authenticated: true,
-        message: "user has been authenticated"
+        message: 'user has been authenticated'
     });
 });
 
@@ -22,7 +22,7 @@ router.get('/delete-data-base', controllers.DataBaseController.deleteDB);
 /**
  * GET the number of submissions that have no grader for an assignment. 
  */
-router.get('/unassigned-submissions/:assignment_id', controllers.ProfessorDashboardController.getUnassignedSubmissions)
+router.get('/unassigned-submissions/:assignment_id', controllers.ProfessorDashboardController.getUnassignedSubmissions);
 
 
 /* GET home page. */
@@ -47,13 +47,13 @@ router.post('/canvas-api', controllers.CanvasAPIController.GET_all);
 
 
 /*SYNC APP DATA WITH CANVAS*/
-router.get('/sync-with-canvas/:type', controllers.SyncWithCanvasController.syncWithCanvas)
+router.get('/sync-with-canvas/:type', controllers.SyncWithCanvasController.syncWithCanvas);
 
 /*GET ALL ASSIGMENTS */
-router.get('/get-all-assignments', controllers.SubmissionsController.getAllAssignments)
+router.get('/get-all-assignments', controllers.SubmissionsController.getAllAssignments);
 
 /*DOWNLOAD SUBMISSIONS*/
-router.post('/download-submission', controllers.DownloadController.downloadSubmissions)
+router.post('/download-submission', controllers.DownloadController.downloadSubmissions);
 
 
 /*DISTRIBUTION PIPELINE*/
