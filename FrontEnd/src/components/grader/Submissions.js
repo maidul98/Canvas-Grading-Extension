@@ -36,7 +36,7 @@ export default function Submissions(props){
                 let downloadObject = {
                     "assignment_id":props.assignment_id,
                     "user_ids": user_ids,
-                    "grader_id": user.id // will be dynmaic 
+                    "grader_id": user?.id // will be dynmaic 
                 }
                 props.setDownloadGraderIds(downloadObject)
                 
@@ -44,6 +44,7 @@ export default function Submissions(props){
             }
         },
         onError: (error, params) => {
+            console.log(error)
             alert.error('Something went wrong when pulling your submissions, please try refreshing the page.')
         },
         formatResult: (response) => {

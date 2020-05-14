@@ -11,13 +11,15 @@ import WorkLoadModal from './WorkLoadModal';
 import { UserContext } from '../../userContext';
 import config from '../../config';
 import axios from 'axios';
+import Dropdown from 'react-bootstrap/Dropdown'
+import DropdownButton from 'react-bootstrap/DropdownButton'
 
 export default function Dashboard() {
     let user = useContext(UserContext)
     const alert = useAlert();
-    const [graderEditObject, setGraderEditObject] = useState([])
-    const [assignment_id, setAssignment_id] = useState(null)
-    const [assignments, setAssignments] = useState([])
+    const [graderEditObject, setGraderEditObject] = useState([]);
+    const [assignment_id, setAssignment_id] = useState(null);
+    const [assignments, setAssignments] = useState([]);
 
     /**
      * Get the list of unassigned submissions for seleted assigment 
@@ -62,14 +64,15 @@ export default function Dashboard() {
     });
 
     /**
-     * Sync submissions, assigment caps table and assigments with Canvas ------------
+     * Sync submissions, assigment caps table and assigments with Canvas
      */
-    const syncWithCanvas = useRequest(async () => {
-        return axios(`${config.backend.url}/sync-with-canvas`)
+    const syncWithCanvas = useRequest(async (type) => {
+        return axios(`${config.backend.url}/sync-with-canvas/${type}`)
     }, {
         manual: true,
         onSuccess: (message, params) => {
-            alert.success("Synced with canvas");
+            alert.success("Synced with canvas complete");
+            fetchGradersData.run(assignment_id);
         },
         onError: (error, params) => {
             alert.error(error.response.data);
@@ -169,22 +172,17 @@ export default function Dashboard() {
         }
     }
 
-    /**
-     * Sync graders, assignmets, submissions with Canvas 
-     */
-    function handleCanvasSync() {
-        syncWithCanvas.run();
-        fetchAssignmentsList.run();
-        fetchGradersData.run(assignment_id);
-    }
-
     if (fetchGradersData.loading | updateGraderDetails.loading | fetchAssignmentsList.loading | syncWithCanvas.loading | runDisturbation.loading) return <LoadingIcon />;
 
     return (
         <div className="container">
-            <Button onClick={handleCanvasSync} variant="secondary">Sync with Canvas</Button>
+            <DropdownButton id="dropdown-basic-button" variant="secondary" className="float-left" title="Sync with Canvas" onSelect={function(evt){syncWithCanvas.run(evt)}}>
+                <Dropdown.Item eventKey={'submissions and assignments'} >Sync assignments and submissions</Dropdown.Item>
+                <Dropdown.Item eventKey={'graders'}>Sync Graders</Dropdown.Item>
+            </DropdownButton>
+            {/* <Button onClick={handleCanvasSync} variant="secondary">Sync with Canvas</Button> */}
             <select className="float-right" id="selectAssignmentDropdown" value={assignment_id} onChange={event => handleDropdown(event)}>
-                <option >Select assignment to distribute</option>
+                <option >Select assignment</option>
                 {
                     assignments.map(assignment =>
                         <option value={assignment.assignment_id} key={assignment.assignment_id}>Progress for {assignment.assignment_name}</option>)

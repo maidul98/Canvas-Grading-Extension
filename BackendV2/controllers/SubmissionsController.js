@@ -6,7 +6,7 @@ const submission = require('../models/Submission')
  */
 module.exports.assigned = async (req, res) => {
     try{
-        let user;
+        console.log('getting assigned')
         if(req.user.role == "PROFESSOR"){
             user = req.query.user_id
         }else{
