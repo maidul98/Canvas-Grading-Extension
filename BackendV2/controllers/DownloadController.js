@@ -3,9 +3,9 @@ var mkdirp = require('mkdirp');
 const fs = require('fs-extra');
 const path = require('path');
 const fetch = require('node-fetch');
-var rimraf = require("rimraf");
+var rimraf = require('rimraf');
 const { zip } = require('zip-a-folder');
-const grader = require('../models/Grader')
+const grader = require('../models/Grader');
 
 /**
  * This function downloads a single attachment and savesit to its users folder. 
@@ -18,13 +18,13 @@ function downloadAttachment(attachment, user_folder_path) {
         try {
             const fileStream = fs.createWriteStream(`${user_folder_path}/${attachment.filename}`);
             fetch(attachment.url).then((response) => {
-                let data = response.body
+                let data = response.body;
                 data.pipe(fileStream).on('finish', async () => {
-                    resolve()
+                    resolve();
                 });
-            })
+            });
         } catch (error) {
-            reject(error)
+            reject(error);
         }
     });
 }
@@ -40,15 +40,15 @@ function downloadAttachment(attachment, user_folder_path) {
 async function getAllUserAttachments(user_id, net_id, assignment_id, parentPath, canvasReqConfig) {
     try {
         const user_folder_path = mkdirp.sync(`${parentPath}/${net_id}`);
-        const submission = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${canvasReqConfig.course_id}/assignments/${assignment_id}/submissions/${user_id}`, canvasReqConfig.token)
+        const submission = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${canvasReqConfig.course_id}/assignments/${assignment_id}/submissions/${user_id}`, canvasReqConfig.token);
         if (submission.data.attachments) {
             return await Promise.all(submission.data.attachments.map(attachment =>
                 downloadAttachment(attachment, user_folder_path)
-            ))
+            ));
         }
-        return
+        return;
     } catch (error) {
-        throw error
+        throw error;
     }
 }
 
@@ -61,13 +61,13 @@ async function getAllUserAttachments(user_id, net_id, assignment_id, parentPath,
  */
 async function downloadAllAttachmentsForAllUser(batchDownloadPath, user_ids, assignment_id, canvasReqConfig) {
     try {
-        let parentPath = await mkdirp(batchDownloadPath)
+        let parentPath = await mkdirp(batchDownloadPath);
         return await Promise.all(user_ids.map((user) => {
-            return getAllUserAttachments(user[0], user[1], assignment_id, parentPath, canvasReqConfig)
+            return getAllUserAttachments(user[0], user[1], assignment_id, parentPath, canvasReqConfig);
         }
-        ))
+        ));
     } catch (error) {
-        throw error
+        throw error;
     }
 
 }
@@ -80,9 +80,9 @@ async function downloadAllAttachmentsForAllUser(batchDownloadPath, user_ids, ass
  */
 function deleteFolder(path) {
     try {
-        rimraf.sync(path)
+        rimraf.sync(path);
     } catch (e) {
-        console.log(e)
+        console.log(e);
         return;
     }
 }
@@ -94,9 +94,9 @@ function deleteFolder(path) {
  */
 function deleteFile(path) {
     try {
-        fs.unlink(path)
+        fs.unlink(path);
     } catch (e) {
-        console.log(e)
+        console.log(e);
         return;
     }
 }
@@ -106,7 +106,7 @@ function deleteFile(path) {
  * @param {int} minutes The number of minutes the delay is required to last
  */
 function computeTimeout(minutes) {
-    return minutes * 60000
+    return minutes * 60000;
 }
 
 /**
@@ -114,45 +114,45 @@ function computeTimeout(minutes) {
  */
 module.exports.downloadSubmissions = async (req, res) => {
     try {
-        let canvasReqConfig = await grader.getCanvasReqConfig(req.user.id)
+        let canvasReqConfig = await grader.getCanvasReqConfig(req.user.id);
 
-        let folder_name = `${req.body.assignment_id}-${req.user.id}`
+        let folder_name = `${req.body.assignment_id}-${req.user.id}`;
         let bulkSubmissionsPath = `temp_bulk_downloads/assignment-${folder_name}`;
-        let zip_file_path = `${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`
+        let zip_file_path = `${path.join(__dirname, '../temp_bulk_downloads')}/${folder_name}.zip`;
         if (!fs.existsSync('temp_bulk_downloads')) {
-            await mkdirp('temp_bulk_downloads')
+            await mkdirp('temp_bulk_downloads');
         }
 
-        console.log(bulkSubmissionsPath)
+        console.log(bulkSubmissionsPath);
 
-        const timeout = computeTimeout(1) // 2 minutes for now
+        const timeout = computeTimeout(1); // 2 minutes for now
         if (fs.existsSync(zip_file_path)) {
-            deleteFile(zip_file_path)
-            deleteFolder(bulkSubmissionsPath)
-            await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id, canvasReqConfig)
+            deleteFile(zip_file_path);
+            deleteFolder(bulkSubmissionsPath);
+            await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id, canvasReqConfig);
             await zip(`${bulkSubmissionsPath}/`, zip_file_path);
-            res.setHeader("content-type", "application/zip");
+            res.setHeader('content-type', 'application/zip');
             fs.createReadStream(zip_file_path).pipe(res).on('finish', function () {
                 setTimeout(function () {
-                    deleteFile(zip_file_path)
-                    deleteFolder(bulkSubmissionsPath)
-                }, timeout)
+                    deleteFile(zip_file_path);
+                    deleteFolder(bulkSubmissionsPath);
+                }, timeout);
             });
 
         } else {
-            await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id, canvasReqConfig)
+            await downloadAllAttachmentsForAllUser(bulkSubmissionsPath, req.body.user_ids, req.body.assignment_id, canvasReqConfig);
             await zip(`${bulkSubmissionsPath}/`, zip_file_path);
-            res.setHeader("content-type", "application/zip");
+            res.setHeader('content-type', 'application/zip');
             fs.createReadStream(zip_file_path).pipe(res).on('finish', function () {
                 setTimeout(function () {
-                    deleteFile(zip_file_path)
-                    deleteFolder(bulkSubmissionsPath)
-                }, timeout)
+                    deleteFile(zip_file_path);
+                    deleteFolder(bulkSubmissionsPath);
+                }, timeout);
             });
         }
 
     } catch (error) {
-        error.message
-        res.status(500).send(error.message)
+        error.message;
+        res.status(500).send(error.message);
     }
-}
+};

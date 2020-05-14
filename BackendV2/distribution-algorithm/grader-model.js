@@ -45,7 +45,7 @@ AssignmentGrader.prototype.update_cap = function (cap) {
         throw new TypeError('cap should be an integer');
     }
     this.cap = cap;
-}
+};
 
 /** Overwrites the grader's dist_num_assigned to [dist_num_assigned] */
 AssignmentGrader.prototype.update_dist_num_assigned = function (dist_num_assigned) {

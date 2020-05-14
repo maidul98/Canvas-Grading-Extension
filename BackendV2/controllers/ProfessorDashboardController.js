@@ -1,6 +1,6 @@
-const grader = require("../models/Grader");
-const distrbute = require("../distribution-algorithm/distributionPipeline");
-const submission = require("../models/Submission")
+const grader = require('../models/Grader');
+const distrbute = require('../distribution-algorithm/distributionPipeline');
+const submission = require('../models/Submission');
 
 /**
  * Get weights, net_id, and offset, cap, total assigned for all graders. 
@@ -8,12 +8,12 @@ const submission = require("../models/Submission")
  */
 module.exports.getGraderInfo = async (req, res) => {
     try {
-        grader_array = await grader.grader_info(req.query.assignment_id)
-        res.send(grader_array)
+        grader_array = await grader.grader_info(req.query.assignment_id);
+        res.send(grader_array);
     } catch (error) {
-        res.status(500).send("Something went wrong")
+        res.status(500).send('Something went wrong');
     }
-}
+};
 
 
 /**
@@ -25,9 +25,9 @@ module.exports.getUnassignedSubmissions = async (req, res) => {
         num_unassigned = await submission.get_unassigned_submissions(req.params.assignment_id);
         res.send({ num_unassigned });
     } catch (error) {
-        res.status(406).send(error)
+        res.status(406).send(error);
     }
-}
+};
 
 
 
@@ -39,9 +39,9 @@ module.exports.updateGraderInfo = async (req, res) => {
         let successMessage = await grader.updateGraderInfo(req.body);
         res.send(successMessage);
     } catch (error) {
-        res.status(406).send(error)
+        res.status(406).send(error);
     }
-}
+};
 
 /**
  * TODO
@@ -51,8 +51,8 @@ module.exports.runDisturbation = async (req, res) => {
         await distrbute.runPipeline(req.body.assignment_id);
         res.send();
     } catch (error) {
-        res.status(406).send(error)
+        res.status(406).send(error);
     }
-}
+};
 
 
