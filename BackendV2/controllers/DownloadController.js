@@ -3,7 +3,7 @@ var mkdirp = require('mkdirp');
 const fs = require('fs-extra');
 const path = require('path');
 const fetch = require('node-fetch');
-var rimraf = require("rimraf"); 
+var rimraf = require("rimraf");
 const { zip } = require('zip-a-folder');
 const grader = require('../models/Grader')
 
@@ -62,7 +62,7 @@ async function getAllUserAttachments(user_id, net_id, assignment_id, parentPath,
 async function downloadAllAttachmentsForAllUser(batchDownloadPath, user_ids, assignment_id, canvasReqConfig) {
     try {
         let parentPath = await mkdirp(batchDownloadPath)
-        return await Promise.all(user_ids.map((user)  =>{
+        return await Promise.all(user_ids.map((user) => {
             return getAllUserAttachments(user[0], user[1], assignment_id, parentPath, canvasReqConfig)
         }
         ))
