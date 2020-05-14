@@ -72,6 +72,7 @@ export default function Dashboard() {
         manual: true,
         onSuccess: (message, params) => {
             alert.success("Synced with canvas complete");
+            fetchAssignmentsList.refresh()
             fetchGradersData.run(assignment_id);
         },
         onError: (error, params) => {
@@ -167,7 +168,7 @@ export default function Dashboard() {
      */
     function handleDropdown(event) {
         if (event.target.value != null) {
-            fetchGradersData.run(event.target.value)
+            fetchGradersData.refresh(event.target.value)
             setAssignment_id(event.target.value);
         }
     }
@@ -180,7 +181,6 @@ export default function Dashboard() {
                 <Dropdown.Item eventKey={'submissions and assignments'} >Sync assignments and submissions</Dropdown.Item>
                 <Dropdown.Item eventKey={'graders'}>Sync Graders</Dropdown.Item>
             </DropdownButton>
-            {/* <Button onClick={handleCanvasSync} variant="secondary">Sync with Canvas</Button> */}
             <select className="float-right" id="selectAssignmentDropdown" value={assignment_id} onChange={event => handleDropdown(event)}>
                 <option >Select assignment</option>
                 {

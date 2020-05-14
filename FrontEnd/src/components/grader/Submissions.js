@@ -73,7 +73,7 @@ export default function Submissions(props){
         fetchKey: id => id,
         formatResult: [],
         onError: (error, params) => {
-            alert.error(`Something went wrong when fetching ${params[1]}'s submission`)
+            alert.error(`Please add or update your Canvas token first`)
         }
     });
 
