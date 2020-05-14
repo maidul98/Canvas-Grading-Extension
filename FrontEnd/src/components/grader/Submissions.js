@@ -19,7 +19,7 @@ export default function Submissions(props){
      * Get all of the submissions that are tasked for this grader from distribution algo 
      */
     const assignedSubmissions = useRequest(()=>{
-        return axios(`${config.backend.url}/get-assigned-submissions-for-assigment?user_id=${user.id}&assigment_id=${props.assignment_id}`)
+        return axios(`${config.backend.url}/get-assigned-submissions-for-assigment?user_id=${user?.id}&assigment_id=${props.assignment_id}`)
     }, {
         manual: true,
         onSuccess:  async (result, params) => {
@@ -69,6 +69,7 @@ export default function Submissions(props){
         })).json()
     }, {
         manual: true,
+        cacheKey: 'loadMoreDemoCacheId',
         initialData: [],
         fetchKey: id => id,
         formatResult: [],
