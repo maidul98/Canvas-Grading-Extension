@@ -24,11 +24,11 @@ passport.use(new GoogleStrategy({
       let user = await grader.userWithEmailExists(profile._json.email);
 
       if (user == []) {
-        return done(null, new Error("Grader not found"), { message: 'You are not listed are a listed grader. You are, please contact that course admin.' });
+        return done(null, false, { message: 'You are not listed are a listed grader. You are, please contact that course admin.' });
       }
       return done(null, user);
     } catch (error) {
-      return done(null, error, { message: 'Something went wrong, please try again later' });
+      return done(null, false, { message: 'Something went wrong, please try again later' });
     }
   }
 ));

@@ -649,6 +649,18 @@ ol.breadcrumb{
 }
 
 /*===================PROFESSOR: DASHBOARD===============*/
+.setting{
+margin-bottom: 70px;
+}
+
+.setting h4{
+  margin-bottom: 15px;
+}
+
+.setting p{
+  margin-bottom: 20px;
+}
+
 #selectAssignments{
   width: 100%;
 }

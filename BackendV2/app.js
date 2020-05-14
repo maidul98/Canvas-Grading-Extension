@@ -48,14 +48,14 @@ app.use(bodyParser.json());
 app.use('/auth', authRoutes);
 //Check if the user is logged in
 const authCheck = (req, res, next) => {
-  // if (!req.user) {
-  //     res.status(401).json({
-  //       authenticated: false,
-  //       message: "user has not been authenticated"
-  //     });
-  //   } else {
+  if (!req.user) {
+      res.status(401).json({
+        authenticated: false,
+        message: "user has not been authenticated"
+      });
+    } else {
   next();
-  // }
+  }
 };
 
 

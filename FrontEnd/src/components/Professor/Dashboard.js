@@ -20,6 +20,25 @@ export default function Dashboard() {
     const [assignments, setAssignments] = useState([])
 
     /**
+     * Get the list of unassigned submissions for seleted assigment 
+    */
+   const getUngradedsubs = useRequest(() => {
+        return axios({ url: `${config.backend.url}/unassigned-submissions/${assignment_id}`})
+    }, {
+        onSuccess: (data)=>{
+            console.log(data)
+        },
+        onError: (error, params) => {
+            alert.error("Something happened when fetching the number of ungraded submissions");
+        },
+        formatResult: (response) => {
+            return {...response.data}
+        },
+        manual: true,
+        initialData: {},
+    });
+
+    /**
      * Get the list of assignments from Canvas from which the user can drop down from 
      */
     const fetchAssignmentsList = useRequest(() => {
@@ -29,9 +48,11 @@ export default function Dashboard() {
             if (result[0]?.assignment_id != undefined) {
                 fetchGradersData.run(result[0].assignment_id);
                 setAssignment_id(result[0].assignment_id);
+                setAssignments(result)
             }
         },
         onError: (error, params) => {
+            console.log(error)
             alert.error("Something went wrong while fetching assignments, please try refreshing the page");
         },
         formatResult: (response) => {
@@ -39,9 +60,6 @@ export default function Dashboard() {
         },
         initialData: []
     });
-
-
-    console.log(fetchAssignmentsList.data)
 
     /**
      * Sync submissions, assigment caps table and assigments with Canvas ------------
@@ -54,7 +72,7 @@ export default function Dashboard() {
             alert.success("Synced with canvas");
         },
         onError: (error, params) => {
-            alert.error("Something went wrong when syncing with Canvas");
+            alert.error(error.response.data);
         },
         formatResult: (response) => {
             return response.data
@@ -71,6 +89,9 @@ export default function Dashboard() {
         manual: true,
         onError: (error, params) => {
             alert.error('Something went wrong while fetching graders, please try refreshing the page.');
+        },
+        onSuccess: (data)=>{
+            getUngradedsubs.run();
         },
         formatResult: (response) => {
             return [...response.data]
@@ -165,7 +186,7 @@ export default function Dashboard() {
             <select className="float-right" id="selectAssignmentDropdown" value={assignment_id} onChange={event => handleDropdown(event)}>
                 <option >Select assignment to distribute</option>
                 {
-                    fetchAssignmentsList.data.map(assignment =>
+                    assignments.map(assignment =>
                         <option value={assignment.assignment_id} key={assignment.assignment_id}>Progress for {assignment.assignment_name}</option>)
                 }
             </select>
@@ -219,7 +240,10 @@ export default function Dashboard() {
                     }
                 </tbody>
             </Table>
-            {<Button className="float-right" disabled={graderEditObject.length != 0} id="distribute-btn" onClick={(runDisturbation.run)}>Distribute</Button>}
+            <Button className="float-right" disabled={graderEditObject.length != 0} id="distribute-btn" onClick={(runDisturbation.run)}>
+                Distribute <span class="badge badge-pill badge-light">{getUngradedsubs.data?.num_unassigned}</span>
+            </Button>
+                
             {<Button className="float-right" disabled={graderEditObject.length == 0} onClick={updateGraderDetails.run}>Update</Button>}
         </div>
     );

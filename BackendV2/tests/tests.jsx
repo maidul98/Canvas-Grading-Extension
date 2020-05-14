@@ -85,6 +85,6 @@ async function createDummyData(assignment_id) {
 
 
 
-createDummyData('1');
+//createDummyData('1');
 
 //reset('1')

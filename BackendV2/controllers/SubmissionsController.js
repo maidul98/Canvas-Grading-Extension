@@ -13,7 +13,7 @@ module.exports.assigned = async (req, res) => {
             user = req.user.id
         }
 
-        let submissions = await submission.get_assigned(req.query.assigment_id, user)
+        let submissions = await submission.get_assigned(req.query.assigment_id, req.query.user_id)
 
         res.send(submissions);
     }catch(error){
