@@ -29,16 +29,10 @@ module.exports.get_assigned = function (assigment_id, user_id) {
  * Adds new submissions from Canvas by assignment_id into DB
  * @param {Number} assignment_id The assignment ID
  */
-module.exports.pull_submissions_from_canvas = function (assignment_id) {
+module.exports.pull_submissions_from_canvas = function (assignment_id, configForCanvasReq) {
     return new Promise(async function (resolve, reject) {
-      const config = {
-        headers: {
-          Authorization: 'Bearer 9713~8gLsbC5WwTWOwqv8U3RPK4KK0wcgFThoufCz7fsCwXKsM00w9jKRcqFsbAo8HvJJ',
-          'Accept': 'application/json',
-        },
-      };
       try {
-        let response = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user&include[]=assignment&per_page=3000`, config)
+        let response = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user&include[]=assignment&per_page=3000`, configForCanvasReq)
         dbJSON = [];
         visitedGroups = new Set();
         response.data.forEach(element => {
@@ -65,7 +59,7 @@ module.exports.pull_submissions_from_canvas = function (assignment_id) {
         });
     
         pool.getConnection(function (err, connection) {//add the pulled submissions to the DB
-          if (err) throw reject(err);
+          if (err) throw reject(new Error('Could not fetch submmissions from Canvas.'));
           dbJSON.forEach(e => {
             let id = e.id;
             let grader_id = e.grader_id;
