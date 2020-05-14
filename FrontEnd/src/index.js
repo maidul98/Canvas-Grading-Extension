@@ -16,25 +16,25 @@ const options = {
 axios.interceptors.request.use((config) => {
     config.withCredentials = true;
     config.header = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Credentials": true
-    }
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Credentials': true
+    };
     return config;
-  }, (error) => {
+}, (error) => {
     return Promise.reject(error);
-  });
+});
 
 
 // Add a response interceptor
 axios.interceptors.response.use((response) => {
     return response;
-  }, (error) => {
-      console.log(error.response)
+}, (error) => {
+    console.log(error.response);
     if(error.response != undefined){
         if(error.response.status == 401){
             if(window.location.pathname != '/'){
-                window.location = '/?message=Either your session has ended or you are not logged in'
+                window.location = '/?message=Either your session has ended or you are not logged in';
             }
         }
     }

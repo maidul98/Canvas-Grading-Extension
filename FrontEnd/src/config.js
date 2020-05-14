@@ -1,14 +1,14 @@
 module.exports = {
     header:{
-        credentials: "include",
+        credentials: 'include',
         headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Credentials": true
-            }
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Credentials': true
+        }
     },
     backend:{
-        url:"http://localhost:5000"
+        url:'http://localhost:5000'
     }
 
 };
