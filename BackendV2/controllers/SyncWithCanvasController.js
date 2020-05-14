@@ -7,12 +7,11 @@ const axios = require('axios');
  */
 module.exports.syncWithCanvas = async (req, res) => {
   try {
-
     // get token 
     let configForCanvasReq = await grader.getCanvasReqConfig(req.user.id)
 
     //get the list of assigments 
-    let assignments = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments?per_page=200`, configForCanvasReq);
+    let assignments = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${configForCanvasReq.course_id}/assignments?per_page=200`, configForCanvasReq.token);
     assignments = assignments.data.filter(assignment => {
       return assignment.workflow_state == "published";
     });
@@ -23,9 +22,8 @@ module.exports.syncWithCanvas = async (req, res) => {
       return assignment[0]
     })
 
-
-    //get the list of all graders from Canvas 
-    let list_of_graders = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/enrollments?per_page=1000`, configForCanvasReq);
+    // //get the list of all graders from Canvas 
+    let list_of_graders = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${configForCanvasReq.course_id}/enrollments?per_page=1000`, configForCanvasReq.token);
 
     list_of_graders = list_of_graders.data.filter(enrollment => {
       return enrollment.role == 'TeacherEnrollment' || enrollment.role == 'TaEnrollment';
@@ -51,7 +49,10 @@ module.exports.syncWithCanvas = async (req, res) => {
     //check if names of assigments updated
     res.send("Synced with Canvas");
   } catch (error) {
-    console.log(error)
-    res.status(406).send(error.message)
+    if(error.type == "CGE"){
+      res.status(400).send(error.message)
+    }else{
+      res.status(500).send("Something went wrong, please try again later")
+    }
   }
 }

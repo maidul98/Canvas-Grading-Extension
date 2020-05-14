@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, useContext} from 'react';
 import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import { useRequest } from '@umijs/hooks';
@@ -6,8 +6,11 @@ import { useAlert } from 'react-alert'
 import ExtendedSubmissionView from './bulk_edit/ExtendedSubmissionView'
 import BasicSubmissionView from './bulk_edit/BasicSubmissionView';
 import config from '../../config'
+import {UserContext} from '../../userContext';
+import axios from 'axios'
 
 export default function Submissions(props){
+    let user = useContext(UserContext)
     const alert = useAlert();
     const gradesAndComments = useRef([]);
     const gradeInput = useRef();
@@ -15,12 +18,11 @@ export default function Submissions(props){
     /**
      * Get all of the submissions that are tasked for this grader from distribution algo 
      */
-    const assignedSubmissions = useRequest(async ()=>{
-        return (await fetch(`${config.backend.url}/get-assigned-submissions-for-assigment?user_id=1&assigment_id=${props.assignment_id}`,config.header)).json();
-        }, {
+    const assignedSubmissions = useRequest(()=>{
+        return axios(`${config.backend.url}/get-assigned-submissions-for-assigment?user_id=${user.id}&assigment_id=${props.assignment_id}`)
+    }, {
         manual: true,
         onSuccess:  async (result, params) => {
-            console.log(result)
             if(result.length == 0){
                 alert.show('You have no assigned submissions for this assignment yet')
                 props.showControls(false)
@@ -34,7 +36,7 @@ export default function Submissions(props){
                 let downloadObject = {
                     "assignment_id":props.assignment_id,
                     "user_ids": user_ids,
-                    "grader_id": 1 // will be dynmaic 
+                    "grader_id": user.id // will be dynmaic 
                 }
                 props.setDownloadGraderIds(downloadObject)
                 
@@ -43,8 +45,12 @@ export default function Submissions(props){
         },
         onError: (error, params) => {
             alert.error('Something went wrong when pulling your submissions, please try refreshing the page.')
-        }
-    });
+        },
+        formatResult: (response) => {
+            return [...response.data]
+        },
+        initialData: []
+    })
 
     /**
      * Get grades and comments for quick edit from canvas
@@ -141,7 +147,7 @@ export default function Submissions(props){
         <div>
             {submitGrades?.loading | assignedSubmissions?.loading ? <LoadingIcon />:null}
             {Object.values(singleSubmissionFetch?.fetches).map(res => 
-                <div key={res.data.id}>
+                <div key={res.data?.id}>
                     {console.log(res)}
                     {
                     (props.bulk_edit)
@@ -152,7 +158,7 @@ export default function Submissions(props){
                         handleCommentGrade={handleCommentGrade}
                     />
                     :
-                    <BasicSubmissionView user_id={res?.data?.user?.id} displayName={res?.data?.user?.login_id} assignment_id={res?.data.assignment_id} is_graded={res?.data?.grade} loading={res.loading} />
+                    <BasicSubmissionView user_id={res?.data?.user?.id} displayName={res?.data?.user?.login_id} assignment_id={res?.data?.assignment_id} is_graded={res?.data?.grade} loading={res.loading} />
                     }
                 </div>)
             }

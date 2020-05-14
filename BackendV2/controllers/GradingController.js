@@ -20,7 +20,7 @@ exports.batchGrade = async function (req, res) {
         });
 
         try{
-          await axios.post(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), canvasReqConfig)
+          await axios.post(`https://canvas.cornell.edu/api/v1/courses/${canvasReqConfig.course_id}/assignments/${req.params.assignment_id}/submissions/update_grades`, qs.stringify(formData), canvasReqConfig.token)
           await grade.set_assignments_as_graded(submission_ids, req.params.assignment_id)
         }catch(error){
           throw new Error('Your Canvas token has expired, please update the token in settings and try again')

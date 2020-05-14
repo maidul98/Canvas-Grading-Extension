@@ -9,6 +9,7 @@ const axios = require('axios');
  * @param {*} res 
  */
 module.exports.get_assigned = function (assigment_id, user_id) {
+  console.log(`${assigment_id} -- ${user_id} `)
     return new Promise(function(reslove, reject){
         let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
         pool.query(
@@ -32,7 +33,7 @@ module.exports.get_assigned = function (assigment_id, user_id) {
 module.exports.pull_submissions_from_canvas = function (assignment_id, configForCanvasReq) {
     return new Promise(async function (resolve, reject) {
       try {
-        let response = await axios.get(`https://canvas.cornell.edu/api/v1/courses/15037/assignments/${assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user&include[]=assignment&per_page=3000`, configForCanvasReq)
+        let response = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${configForCanvasReq.course_id}/assignments/${assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user&include[]=assignment&per_page=3000`, configForCanvasReq.token)
         dbJSON = [];
         visitedGroups = new Set();
         response.data.forEach(element => {

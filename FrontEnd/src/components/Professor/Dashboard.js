@@ -40,9 +40,6 @@ export default function Dashboard() {
         initialData: []
     });
 
-
-    console.log(fetchAssignmentsList.data)
-
     /**
      * Sync submissions, assigment caps table and assigments with Canvas ------------
      */
@@ -54,7 +51,7 @@ export default function Dashboard() {
             alert.success("Synced with canvas");
         },
         onError: (error, params) => {
-            alert.error("Something went wrong when syncing with Canvas");
+            alert.error(error.response.data);
         },
         formatResult: (response) => {
             return response.data

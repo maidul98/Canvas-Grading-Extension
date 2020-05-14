@@ -19,10 +19,6 @@ router.get('/user', function (req, res, next) {
 router.get('/delete-data-base', controllers.DataBaseController.deleteDB);
 
 
-/* GET course number. */
-router.get('/get-course-number', controllers.CanvasController.getCourseNumber);
-
-
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', { title: 'Backend' });
