@@ -26,12 +26,7 @@ module.exports.syncWithCanvas = async (req, res) => {
     let list_of_graders = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${configForCanvasReq.course_id}/enrollments?per_page=1000`, configForCanvasReq.token);
 
     list_of_graders = list_of_graders.data.filter(enrollment => {
-<<<<<<< HEAD
-      // TODO: modify for undegrad ta, course admin.
-      return enrollment.role == 'TeacherEnrollment' || enrollment.role == 'TaEnrollment';
-=======
       return enrollment.type == 'TeacherEnrollment' || enrollment.type == 'TaEnrollment';
->>>>>>> cd38a53e62e1b74c9f3fe2735edc0a7b091f185d
     });
 
     list_of_graders = list_of_graders.map(enrollment => {

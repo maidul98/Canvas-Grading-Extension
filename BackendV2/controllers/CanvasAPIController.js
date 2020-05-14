@@ -11,7 +11,7 @@ exports.GET_all = async function (req, res) {
     let result = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${configForCanvasReq.course_id}/${req.body.endpoint}`, configForCanvasReq.token)
     res.json(result.data);
   }catch(error){
-    console.log(error)
+    // console.log(error)
     if(error.type == "CGE"){
       res.status(400).send(error.message)
     }else{

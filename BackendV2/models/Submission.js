@@ -13,7 +13,7 @@ module.exports.get_unassigned_submissions = async function (assignment_id) {
     const promisePool = pool.promise();
     let sql_query = `SELECT * FROM submission WHERE grader_id IS NULL AND assignment_id = ?`;
     const [row, fields] = await promisePool.query(sql_query, [assignment_id]);
-    
+
     return row.length;
   } catch (error) {
     return new Error("There was an error in fetching the number of unassigned submissions.");
@@ -22,34 +22,23 @@ module.exports.get_unassigned_submissions = async function (assignment_id) {
 
 
 /**
- * Returns the assigned submissions for every grader for an assignment:
+ * Returns array of assigned submissions for every grader for an assignment:
  * {grader1_id: [submission1_id, submission2_id], grader2_id: [submission3_id, submission4_id]}
  * @param {*} req 
  * @param {*} res 
  */
-const get_assigned = async function (assignment_id, user_id) {
+module.exports.get_assigned = async function (assignment_id, user_id) {
   try {
     const promisePool = pool.promise()
     let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
-    let [rows, _] = await promisePool.query(sql_query, [assignment_id, user_id]);
-    return rows.map(r => r.id)
+    let [submissions, _] = await promisePool.query(sql_query, [assignment_id, user_id]);
+    return submissions
   } catch (e) {
-    throw new Error(e);
+    throw{
+      type: "CGE", 
+      message: "Something went wrong when fetching assigned submissions" 
+    }
   }
-
-  // return new Promise(function (reslove, reject) {
-  //   let sql_query = "SELECT * FROM submission WHERE assignment_id=? AND grader_id=?";
-  //   pool.query(
-  //     sql_query, [assigment_id, user_id],
-  //     function (err, results) {
-  //       if (err) {
-  //         reject(err)
-  //       } else {
-  //         reslove(results)
-  //       }
-  //     }
-  //   );
-  // });
 }
 
 
