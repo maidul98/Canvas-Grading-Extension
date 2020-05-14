@@ -128,7 +128,7 @@ module.exports.downloadSubmissions = async (req, res) => {
             await mkdirp('temp_bulk_downloads')
         }
 
-        const timeout = computeTimeout(1) // 2 minutes for now
+        const timeout = computeTimeout(1) // 1 minute for now
         if (fs.existsSync(zip_file_path)) {
             deleteFile(zip_file_path)
             deleteFolder(bulkSubmissionsPath)
