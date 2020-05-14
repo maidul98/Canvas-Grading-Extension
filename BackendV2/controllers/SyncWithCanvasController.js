@@ -55,6 +55,6 @@ module.exports.syncWithCanvas = async (req, res) => {
       res.status(500).send("Something went wrong, please try again later")
     }
 
-    console.log(error)
+    // console.log(error)
   }
 }

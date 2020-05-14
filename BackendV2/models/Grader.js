@@ -146,7 +146,7 @@ module.exports.getCanvasReqConfig = async function (userId) {
     let promisePool = pool.promise();
     const [bearToken, fields] = await promisePool.query("SELECT c_token from grader where id=?", [userId]);
 
-    if (bearToken == []) {
+    if (bearToken[0].c_token == '' | bearToken[0].c_token == null) {
       throw{
         type: "CGE", 
         message: "Please add a Canvas Token then try again" 
