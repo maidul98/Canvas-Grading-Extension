@@ -54,7 +54,6 @@ export default function Dashboard() {
             }
         },
         onError: (error, params) => {
-            console.log(error)
             alert.error("Something went wrong while fetching assignments, please try refreshing the page");
         },
         formatResult: (response) => {
@@ -72,7 +71,7 @@ export default function Dashboard() {
         manual: true,
         onSuccess: (message, params) => {
             alert.success("Synced with canvas complete");
-            fetchAssignmentsList.refresh()
+            fetchAssignmentsList.run()
             fetchGradersData.run(assignment_id);
         },
         onError: (error, params) => {
@@ -168,7 +167,7 @@ export default function Dashboard() {
      */
     function handleDropdown(event) {
         if (event.target.value != null) {
-            fetchGradersData.refresh(event.target.value)
+            fetchGradersData.run(event.target.value)
             setAssignment_id(event.target.value);
         }
     }

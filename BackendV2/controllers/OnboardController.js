@@ -16,7 +16,7 @@ module.exports.addCanvasToken = async (req, res) => {
  */
 module.exports.addCourseID = async (req, res) => {
     try{
-        grader_array = await grader.updateCourseID(15037);
+        grader_array = await grader.updateCourseID(req.body.course_id);
         res.send('Course updated!');
     }catch(error){
         res.status(500).send(error.message);

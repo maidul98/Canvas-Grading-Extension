@@ -170,6 +170,8 @@ module.exports.getCanvasReqConfig = async function (userId) {
 };
 
 
+//TODO if the grader is trying to update a token and there is no course id in the DB, then throw error.
+
 /**
  * Validates and updates token
  */
