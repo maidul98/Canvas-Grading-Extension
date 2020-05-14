@@ -28,7 +28,6 @@ export default function Welcome(props){
     }, [])
     return(
         <div>
-            {console.log(findGetParameter('message'))}
             <div className="container">
                 <div id="welcome_text_conatiner">
                     <div id="textboxcenter">
