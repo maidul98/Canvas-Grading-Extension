@@ -4,8 +4,10 @@ import LoadingIcon from '../LoadingIcon';
 import Button from 'react-bootstrap/Button';
 import Submissions from './Submissions';
 import Spinner from 'react-bootstrap/Spinner'
-import config from '../../config'
+import config from '../../config';
+import axios from 'axios';
 let FileSaver = require('file-saver');
+
 
 
 export default function AssignmentList(props) {
@@ -15,36 +17,23 @@ export default function AssignmentList(props) {
     const [showControls, setShowControls] = useState(false);
     const [downloadGraderIds, setDownloadGraderIds] = useState({});
 
-    /**START OF USER AUTH**/
-    const [user, setUser] = useState({});
-    useEffect(async ()=>{
-        let response = await fetch(`${config.backend.url}/user`, config.header);
-        if(response.status == 200){
-            let userFetched = await response.json();
-            setUser(userFetched.user)
-        }else{
-            if(window.location.pathname != '/'){
-                window.location = '/';
-            }
-        }
-    }, [])
-    /**END OF USER AUTH**/
-
     /**
      * Get the list of assignments from Canvas  
      */
     const fetchAssignments = useRequest(()=>{
-        return fetch(`${process.env.REACT_APP_BASE_URL}/get-all-assignments`,config.header);
+        return axios(`${config.backend.url}/get-all-assignments`);
     }, {
         manual: true,
-        onSuccess: async (response, params) => {
-            let data = await response.json();
+        onSuccess: (data, params) => {
             setAssignments(data);
-            if(data != []){
+            if(data.length!=0){
                 setCurrent_assignment_id(data[0].assignment_id)
             }
         },
-        formatResult: []
+        formatResult: (response) => {
+            return [...response.data]
+        },
+        initialData: []
     });
 
     /**
@@ -52,22 +41,17 @@ export default function AssignmentList(props) {
      * returns an error otherwise. 
      */
     const downloadBulkSubmissions = useRequest(()=>{
-        return fetch(`${process.env.REACT_APP_BASE_URL}/download-submission`, {
+        return axios({url:`${config.backend.url}/download-submission`,
             method: 'POST', 
             responseType: 'arraybuffer', 
-            credentials: "include",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Credentials": true
-            }, 
-            body: JSON.stringify(downloadGraderIds)
+            data: downloadGraderIds
         })
     },{
         manual: true,
         onSuccess: async (response, params) => {
             console.log(response)
-            let zip = await response.blob();
+            let zip = new Blob([response.data])
+            console.log(zip)
             FileSaver.saveAs(zip, "Submissions.zip");
         },
     });

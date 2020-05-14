@@ -1,7 +1,0 @@
-# Query: profile_ur
-# Flags: IgnoreExcludeSettings
-
-1 result - 1 file
-
-BackendV2/config/passport-setup.js:
-  12:   const [rows, fileds] = await promisePool.query('SELECT id, name, role from grader WHERE id=?', [id]);

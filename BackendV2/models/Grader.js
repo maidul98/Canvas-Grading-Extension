@@ -1,6 +1,7 @@
 const pool = require('../pool');
 var encryptor = require('simple-encryptor')(process.env.APP_SECRET_KEY);
 const axios = require('axios');
+const canvas = require('./Canvas')
 
 /**
  * Get weights, net_id, and offset, cap, total assigned for all graders given a assignment_id. 
@@ -136,16 +137,22 @@ module.exports.userWithEmailExists = async function (email) {
 
 
 /*
-Give the users bear token for Canvas requests.
+Give the users bear token and canvas course id for Canvas requests.
  */
 module.exports.getCanvasReqConfig = async function (userId) {
   try {
+    let courseId = await canvas.getCourseNumber();
+    
     let promisePool = pool.promise();
     const [bearToken, fields] = await promisePool.query("SELECT c_token from grader where id=?", [userId]);
 
     if (bearToken == []) {
-      throw new Error("Please add a Canvas Token");
+      throw{
+        type: "CGE", 
+        message: "Please add a Canvas Token then try again" 
+      }
     }
+    
     var decryptedToken = encryptor.decrypt(bearToken[0].c_token);
 
     let configConstruct = {
@@ -155,7 +162,7 @@ module.exports.getCanvasReqConfig = async function (userId) {
       },
     }
 
-    return configConstruct;
+    return {'token':configConstruct, "course_id":courseId};
 
   } catch (error) {
     throw error
