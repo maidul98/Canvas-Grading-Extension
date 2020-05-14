@@ -106,7 +106,7 @@ module.exports.pull_submissions_from_canvas = function (assignment_id, configFor
  */
 module.exports.getAllAssignments = async function () {
   let promisePool = pool.promise();
-  let query = "SELECT DISTINCT assignment_id, assignment_name FROM submission";
+  let query = "SELECT DISTINCT assignment_id, assignment_name, assignment_id FROM submission";
   const [rows, fields] = await promisePool.query(query);
   return rows
 }

@@ -47,7 +47,7 @@ router.post('/canvas-api', controllers.CanvasAPIController.GET_all);
 
 
 /*SYNC APP DATA WITH CANVAS*/
-router.get('/sync-with-canvas', controllers.SyncWithCanvasController.syncWithCanvas)
+router.get('/sync-with-canvas/:type', controllers.SyncWithCanvasController.syncWithCanvas)
 
 /*GET ALL ASSIGMENTS */
 router.get('/get-all-assignments', controllers.SubmissionsController.getAllAssignments)
