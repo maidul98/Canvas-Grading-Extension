@@ -90,6 +90,25 @@ export default function Settings(props){
                     </div>
                 </div>
             </section>
+            {user?.role == "PROFESSOR"?
+            <section class="setting">
+                <div className="row">
+                    <div className="col-sm-8">
+                        <h4>Course ID</h4>
+                        <p>Link your course ID from Canvas</p>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-sm-8">
+                        <FormControl  />
+                    </div>
+                    <div className="col-sm-4">
+                        <Button variant="primary" onClick={handleCourseReset}>Link course</Button>
+                    </div>
+                </div>
+            </section>
+            :false
+            }
             <section class="setting">
                 <div className="row">
                     <div className="col-sm-8">
