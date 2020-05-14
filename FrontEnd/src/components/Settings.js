@@ -10,7 +10,8 @@ import {UserContext} from '../userContext';
 import axios from 'axios';
 import LoadingIcon from './LoadingIcon';
 export default function Settings(props){
-    const [bearToken, setBearToken] = useState();
+    const [bearToken, setBearToken] = useState(null);
+    const [deleteCourseConfirm, setDeleteCourseConfirm] = useState();
     const alert = useAlert();
     let user = useContext(UserContext)
 
@@ -33,19 +34,79 @@ export default function Settings(props){
         },
     });
 
+    /**
+     * Make request update the token
+     */
+    const resetCourse = useRequest(()=>{
+        return axios({
+        url:`${config.backend.url}/delete-data-base`,
+        })}, {
+        manual: true,
+        onSuccess: (response, params)=>{
+            alert.success(response.data);
+        },
+        onError: (error, params) => {
+            alert.error("Something went wrong when deleting the course")
+        },
+    });
+
+    /**
+     * Make sure the user knows that this is undoable
+     * @param {*} event 
+     */
+    function handleCourseReset(){
+        if(deleteCourseConfirm == "DELETE ALL COURSE DATA"){
+            resetCourse.run()
+        }else{
+            alert.info('Your confirm text is incorrect, course not deleted')
+        }
+    }
+
+    function updateToken(){
+        if(bearToken != null){
+            updateCanvasToken.run()
+        }else{
+            alert.info('Please enter a token first')
+        }
+    }
+
     if (updateCanvasToken.loading) return <LoadingIcon />;
     
     return(
         <div className="container">
-            <p>Your canvas token</p>
-            <div className="row">
-                <div className="col-sm-8">
-                    <FormControl onChange={(event)=>setBearToken(event.target.value)} placeholder={'Paste Canvas token here'} />
+            <section class="setting">
+                <div className="row">
+                    <div className="col-sm-8">
+                        <h4>Your canvas token</h4>
+                        <p>Vist Account in account in Canvas then go into settings to generate a token</p>
+                    </div>
                 </div>
-                <div className="col-sm-4">
-                    <Button variant="primary" onClick={updateCanvasToken.run}>Update</Button>
+                <div className="row">
+                    <div className="col-sm-8">
+                        <FormControl onChange={(event)=>setBearToken(event.target.value)} placeholder={'Paste Canvas token here'} />
+                    </div>
+                    <div className="col-sm-4">
+                        <Button variant="primary" onClick={updateToken}>Update</Button>
+                    </div>
                 </div>
-            </div>
+            </section>
+            <section class="setting">
+                <div className="row">
+                    <div className="col-sm-8">
+                        <h4>Reset course data</h4>
+                        <p>This will remove graders, submissions and assignments</p>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-sm-8">
+                        <FormControl  onChange={(event)=>setDeleteCourseConfirm(event.target.value)} placeholder={'This change cannot be undone. Confirm by DELETE ALL COURSE DATA to continue'} />
+                    </div>
+                    <div className="col-sm-4">
+                        <Button variant="danger" onClick={handleCourseReset}>Reset course</Button>
+                    </div>
+                </div>
+            </section>
+
         </div>
     );
 }
