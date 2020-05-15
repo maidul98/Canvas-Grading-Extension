@@ -44,7 +44,6 @@ export default function Submissions(props){
             }
         },
         onError: (error, params) => {
-            console.log(error)
             alert.error('Something went wrong when pulling your submissions, please try refreshing the page.')
         },
         formatResult: (response) => {
@@ -56,28 +55,24 @@ export default function Submissions(props){
     /**
      * Get grades and comments for quick edit from canvas
     */
-    const singleSubmissionFetch = useRequest(async(user_id, net_id)=>{
-        return (await fetch(`${config.backend.url}/canvas-api`,{
+    const singleSubmissionFetch = useRequest(async(user_id, netid)=>{
+        return axios({url:`${config.backend.url}/canvas-api`,
             method:"POST",
-            credentials: "include",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Credentials": true
-            },
-            body: JSON.stringify({endpoint:`assignments/${props.assignment_id}/submissions/${user_id}?include[]=user&include[]=submission_comments`})
-        })).json()
+            data: {endpoint:`assignments/${props.assignment_id}/submissions/${user_id}?include[]=user&include[]=submission_comments`}
+        })
     }, {
         manual: true,
         initialData: [],
         fetchKey: id => id,
         formatResult: [],
         onError: (error, params) => {
-            console.log(error.message)
-            console.log(Object.getOwnPropertyNames(error));
-            alert.error(`Please add or update your Canvas token first`)
+            alert.error(`${error.response.data}`)
+        },
+        formatResult: (response)=>{
+            return response.data
         }
     });
+
 
     /**
      * Submit all of the submission edits changed their values 
@@ -146,7 +141,6 @@ export default function Submissions(props){
         }
     }
 
-    console.log(singleSubmissionFetch?.fetches)
     return (
         <div>
             {submitGrades?.loading | assignedSubmissions?.loading ? <LoadingIcon />:null}

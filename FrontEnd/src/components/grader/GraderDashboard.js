@@ -26,8 +26,6 @@ export default function AssignmentList() {
         manual: true,
         onSuccess: (data) => {
             setAssignments(data);
-            console.log('fetching assigments');
-            console.log(data);
             if(data.length!=0){
                 setCurrent_assignment_id(data[0].assignment_id);
             }
@@ -51,9 +49,7 @@ export default function AssignmentList() {
     },{
         manual: true,
         onSuccess: async (response) => {
-            console.log(response);
             let zip = new Blob([response.data]);
-            console.log(zip);
             FileSaver.saveAs(zip, 'Submissions.zip');
         },
     });
