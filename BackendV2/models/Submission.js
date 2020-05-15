@@ -36,9 +36,9 @@ module.exports.get_assigned = async function (assignment_id, user_id) {
         console.log(submissions);
         return submissions;
     } catch (e) {
-        throw{
-            type: 'CGE', 
-            message: 'Something went wrong when fetching assigned submissions' 
+        throw {
+            type: 'CGE',
+            message: 'Something went wrong when fetching assigned submissions'
         };
     }
 };
@@ -52,15 +52,16 @@ module.exports.pull_submissions_from_canvas = function (assignment_id, configFor
     return new Promise(async function (resolve, reject) {
         try {
             let response = await axios.get(`https://canvas.cornell.edu/api/v1/courses/${configForCanvasReq.course_id}/assignments/${assignment_id}/submissions?include[]=group&include[]=submission_comments&include[]=user&include[]=assignment&per_page=3000`, configForCanvasReq.token);
+
             dbJSON = [];
             visitedGroups = new Set();
             response.data.forEach(element => {
-                if (element.workflow_state === 'submitted') {
+                if (element.workflow_state === 'submitted' || element.workflow_state === 'graded') {
                     json = {
                         id: element.id,
                         grader_id: element.grader_id,
                         assignment_id: element.assignment_id,
-                        is_graded: element.graded_at !== null,
+                        is_graded: element.graded_at != null,
                         updated_at: element.submitted_at,
                         name: element.user.login_id,
                         user_id: element.user.id,
