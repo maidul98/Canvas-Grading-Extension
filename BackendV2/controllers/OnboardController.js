@@ -31,3 +31,20 @@ module.exports.addCourseID = async (req, res) => {
         }
     }
 };
+
+/**
+ * Takes in a course number
+ */
+module.exports.getCourseId = async (req, res) => {
+    try{
+        let course_id = await canvas.getCourseNumberForRoute();
+        res.send({course_id:course_id});
+    }catch(error){
+        console.log(error)
+        if (error.type == 'CGE') {
+            res.status(400).send(error.message);
+        } else {
+            res.status(500).send('Something went wrong when fetching course ID, please try again later');
+        }
+    }
+};

@@ -63,9 +63,11 @@ router.post('/distribute', controllers.ProfessorDashboardController.runDisturbat
 /*GRADE PASS BACK*/
 router.post('/upload-submission-grades/assignments/:assignment_id/submissions/batch-update-grades', controllers.GradingController.batchGrade);
 
-
+/*USER ON BOARD */
 router.post('/update-canvas-token', (controllers.OnboardController.addCanvasToken));
 
 router.post('/update-course-id', (controllers.OnboardController.addCourseID));
+
+router.get('/get-course-id', (controllers.OnboardController.getCourseId));
 
 module.exports = router;

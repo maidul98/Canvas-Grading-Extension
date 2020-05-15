@@ -146,7 +146,6 @@ export default function Submissions(props){
             {submitGrades?.loading | assignedSubmissions?.loading ? <LoadingIcon />:null}
             {Object.values(singleSubmissionFetch?.fetches).map(res => 
                 <div key={res.data?.id}>
-                    {console.log(res)}
                     {
                     (props.bulk_edit)
                     ?

@@ -123,8 +123,6 @@ module.exports.downloadSubmissions = async (req, res) => {
             await mkdirp('temp_bulk_downloads');
         }
 
-        console.log(bulkSubmissionsPath);
-
         const timeout = computeTimeout(1); // 2 minutes for now
         if (fs.existsSync(zip_file_path)) {
             deleteFile(zip_file_path);
@@ -152,7 +150,10 @@ module.exports.downloadSubmissions = async (req, res) => {
         }
 
     } catch (error) {
-        error.message;
-        res.status(500).send(error.message);
+        if(error.type == 'CGE'){
+            res.status(400).send(error.message);
+        }else{
+            res.status(500).send('Something went wrong, please try again later');
+        }
     }
 };

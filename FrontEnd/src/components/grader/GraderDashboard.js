@@ -6,6 +6,7 @@ import Submissions from './Submissions';
 import Spinner from 'react-bootstrap/Spinner';
 import config from '../../config';
 import axios from 'axios';
+import { useAlert } from 'react-alert'
 let FileSaver = require('file-saver');
 
 
@@ -16,6 +17,7 @@ export default function AssignmentList() {
     const [current_assignment_id, setCurrent_assignment_id] = useState(0);
     const [showControls, setShowControls] = useState(false);
     const [downloadGraderIds, setDownloadGraderIds] = useState({});
+    const alert = useAlert();
 
     /**
      * Get the list of assignments from Canvas  
@@ -51,6 +53,9 @@ export default function AssignmentList() {
         onSuccess: async (response) => {
             let zip = new Blob([response.data]);
             FileSaver.saveAs(zip, 'Submissions.zip');
+        },
+        onError: async (error) => {
+            alert.error('Something went wrong, please try again later')
         },
     });
 

@@ -69,6 +69,18 @@ export default function Settings(props){
     });
 
     /**
+     * Update course id 
+     */
+    const getCourseId = useRequest(()=>{
+        return axios({
+        url:`${config.backend.url}/get-course-id`
+        })}, {
+        formatResult:(result)=>{
+            return result.data
+        }
+    });
+
+    /**
      * Make sure the user knows that this is undoable
      * @param {*} event 
      */
@@ -118,7 +130,7 @@ export default function Settings(props){
                 </div>
                 <div className="row">
                     <div className="col-sm-8">
-                        <FormControl onChange={(event)=>setCourseId(event.target.value)} />
+                        <FormControl defaultValue={getCourseId?.data?.course_id} onChange={(event)=>setCourseId(event.target.value)} />
                     </div>
                     <div className="col-sm-4">
                         <Button variant="primary" onClick={updateCourse.run}>Link course</Button>

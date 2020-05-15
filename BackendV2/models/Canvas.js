@@ -3,7 +3,7 @@ var encryptor = require('simple-encryptor')(process.env.APP_SECRET_KEY);
 const axios = require('axios');
 
 /**
- * Gets the Course Number
+ * Gets the Course Number for internal functions
  */
 getCourseNumber = async function () {
     try {
@@ -23,10 +23,25 @@ getCourseNumber = async function () {
     }
 };
 
+
+/**
+ * Gets the Course Number for route
+ */
+getCourseNumberForRoute = async function () {
+    try {
+        let promisePool = pool.promise();
+        let query = 'SELECT course_id FROM course_info WHERE id =1';
+        const [courseId, fields] = await promisePool.query(query);
+        return courseId[0].course_id
+    } catch (error) {
+        throw error;
+    }
+};
+
 /*
 Give the users bear token and canvas course id for Canvas requests.
  */
-module.exports.getCanvasReqConfig = async function (userId) {
+getCanvasReqConfig = async function (userId) {
     try {
         let courseId = await getCourseNumber();
     
@@ -62,7 +77,7 @@ module.exports.getCanvasReqConfig = async function (userId) {
 /**
  * Validates and updates token
  */
-module.exports.updateCanvasToken = async function (user_id, token) {
+updateCanvasToken = async function (user_id, token) {
     try {
         let courseId = await getCourseNumber();
 
@@ -91,8 +106,7 @@ module.exports.updateCanvasToken = async function (user_id, token) {
 /**
  * Updates course ID
  */
-module.exports.updateCourseID = async function (course_id) {
-    console.log(course_id)
+updateCourseID = async function (course_id) {
     try {
         let promisePool = pool.promise();
         await promisePool.query('UPDATE course_info SET course_id=? WHERE id = 1', [course_id]);
@@ -103,4 +117,12 @@ module.exports.updateCourseID = async function (course_id) {
             message: "Failed to update course id, please try again" 
           }
     }
+}
+
+module.exports = {
+    getCourseNumber:getCourseNumber,
+    getCanvasReqConfig:getCanvasReqConfig,
+    updateCanvasToken:updateCanvasToken,
+    updateCourseID:updateCourseID,
+    getCourseNumberForRoute:getCourseNumberForRoute
 }
