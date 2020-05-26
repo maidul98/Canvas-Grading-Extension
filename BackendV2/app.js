@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var logger = require('morgan');
 var indexRouter = require('./routes/routes');
+var clientRoutes = require('./routes/clientRoutes');
 var authRoutes = require('./routes/authRoutes');
 const passportSetup = require('./config/passport-setup');
 var passport = require('passport');
@@ -48,7 +49,6 @@ app.use(express.json());
 // app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 
-app.use('/auth', authRoutes);
 //Check if the user is logged in
 const authCheck = (req, res, next) => {
     if (!req.user) {
@@ -61,8 +61,9 @@ const authCheck = (req, res, next) => {
     }
 };
 
-
-app.use('/', indexRouter);
+app.use('/', clientRoutes);
+app.use('/auth', authRoutes);
+app.use('/api', authCheck, indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

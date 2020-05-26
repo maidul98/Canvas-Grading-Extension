@@ -1,23 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var controllers = require('../controllers/');
-var path = require('path');
-
-/* GET React App */
-router.get(['/assignments', '/message', '/assignments/*', '/dashboard', '/settings'], function(req, res, next) {
-    res.sendFile(path.join(__dirname, '../public', 'index.html'));
-});
-
-
-/* GET LOGGED IN USER */
-router.get('/user', function (req, res, next) {
-    res.status(200).json({
-        user: req.user,
-        authenticated: true,
-        message: 'user has been authenticated'
-    });
-});
-
 
 /* DELETE all entires of all tables in the DB. */
 router.get('/delete-data-base', controllers.DataBaseController.deleteDB);

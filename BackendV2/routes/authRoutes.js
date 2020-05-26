@@ -21,4 +21,13 @@ router.get('/logout',  (req, res) => {
     return res.redirect('/message=You have been logged out');
 });
 
+/* GET LOGGED IN USER */
+router.get('/user', function (req, res, next) {
+    res.status(200).json({
+        user: req.user,
+        authenticated: true,
+        message: 'user has been authenticated'
+    });
+});
+
 module.exports = router;
