@@ -13,13 +13,13 @@ export default function DetailedAssignmentView(props){
     const gradeInput = useRef();
 
     /**
-     * Get grades and comments for quick edit from canvas
+     * Get grades and comments for quick edit from canvass
     */
     const singleSubmissionFetch = useRequest(()=>{
         return axios({
         url:`/api/canvas-api`,
-        method:'post',
-        data:{endpoint:`/api/assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}?include[]=user&include[]=submission_comments`},
+        method:'POST',
+        data:{endpoint:`assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}?include[]=user&include[]=submission_comments`},
         })
     }, {
         manual: true,
