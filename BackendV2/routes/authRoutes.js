@@ -18,7 +18,7 @@ router.get('/login-failed', (req,res)=>{
 // When logout, redirect to client
 router.get('/logout',  (req, res) => {
     req.logout();
-    return res.redirect('/message=You have been logged out');
+    return res.redirect('/?message=You have been logged out');
 });
 
 /* GET LOGGED IN USER */
