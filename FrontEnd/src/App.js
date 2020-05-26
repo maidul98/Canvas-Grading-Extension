@@ -16,7 +16,7 @@ import './index.css';
 function App() {
     const [user, setUser] = useState(null);
     useEffect(() => {
-        axios({ url: `${config.backend.url}/user` }).then((response) => {
+        axios({ url: `/user` }).then((response) => {
             if (response != undefined) {
                 setUser(response.data.user);
             }
@@ -29,7 +29,7 @@ function App() {
                 <BrowserRouter>
                     <NavigationMenu />
                     <Switch>
-                        <Route path="/" component={Welcome} exact />
+                        <Route path="/" component={Welcome} exact/>
                         <Route exact path="/assignments" component={GraderDashboard} />
                         <Route path="/assignments/:assignment_id/:student_id" exact component={DetailedAssignmentView} />
                         <Route path="/dashboard" component={Dashboard} />

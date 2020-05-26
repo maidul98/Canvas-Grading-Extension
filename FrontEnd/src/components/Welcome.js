@@ -33,7 +33,7 @@ export default function Welcome(props){
                     <div id="textboxcenter">
                         <p> Welcome to Canvas Grading Extension</p>
                         <p>Please login using your Cornell email account</p>
-                        <a href={`${process.env.REACT_APP_BASE_URL}/auth/google`} id="login-link">Login</a>
+                        <a href={`/auth/google`} id="login-link">Login</a>
                     </div>
                 </div>
             </div>

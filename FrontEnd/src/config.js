@@ -8,7 +8,7 @@ module.exports = {
         }
     },
     backend:{
-        url:'http://localhost:5000'
+        url:''
     }
 
 };

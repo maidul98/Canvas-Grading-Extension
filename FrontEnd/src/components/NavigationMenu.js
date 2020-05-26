@@ -27,7 +27,7 @@ export default function NavigationMenu(props) {
                                     <Dropdown.Item href="/assignments">My workload</Dropdown.Item>
                                     <Dropdown.Item href="/dashboard">Dashboard</Dropdown.Item>
                                     <Dropdown.Item href="/settings">Setting</Dropdown.Item>
-                                    <Dropdown.Item href="http://localhost:5000/auth/logout">Logout</Dropdown.Item>
+                                    <Dropdown.Item href="/auth/logout">Logout</Dropdown.Item>
                                 </Dropdown.Menu>
                             </Dropdown>
                         </div>

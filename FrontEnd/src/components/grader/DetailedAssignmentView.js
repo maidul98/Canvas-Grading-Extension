@@ -17,7 +17,7 @@ export default function DetailedAssignmentView(props){
     */
     const singleSubmissionFetch = useRequest(()=>{
         return axios({
-        url:`${config.backend.url}/canvas-api`,
+        url:`/canvas-api`,
         method:'post',
         data:{endpoint:`assignments/${props.match.params.assignment_id}/submissions/${props.match.params.student_id}?include[]=user&include[]=submission_comments`},
         })
@@ -35,7 +35,7 @@ export default function DetailedAssignmentView(props){
      * Submit all of the submission edits changed their values 
      */
     const submitGrades = useRequest(()=>{
-        return axios(`${config.backend.url}/upload-submission-grades/assignments/${props.match.params.assignment_id}/submissions/batch-update-grades`,{
+        return axios(`/upload-submission-grades/assignments/${props.match.params.assignment_id}/submissions/batch-update-grades`,{
             method:"post",
             data: gradesAndComments.current
         })

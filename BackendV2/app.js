@@ -7,13 +7,15 @@ var bodyParser = require('body-parser');
 var logger = require('morgan');
 var indexRouter = require('./routes/routes');
 var authRoutes = require('./routes/authRoutes');
-
 const passportSetup = require('./config/passport-setup');
 var passport = require('passport');
 var cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 var cors = require('cors');
 var app = express();
+
+app.use(express.static("public"));
+
 app.set('view engine', 'jade');
 app.use(
     cookieSession({
@@ -22,6 +24,7 @@ app.use(
         maxAge: 24 * 60 * 60 * 100
     })
 );
+
 
 // parse cookies
 app.use(cookieParser());
@@ -59,12 +62,13 @@ const authCheck = (req, res, next) => {
 };
 
 
-app.use('/', authCheck, indexRouter);
+app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));
 });
+
 
 // Handle errors
 app.use(function (err, req, res, next) {

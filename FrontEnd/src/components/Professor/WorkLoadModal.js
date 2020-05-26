@@ -17,7 +17,7 @@ export default function CommentsModal({user_id, assignment_id}){
      * Get all of the submissions that are tasked for this grader from distribution algo 
      */
     const assignedSubmissions = useRequest(async ()=>{
-        return fetch(`${config.backend.url}/get-assigned-submissions-for-assigment?user_id=${user_id}&assigment_id=`+assignment_id, config.header);
+        return fetch(`/get-assigned-submissions-for-assigment?user_id=${user_id}&assigment_id=`+assignment_id, config.header);
     }, {
         manual: true,
         initialData: [],

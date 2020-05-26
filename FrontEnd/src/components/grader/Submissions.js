@@ -19,7 +19,7 @@ export default function Submissions(props) {
      * Get all of the submissions that are tasked for this grader from distribution algo 
      */
     const assignedSubmissions = useRequest(() => {
-        return axios(`${config.backend.url}/get-assigned-submissions-for-assigment?user_id=${user?.id}&assigment_id=${props.assignment_id}`)
+        return axios(`/get-assigned-submissions-for-assigment?user_id=${user?.id}&assigment_id=${props.assignment_id}`)
     }, {
         manual: true,
         onSuccess: async (result, params) => {
@@ -57,7 +57,7 @@ export default function Submissions(props) {
     */
     const singleSubmissionFetch = useRequest(async (user_id, netid) => {
         return axios({
-            url: `${config.backend.url}/canvas-api`,
+            url: `/canvas-api`,
             method: "POST",
             data: { endpoint: `assignments/${props.assignment_id}/submissions/${user_id}?include[]=user&include[]=submission_comments` }
         })
@@ -81,7 +81,7 @@ export default function Submissions(props) {
 
 
     const submitGrades = useRequest(async (user_id, net_id) => {
-        return fetch(`${config.backend.url}/upload-submission-grades/assignments/${props.assignment_id}/submissions/batch-update-grades`, {
+        return fetch(`/upload-submission-grades/assignments/${props.assignment_id}/submissions/batch-update-grades`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -108,7 +108,7 @@ export default function Submissions(props) {
 
 
     useEffect(() => {
-        assignedSubmissions.run(`${process.env.REACT_APP_BASE_URL}/get-assigned-submissions-for-assigment?user_id=1&assigment_id=` + props.assignment_id);
+        assignedSubmissions.run(`/get-assigned-submissions-for-assigment?user_id=1&assigment_id=` + props.assignment_id);
     }, [props.assignment_id]);
 
 
