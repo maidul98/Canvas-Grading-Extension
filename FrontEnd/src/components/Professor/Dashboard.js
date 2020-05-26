@@ -25,7 +25,7 @@ export default function Dashboard() {
      * Get the list of unassigned submissions for seleted assigment 
     */
    const getUngradedsubs = useRequest(() => {
-        return axios({ url: `/unassigned-submissions/${assignment_id}`})
+        return axios({ url: `/api/unassigned-submissions/${assignment_id}`})
     }, {
         onSuccess: (data)=>{
             console.log(data)
@@ -44,7 +44,7 @@ export default function Dashboard() {
      * Get the list of assignments from Canvas from which the user can drop down from 
      */
     const fetchAssignmentsList = useRequest(() => {
-        return axios(`/get-all-assignments`)
+        return axios(`/api/get-all-assignments`)
     }, {
         onSuccess: (result, params) => {
             if (result[0]?.assignment_id != undefined) {
@@ -66,7 +66,7 @@ export default function Dashboard() {
      * Sync submissions, assigment caps table and assigments with Canvas
      */
     const syncWithCanvas = useRequest(async (type) => {
-        return axios(`/sync-with-canvas/${type}`)
+        return axios(`/api/sync-with-canvas/${type}`)
     }, {
         manual: true,
         onSuccess: (message, params) => {
@@ -87,7 +87,7 @@ export default function Dashboard() {
      * Get grader detials from DB
      */
     const fetchGradersData = useRequest((assignment_id) => {
-        return axios(`/get-grader-info?assignment_id=${assignment_id}`)
+        return axios(`/api/get-grader-info?assignment_id=${assignment_id}`)
     }, {
         manual: true,
         onError: (error, params) => {
@@ -129,7 +129,7 @@ export default function Dashboard() {
      * @param {*} event 
      */
     const runDisturbation = useRequest(() => {
-        return axios({ url: `/distribute`, method: 'POST', data: { assignment_id: assignment_id } })
+        return axios({ url: `/api/distribute`, method: 'POST', data: { assignment_id: assignment_id } })
     }, {
         manual: true,
         onSuccess: (result, params) => {
@@ -147,7 +147,7 @@ export default function Dashboard() {
      * Sends the grader object to the backend to be be updated in the database 
      */
     const updateGraderDetails = useRequest(() => {
-        return axios({ url: `/update-grader-info`, method: 'post', data: graderEditObject })
+        return axios({ url: `/api/update-grader-info`, method: 'post', data: graderEditObject })
     }, {
         manual: true,
         onSuccess: (data) => {

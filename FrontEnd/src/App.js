@@ -16,7 +16,7 @@ import './index.css';
 function App() {
     const [user, setUser] = useState(null);
     useEffect(() => {
-        axios({ url: `/user` }).then((response) => {
+        axios({ url: `auth/user` }).then((response) => {
             if (response != undefined) {
                 setUser(response.data.user);
             }

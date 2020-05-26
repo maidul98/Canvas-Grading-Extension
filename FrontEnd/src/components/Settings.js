@@ -21,7 +21,7 @@ export default function Settings(props){
      */
     const updateCanvasToken = useRequest(()=>{
         return axios({
-        url:`/update-canvas-token`,
+        url:`/api/update-canvas-token`,
         method:'post',
         data:{'token': bearToken}
         })}, {
@@ -39,7 +39,7 @@ export default function Settings(props){
      */
     const resetCourse = useRequest(()=>{
         return axios({
-        url:`/delete-data-base`,
+        url:`/api/delete-data-base`,
         })}, {
         manual: true,
         onSuccess: (response, params)=>{
@@ -55,7 +55,7 @@ export default function Settings(props){
      */
     const updateCourse = useRequest(()=>{
         return axios({
-        url:`/update-course-id`,
+        url:`/api/update-course-id`,
         method:'post',
         data: {"course_id":courseId}
         })}, {
@@ -73,7 +73,7 @@ export default function Settings(props){
      */
     const getCourseId = useRequest(()=>{
         return axios({
-        url:`/get-course-id`
+        url:`/api/get-course-id`
         })}, {
         formatResult:(result)=>{
             return result.data

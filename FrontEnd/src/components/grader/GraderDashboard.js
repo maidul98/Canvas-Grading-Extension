@@ -23,7 +23,7 @@ export default function AssignmentList() {
      * Get the list of assignments from Canvas  
      */
     const fetchAssignments = useRequest(()=>{
-        return axios(`/get-all-assignments`);
+        return axios(`/api/get-all-assignments`);
     }, {
         manual: true,
         onSuccess: (data) => {
@@ -43,7 +43,7 @@ export default function AssignmentList() {
      * returns an error otherwise. 
      */
     const downloadBulkSubmissions = useRequest(()=>{
-        return axios({url:`/download-submission`,
+        return axios({url:`/api/download-submission`,
             method: 'POST', 
             responseType: 'arraybuffer', 
             data: downloadGraderIds
