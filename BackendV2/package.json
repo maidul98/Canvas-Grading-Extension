@@ -24,7 +24,7 @@
     "morgan": "~1.9.1",
     "ms": "^2.1.2",
     "mysql2": "^2.1.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "node-rsa": "^1.0.8",
     "nodemon": "^2.0.4",
     "passport": "^0.4.1",
