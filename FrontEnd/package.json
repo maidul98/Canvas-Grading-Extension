@@ -12,7 +12,7 @@
     "dotenv": "^8.2.0",
     "downloadjs": "^1.4.7",
     "file-saver": "^2.0.2",
-    "i": "^0.3.6",
+    "i": "^0.3.7",
     "js-file-download": "^0.4.11",
     "jszip": "^3.3.0",
     "prop-types": "15.7.2",
