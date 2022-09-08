@@ -14,7 +14,7 @@
     "file-saver": "^2.0.2",
     "i": "^0.3.6",
     "js-file-download": "^0.4.11",
-    "jszip": "^3.3.0",
+    "jszip": "^3.7.0",
     "prop-types": "15.7.2",
     "react": "^16.13.0",
     "react-alert": "^7.0.0",
